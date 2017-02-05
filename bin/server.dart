@@ -24,7 +24,7 @@ main(List<String> args) async {
   }
 
   var parser = new ArgParser();
-  parser.addOption('clientFiles', defaultsTo: '../web/');
+  parser.addOption('clientFiles', defaultsTo: '../build/web/');
 
   var results = parser.parse(args);
   var clientFiles = results['clientFiles'];
