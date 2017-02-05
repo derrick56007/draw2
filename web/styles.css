@@ -1,0 +1,143 @@
+@import url(https://fonts.googleapis.com/css?family=Roboto);
+
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Roboto', sans-serif;
+}
+
+#login-card, #lobby-list-card, #create-lobby-card, #password-card {
+    max-width: 400px;
+    margin: 10px auto auto;
+}
+
+#lobby-list-collection {
+    max-height: 275px;
+    overflow-y: auto;
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #666;
+    border-radius: 20px;
+}
+
+::-webkit-scrollbar-track {
+    background: #ddd;
+    border-radius: 20px;
+}
+
+.lobby-list-item {
+    text-align: left;
+}
+
+.input-field {
+    text-align: left;
+}
+
+#play-card {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+#chat-holder {
+    margin-left: 10px;
+    height: 665px;
+    width: 220px;
+}
+
+#chat-holder > .card-content {
+    padding: 10px;
+}
+
+#chat-list {
+    height: 545px;
+    overflow-y: auto;
+}
+
+.chat-item {
+    text-align: left;
+    cursor: default;
+    padding: 5px !important;
+}
+
+.chat-item:hover,
+.player-item:hover {
+    background: #fff !important;
+}
+
+.chat-text {
+    word-wrap: break-word;
+    color: black;
+}
+
+#player-list-holder {
+    margin-right: 10px;
+    width: 220px;
+}
+
+#player-list-holder > .card-content {
+    padding: 10px;
+}
+
+#player-list-collection {
+    text-align: left;
+    overflow-y: auto;
+}
+
+#canvas-header {
+    width: 640px;
+    height: 30px;
+    margin-bottom: -30px;
+    display: flex;
+    z-index: 1;
+    position: relative;
+}
+
+.canvas-header-item {
+    padding-left: 10px;
+    padding-right: 10px;
+    line-height: 30px;
+    flex-basis: 0;
+}
+
+#current-artist, #current-time {
+    flex-grow: 1;
+}
+
+#current-time {
+    text-align: right;
+}
+
+#current-word {
+    text-align: center;
+    font-size: 2em;
+    line-height: 50px;
+    flex-grow: 2;
+}
+
+#artist-options {
+    padding: 7px;
+}
+
+.minicolors-panel {
+    margin-bottom: -7px;
+    border: none;
+}
+
+.noselect {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+#canvas {
+    margin-bottom: -7px;
+}
