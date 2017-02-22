@@ -1,5 +1,5 @@
-library server;
 
+import '../web/common/create_lobby_info.dart';
 import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
@@ -9,10 +9,8 @@ import 'package:args/args.dart';
 import 'package:force/force_serverside.dart';
 
 import '../web/common/common.dart';
+import 'server_websocket.dart';
 
-part 'data.dart';
-part 'game.dart';
-part 'lobby.dart';
 
 main(List<String> args) async {
   int port;
@@ -63,7 +61,7 @@ main(List<String> args) async {
         lobby.removePlayer(name);
         players.remove(name);
 
-        if (lobby.game.players.isEmpty) {
+        if (lobby.game.scores.isEmpty) {
           lobbies.remove(lobby.name);
 
           server.broadcast(Message.lobbyClosed, lobby.name);

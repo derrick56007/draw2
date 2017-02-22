@@ -10,13 +10,8 @@ environment:
 dependencies:
   browser: '>=0.10.0 <0.11.0'
   dart_to_js_script_rewriter: '^1.0.1'
-  force: '^0.7.1'
-  reflectable: '^0.5.0'
-  serializer: '^0.3.1'
   args: 'any'
+  http_server: 'any'
 
 transformers:
   - dart_to_js_script_rewriter
-  - reflectable:
-      entry_points:
-        - web/main.dart

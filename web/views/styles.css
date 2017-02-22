@@ -8,9 +8,13 @@ html, body {
     font-family: 'Roboto', sans-serif;
 }
 
+body {
+    padding-top: 10px;
+}
+
 #login-card, #lobby-list-card, #create-lobby-card, #password-card {
     max-width: 400px;
-    margin: 10px auto auto;
+    margin: 0 auto auto;
 }
 
 #lobby-list-collection {

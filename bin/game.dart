@@ -3,7 +3,7 @@ part of server;
 class Game {
   Lobby lobby;
 
-  var players = <String, int>{};
+  var scores = <ServerWebSocket, int>{};
 
   var unusedWordIndices = <int>[];
 
@@ -13,10 +13,11 @@ class Game {
   Timer timer;
   Stopwatch stopwatch;
 
-  String currentArtist;
+  ServerWebSocket currentArtist;
+
   String currentWord;
 
-  var artistQueue = <String>[];
+  var artistQueue = <ServerWebSocket>[];
 
   Game(this.lobby, this.hasTimer) {
     for (int i = 0; i < Data.words.length; i++) {
@@ -26,18 +27,14 @@ class Game {
     stopwatch = new Stopwatch();
   }
 
-  addPlayer(String username) {
-    players[username] = 0;
-
-    if (currentArtist == null) return;
-
-    // TODO
+  addPlayer(ServerWebSocket socket) {
+    scores[socket] = 0;
   }
 
-  removePlayer(String username) {
-    players.remove(username);
+  removePlayer(ServerWebSocket socket) {
+    scores.remove(socket);
 
-    if (currentArtist != username) return;
+    if (currentArtist != socket) return;
 
     removeArtist();
   }
@@ -68,11 +65,10 @@ class Game {
 
       currentWord = Data.words[unusedWordIndices.removeAt(randIndex)];
 
-      lobby
-        ..server.sendToProfile(
-            'name', currentArtist, Message.setAsArtist, currentWord)
-        ..sendToAll(Message.setArtist, currentArtist,
-            except: currentArtist);
+      currentArtist.send(Message.setAsArtist, currentWord);
+      lobby.sendToAll(
+          Message.setArtist, lobby.usernameFromSocket(currentArtist),
+          except: currentArtist);
 
       if (!hasTimer) return;
 
@@ -98,14 +94,14 @@ class Game {
     });
   }
 
-  addToQueue(String username) {
+  addToQueue(ServerWebSocket socket, String username) {
     // stop if already in queue
-    if (artistQueue.contains(username)) return;
+    if (artistQueue.contains(socket)) return;
 
     // stop if username is empty or is currently artist
-    if (username.isNotEmpty && username == currentArtist) return;
+    if (socket == currentArtist) return;
 
-    artistQueue.add(username);
+    artistQueue.add(socket);
 
     var guess = new Guess()
       ..username = 'Lobby'
@@ -119,12 +115,12 @@ class Game {
     nextArtist();
   }
 
-  onGuess(Guess guess) {
+  onGuess(ServerWebSocket socket, Guess guess) {
     // current artist can't guess word
     if (guess.username == currentArtist) return;
 
     if (guess.guess.toLowerCase() == 'draw next') {
-      addToQueue(guess.username);
+      addToQueue(socket, guess.username);
 
       return;
     }
@@ -136,12 +132,12 @@ class Game {
     // not a match
     if (guess.guess.toLowerCase() != currentWord.toLowerCase()) return;
 
-    onWin(guess.username, currentWord);
+    onWin(socket, guess.username, currentWord);
   }
 
-  onWin(String username, String word) {
+  onWin(ServerWebSocket socket, String username, String word) {
     // TODO point system
-    players[username] += 1;
+    scores[socket] += 1;
 
     lobby.sendToAll(Message.win, '$username guessed \"$word\" correctly!');
 

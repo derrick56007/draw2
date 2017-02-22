@@ -1,7 +1,6 @@
-part of common;
+import 'dart:convert';
 
-@serializable
-class Point extends JsonObject {
+class Point {
   int x, y;
 
   Point();
@@ -10,14 +9,11 @@ class Point extends JsonObject {
       : x = 0,
         y = 0;
 
-  @override
   String toJson() => JSON.encode([x, y]);
 
-  factory Point.fromJson(String json) {
-    var point = JSON.decode(json);
+  factory Point.fromList(List list) => new Point()
+    ..x = list[0]
+    ..y = list[1];
 
-    return new Point()
-      ..x = point[0]
-      ..y = point[1];
-  }
+  factory Point.fromJson(String json) => new Point.fromList(JSON.decode(json));
 }

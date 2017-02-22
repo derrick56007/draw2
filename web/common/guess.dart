@@ -1,12 +1,18 @@
-part of common;
+import 'dart:convert';
 
-@serializable
-class Guess extends JsonObject {
+class Guess {
   String username;
   String guess;
 
   Guess();
 
-  factory Guess.fromJson(String json) =>
-      JsonObject.serializer.decode(json, Guess);
+  factory Guess.fromJson(String json) {
+    Map map = JSON.decode(json) as Map;
+
+    return new Guess()
+      ..username = map['username']
+      ..guess = map['guess'];
+  }
+
+  String toJson() => JSON.encode({'username': username, 'guess': guess});
 }

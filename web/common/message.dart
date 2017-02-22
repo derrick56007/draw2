@@ -1,17 +1,3 @@
-library common;
-
-import 'dart:convert';
-
-import 'package:serializer/serializer.dart';
-
-part 'brush.dart';
-part 'create_lobby_info.dart';
-part 'existing_player.dart';
-part 'guess.dart';
-part 'lobby_info.dart';
-part 'login_info.dart';
-part 'point.dart';
-
 class Message {
   static const toast                  = '0';
   static const login                  = '1';
@@ -38,4 +24,6 @@ class Message {
   static const clearDrawing           = 'm';
   static const changeColor            = 'n';
   static const changeSize             = 'o';
+  static const handshake              = 'p';
+  static const handshakeSuccessful    = 'q';
 }

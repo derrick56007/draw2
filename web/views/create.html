@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/css/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="views/styles.css">
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
+
+    <script defer src="views/create.dart" type="application/dart"></script>
+    <!--<script defer src="packages/browser/dart.js"></script>-->
+</head>
+<body class="blue accent-2">
+<div id="create-lobby-card" class="card white darken-1">
+    <div class="card-content black-text" style="text-align: center">
+        <div class="card-title"><a id="back-to-lobbies-list-btn" class="btn-floating btn-medium waves-effect waves-light left" style="margin-right: -100%;"><i class="material-icons" style="line-height: 40px">arrow_back</i></a>Create Lobby</div>
+        <div class="input-field col s6" style="margin-top: 25px;">
+            <input id="lobby-name" type="text" class="validate">
+            <label for="lobby-name">Lobby Name</label>
+        </div>
+        <div class="input-field col s12">
+            <input id="create-lobby-password" type="password" class="validate">
+            <label for="create-lobby-password">Password</label>
+        </div>
+        <div class="input-field col s12">
+            <select id="number-of-players">
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="15">15</option>
+            </select>
+            <label>Max Players</label>
+        </div>
+        <div class="switch center-align" style="margin-left: -18px;">
+            <label>
+                No Timer
+                <input id="timer-switch" type="checkbox">
+                <span class="lever"></span>
+                Timer
+            </label>
+        </div>
+        <a id="create-lobby-btn" class="waves-effect waves-light btn modal-trigger" style="margin-top: 20px">Create</a>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#number-of-players').material_select();
+    });
+</script>
+</body>
+</html>

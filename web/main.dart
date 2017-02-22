@@ -8,26 +8,42 @@ import 'dart:async';
 import 'dart:html' hide Point;
 import 'dart:js';
 
-import 'package:force/force_browser.dart';
+//import 'package:force/force_browser.dart';
 
-import 'common/common.dart';
-
-Element loginCard = querySelector('#login-card');
-Element lobbyListCard = querySelector('#lobby-list-card');
-Element lobbyListCollection = querySelector('#lobby-list-collection');
-Element createLobbyCard = querySelector('#create-lobby-card');
-Element passwordCard = querySelector('#password-card');
-Element playCard = querySelector('#play-card');
-Element playerListCollection = querySelector('#player-list-collection');
-InputElement chatInput = querySelector('#chat-input');
-Element currentArtist = querySelector('#current-artist');
-Element currentWord = querySelector('#current-word');
-Element currentTime = querySelector('#current-time');
-Element chatList = querySelector('#chat-list');
-CanvasElement canvas = querySelector('#canvas');
-CanvasRenderingContext2D ctx = canvas.context2D;
+//import 'common/common.dart';
+//
+//Element loginCard = querySelector('#login-card');
+//Element lobbyListCard = querySelector('#lobby-list-card');
+//Element lobbyListCollection = querySelector('#lobby-list-collection');
+//Element createLobbyCard = querySelector('#create-lobby-card');
+//Element passwordCard = querySelector('#password-card');
+//Element playCard = querySelector('#play-card');
+//Element playerListCollection = querySelector('#player-list-collection');
+//InputElement chatInput = querySelector('#chat-input');
+//Element currentArtist = querySelector('#current-artist');
+//Element currentWord = querySelector('#current-word');
+//Element currentTime = querySelector('#current-time');
+//Element chatList = querySelector('#chat-list');
+//CanvasElement canvas = querySelector('#canvas');
+//CanvasRenderingContext2D ctx = canvas.context2D;
 
 void main() {
+  WebSocket webSocket = new WebSocket('ws://localhost:8080/ws');
+  webSocket
+    ..onOpen.listen((Event e) {
+      print('connected');
+    })
+    ..onMessage.listen((MessageEvent e) {
+      print(e.data);
+    })
+    ..onClose.listen((Event e) {
+      print('disconnected');
+    })
+    ..onError.listen((Event e) {
+      print('error ${e.type}');
+    });
+
+  return;
   ForceClient client = new ForceClient();
   client.connect();
 
@@ -367,99 +383,99 @@ void main() {
     }
   });
 }
-
-void toast(String message, [int duration = 2500]) {
-  print(message);
-  context['Materialize'].callMethod('toast', [message, duration]);
-}
-
-void loginState() {
-  loginCard.style.display = '';
-  passwordCard.style.display = 'none';
-  lobbyListCard.style.display = 'none';
-  createLobbyCard.style.display = 'none';
-  playCard.style.display = 'none';
-}
-
-void lobbyListState() {
-  loginCard.style.display = 'none';
-  passwordCard.style.display = 'none';
-  lobbyListCard.style.display = '';
-  createLobbyCard.style.display = 'none';
-  playCard.style.display = 'none';
-
-  lobbyListCollection.children.clear();
-
-  var progress = new Element.html('''
-  <div id="lobby-list-progress" class="progress">
-      <div class="indeterminate"></div>
-  </div>''');
-
-  lobbyListCollection.children.add(progress);
-}
-
-void createLobbyState() {
-  loginCard.style.display = 'none';
-  passwordCard.style.display = 'none';
-  lobbyListCard.style.display = 'none';
-  createLobbyCard.style.display = '';
-  playCard.style.display = 'none';
-}
-
-void playState() {
-  loginCard.style.display = 'none';
-  passwordCard.style.display = 'none';
-  lobbyListCard.style.display = 'none';
-  createLobbyCard.style.display = 'none';
-  playCard.style.display = '';
-}
-
-void passwordState() {
-  loginCard.style.display = 'none';
-  passwordCard.style.display = '';
-  lobbyListCard.style.display = 'none';
-  createLobbyCard.style.display = 'none';
-  playCard.style.display = 'none';
-}
-
-void addToChat(String username, String text) {
-  var el = new Element.html('''
-    <a class="collection-item chat-item">
-      <div class="chat-username">$username</div>
-      <div class="chat-text">$text</div>
-     </a>''');
-
-  chatList
-    ..children.add(el)
-    ..scrollTop = chatList.scrollHeight;
-
-  if (chatList.children.length < 200) return;
-
-  chatList.children.removeAt(0);
-}
-
-void drawPoint(num x, num y, num size, String color) {
-  ctx
-    ..beginPath()
-    ..arc(x, y, size / 2, 0, 2 * PI)
-    ..closePath()
-    ..fillStyle = color
-    ..fill();
-}
-
-void drawLine(num x1, num y1, num x2, num y2, num size, String color) {
-  ctx
-    ..beginPath()
-    ..moveTo(x1, y1)
-    ..lineTo(x2, y2)
-    ..closePath()
-    ..lineWidth = size
-    ..strokeStyle = color
-    ..lineCap = 'round'
-    ..lineJoin = 'round'
-    ..stroke();
-}
-
-void clearDrawing() {
-  ctx.clearRect(0, 0, 640, 480);
-}
+//
+//void toast(String message, [int duration = 2500]) {
+//  print(message);
+//  context['Materialize'].callMethod('toast', [message, duration]);
+//}
+//
+//void loginState() {
+//  loginCard.style.display = '';
+//  passwordCard.style.display = 'none';
+//  lobbyListCard.style.display = 'none';
+//  createLobbyCard.style.display = 'none';
+//  playCard.style.display = 'none';
+//}
+//
+//void lobbyListState() {
+//  loginCard.style.display = 'none';
+//  passwordCard.style.display = 'none';
+//  lobbyListCard.style.display = '';
+//  createLobbyCard.style.display = 'none';
+//  playCard.style.display = 'none';
+//
+//  lobbyListCollection.children.clear();
+//
+//  var progress = new Element.html('''
+//  <div id="lobby-list-progress" class="progress">
+//      <div class="indeterminate"></div>
+//  </div>''');
+//
+//  lobbyListCollection.children.add(progress);
+//}
+//
+//void createLobbyState() {
+//  loginCard.style.display = 'none';
+//  passwordCard.style.display = 'none';
+//  lobbyListCard.style.display = 'none';
+//  createLobbyCard.style.display = '';
+//  playCard.style.display = 'none';
+//}
+//
+//void playState() {
+//  loginCard.style.display = 'none';
+//  passwordCard.style.display = 'none';
+//  lobbyListCard.style.display = 'none';
+//  createLobbyCard.style.display = 'none';
+//  playCard.style.display = '';
+//}
+//
+//void passwordState() {
+//  loginCard.style.display = 'none';
+//  passwordCard.style.display = '';
+//  lobbyListCard.style.display = 'none';
+//  createLobbyCard.style.display = 'none';
+//  playCard.style.display = 'none';
+//}
+//
+//void addToChat(String username, String text) {
+//  var el = new Element.html('''
+//    <a class="collection-item chat-item">
+//      <div class="chat-username">$username</div>
+//      <div class="chat-text">$text</div>
+//     </a>''');
+//
+//  chatList
+//    ..children.add(el)
+//    ..scrollTop = chatList.scrollHeight;
+//
+//  if (chatList.children.length < 200) return;
+//
+//  chatList.children.removeAt(0);
+//}
+//
+//void drawPoint(num x, num y, num size, String color) {
+//  ctx
+//    ..beginPath()
+//    ..arc(x, y, size / 2, 0, 2 * PI)
+//    ..closePath()
+//    ..fillStyle = color
+//    ..fill();
+//}
+//
+//void drawLine(num x1, num y1, num x2, num y2, num size, String color) {
+//  ctx
+//    ..beginPath()
+//    ..moveTo(x1, y1)
+//    ..lineTo(x2, y2)
+//    ..closePath()
+//    ..lineWidth = size
+//    ..strokeStyle = color
+//    ..lineCap = 'round'
+//    ..lineJoin = 'round'
+//    ..stroke();
+//}
+//
+//void clearDrawing() {
+//  ctx.clearRect(0, 0, 640, 480);
+//}

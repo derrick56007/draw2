@@ -1,12 +1,18 @@
-part of common;
+import 'dart:convert';
 
-@serializable
-class ExistingPlayer extends JsonObject {
+class ExistingPlayer {
   String username;
   int score;
 
   ExistingPlayer();
 
-  factory ExistingPlayer.fromJson(String json) =>
-      JsonObject.serializer.decode(json, ExistingPlayer);
+  factory ExistingPlayer.fromJson(String json) {
+    Map map = JSON.decode(json) as Map;
+
+    return new ExistingPlayer()
+      ..username = map['username']
+      ..score = map['score'];
+  }
+
+  String toJson() => JSON.encode({'username': username, 'score': score});
 }

@@ -1,7 +1,6 @@
-part of common;
+import 'dart:convert';
 
-@serializable
-class CreateLobbyInfo extends JsonObject {
+class CreateLobbyInfo {
   String name;
   String password;
   bool hasTimer;
@@ -9,6 +8,20 @@ class CreateLobbyInfo extends JsonObject {
 
   CreateLobbyInfo();
 
-  factory CreateLobbyInfo.fromJson(String json) =>
-      JsonObject.serializer.decode(json, CreateLobbyInfo);
+  factory CreateLobbyInfo.fromJson(String json) {
+    Map map = JSON.decode(json) as Map;
+
+    return new CreateLobbyInfo()
+      ..name = map['name']
+      ..password = map['password']
+      ..hasTimer = map['hasTimer']
+      ..maxPlayers = map['maxPlayers'];
+  }
+
+  String toJson() => JSON.encode({
+        'name': name,
+        'password': password,
+        'hasTimer': hasTimer,
+        'maxPlayers': maxPlayers
+      });
 }
