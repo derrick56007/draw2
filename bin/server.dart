@@ -1,16 +1,29 @@
+library server;
 
-import '../web/common/create_lobby_info.dart';
-import 'dart:async';
-import 'dart:collection';
 import 'dart:io';
-
+import 'dart:async';
 import 'dart:math';
-import 'package:args/args.dart';
-import 'package:force/force_serverside.dart';
 
-import '../web/common/common.dart';
+import 'package:args/args.dart';
+import 'package:http_server/http_server.dart';
+
 import 'server_websocket.dart';
 
+import '../web/common/create_lobby_info.dart';
+import '../web/common/existing_player.dart';
+import '../web/common/guess.dart';
+import '../web/common/lobby_info.dart';
+import '../web/common/login_info.dart';
+import '../web/common/message.dart';
+
+part 'data.dart';
+part 'game.dart';
+part 'lobby.dart';
+
+
+var lobbies = <String, Lobby>{};
+var players = <ServerWebSocket, String>{};
+var playerLobby = <ServerWebSocket, Lobby>{};
 
 main(List<String> args) async {
   int port;
@@ -22,146 +35,164 @@ main(List<String> args) async {
   }
 
   var parser = new ArgParser();
-  parser.addOption('clientFiles', defaultsTo: '../build/web/');
+  parser.addOption('clientFiles', defaultsTo: 'web');
 
   var results = parser.parse(args);
   var clientFiles = results['clientFiles'];
 
-  var server = new ForceServer(
-      host: '0.0.0.0',
-      port: port,
-      clientFiles: clientFiles,
-      startPage: 'index.html');
+  var staticFiles = new VirtualDirectory(clientFiles);
+  staticFiles
+    ..allowDirectoryListing = true
+    ..directoryHandler = (dir, request) {
+      var indexUri = new Uri.file(dir.path).resolve('index.html');
 
-  await server.start();
+      staticFiles.serveFile(new File(indexUri.toFilePath()), request);
+    };
 
-  print('Started server');
+  var server = await HttpServer.bind(InternetAddress.LOOPBACK_IP_V4, port);
 
-  var lobbies = <String, Lobby>{};
-  var players = <String>[];
+  await for (HttpRequest request in server) {
+    var uri = request.uri.path;
 
-  Lobby lobbyFromProfile(Map profile) {
-    var name = profile['name'];
-    if (name == null) return null;
+    if (uri == '/ws') {
+      var socket = new ServerWebSocket.ugradeRequest(request);
+      await socket.start();
 
-    var lobbyName = profile['lobby'];
-    if (lobbyName == null) return null;
+      // TODO
+      handleSocket(socket, false);
 
-    return lobbies[lobbyName];
+      continue;
+    } else if (uri.length > 1 &&
+        !uri.contains(' ') &&
+        !uri.contains('/', 1) &&
+        !uri.contains('.') &&
+        !uri.contains('\\')) {
+      // lobby
+    }
+
+    staticFiles.serveRequest(request);
   }
+}
 
-  server
-    ..onProfileChanged.listen((ForceProfileEvent e) {
-      ////////// on disconnected ///////////////
-      if (e.type == ForceProfileType.Removed) {
-        var lobby = lobbyFromProfile(e.profileInfo);
-        if (lobby == null) return;
-
-        var name = e.profileInfo['name'];
-        lobby.removePlayer(name);
-        players.remove(name);
-
-        if (lobby.game.scores.isEmpty) {
-          lobbies.remove(lobby.name);
-
-          server.broadcast(Message.lobbyClosed, lobby.name);
-
-          print('Closed lobby ${lobby.name}');
-        }
-      }
-      //////////////////////////////////////////
-    })
-    ..on(Message.login, (mp, sender) {
-      var username = mp.json;
-
+handleSocket(ServerWebSocket socket, bool onPlayPage) async {
+  socket
+    ..on(Message.login, (String username) {
       /////////// check if username exists ///////////
-      if (players.contains(username)) {
-        sender.reply(Message.toast, 'Username taken');
-        return;
+      if (players.containsValue(username)) {
+        socket.send(Message.toast, 'Username taken');
+        return null;
       }
       ////////////////////////////////////////////////
 
-      players.add(username);
-      sender.reply(Message.loginSuccesful, username);
+      players[socket] = username;
+
+      socket.send(Message.loginSuccesful, username);
 
       print('$username logged in');
     })
-    ..on(Message.requestLobbyList, (_, sender) {
-      // TODO cache this data
-
+    ..on(Message.requestLobbyList, (_) {
+      // TODO cache data
       for (Lobby lobby in lobbies.values) {
-        sender.reply(Message.lobbyOpened, lobby.getInfo().toJson());
+        socket.send(Message.lobbyOpened, lobby.getInfo().toJson());
       }
     })
-    ..on(Message.createLobby, (mp, sender) {
-      var createLobbyInfo = new CreateLobbyInfo.fromJson(mp.json);
+    ..on(Message.createLobby, (String json) {
+      var createLobbyInfo = new CreateLobbyInfo.fromJson(json);
 
       ////////// check if lobby exists /////////////
       if (lobbies.containsKey(createLobbyInfo.name)) {
-        sender.reply(Message.toast, 'Lobby already exists');
-        return;
+        socket.send(Message.toast, 'Lobby already exists');
+        return null;
       }
       //////////////////////////////////////////////
 
-      var lobby = new Lobby(server, createLobbyInfo);
+      print('Created lobby ${createLobbyInfo.toJson()}');
+
+      var lobby = new Lobby(createLobbyInfo);
       lobbies[createLobbyInfo.name] = lobby;
 
-      sender.reply(Message.createLobbySuccessful, createLobbyInfo.name);
+      lobby.sendToAll(Message.lobbyOpened, lobby.getInfo().toJson());
 
-      server.broadcast(Message.lobbyOpened, lobby.getInfo().toJson());
+      playerLobby[socket] = lobby;
+      lobby.addPlayer(socket, players[socket]);
+      socket.send(Message.enterLobbySuccessful, lobby.name);
     })
-    ..on(Message.enterLobby, (mp, sender) {
-      var loginInfo = new LoginInfo.fromJson(mp.json);
-
+    ..on(Message.enterLobby, (String lobbyName) {
       ////////// check if lobby exists ////////////////
-      if (!lobbies.containsKey(loginInfo.lobbyName)) {
-        sender.reply(Message.toast, 'Lobby doesn\'t exist');
-        sender.reply(Message.enterLobbyFailure, '');
-        return;
+      if (!lobbies.containsKey(lobbyName)) {
+        socket.send(Message.toast, 'Lobby doesn\'t exist');
+        socket.send(Message.enterLobbyFailure, '');
+        return null;
       }
-      ////////////////////////////////////////////////
 
-      /////////////// check password /////////////////
+      var lobby = lobbies[lobbyName];
+
+      playerLobby[socket] = lobby;
+      lobby.addPlayer(socket, players[socket]);
+      socket.send(Message.enterLobbySuccessful, lobbyName);
+    })
+    ..on(Message.enterLobbyWithPassword, (String json) {
+      var loginInfo = new LoginInfo.fromJson(json);
+
+      if (!lobbies.containsKey(loginInfo.lobbyName)) {
+        socket.send(Message.toast, 'Lobby doesn\'t exist');
+        socket.send(Message.enterLobbyFailure, '');
+        return null;
+      }
+
       var lobby = lobbies[loginInfo.lobbyName];
 
       if (lobby.hasPassword && lobby.password != loginInfo.password) {
-        sender.reply(Message.toast, 'Password is incorrect');
-        sender.reply(Message.enterLobbyFailure, '');
-        return;
+        socket.send(Message.toast, 'Password is incorrect');
+        socket.send(Message.enterLobbyFailure, '');
+        return null;
       }
-      ////////////////////////////////////////////////
 
-      // add player
-      lobby.addPlayer(loginInfo.username);
-      players.add(loginInfo.username);
-
-      sender.reply(Message.enterLobbySuccessful, lobby.name);
+      playerLobby[socket] = lobby;
+      lobby.addPlayer(socket, players[socket]);
+      socket.send(Message.enterLobbySuccessful, loginInfo.lobbyName);
     })
-    ..on(Message.guess, (mp, _) {
-      var lobby = lobbyFromProfile(mp.profile);
-      if (lobby == null) return;
+    ..on(Message.guess, (String json) {
+      var lobby = playerLobby[socket];
+      if (lobby == null) return null;
 
       var guess = new Guess()
-        ..username = mp.profile['name']
-        ..guess = mp.json;
+        ..username = players[socket]
+        ..guess = json;
 
-      lobby.onGuess(guess);
+      lobby.onGuess(socket, guess);
     })
-    ..on(Message.drawPoint, (mp, _) {
-      var lobby = lobbyFromProfile(mp.profile);
-      lobby?.sendToAll(Message.drawPoint, mp.json, except: mp.profile['name']);
+    ..on(Message.drawPoint, (String json) {
+      var lobby = playerLobby[socket];
+      lobby?.sendToAll(Message.drawPoint, json, except: socket);
     })
-    ..on(Message.drawLine, (mp, _) {
-      var lobby = lobbyFromProfile(mp.profile);
-      lobby?.sendToAll(Message.drawLine, mp.json, except: mp.profile['name']);
+    ..on(Message.drawLine, (String json) {
+      var lobby = playerLobby[socket];
+      lobby?.sendToAll(Message.drawLine, json, except: socket);
     })
-    ..on(Message.changeColor, (mp, _) {
-      var lobby = lobbyFromProfile(mp.profile);
-      lobby?.sendToAll(Message.changeColor, mp.json,
-          except: mp.profile['name']);
+    ..on(Message.changeColor, (String json) {
+      var lobby = playerLobby[socket];
+      lobby?.sendToAll(Message.changeColor, json, except: socket);
     })
-    ..on(Message.changeSize, (mp, _) {
-      var lobby = lobbyFromProfile(mp.profile);
-      lobby?.sendToAll(Message.changeSize, mp.json, except: mp.profile['name']);
+    ..on(Message.changeSize, (String json) {
+      var lobby = playerLobby[socket];
+      lobby?.sendToAll(Message.changeSize, json, except: socket);
     });
+
+  if (onPlayPage) {
+    await socket.done;
+
+    playerLobby.remove(socket);
+    print('${players.remove(socket)} logged out');
+
+    var lobby = playerLobby[socket];
+    if (lobby == null) return;
+    lobby.removePlayer(socket);
+  }
+}
+
+broadcast(String request, dynamic val) {
+  for (ServerWebSocket socket in players.keys) {
+    socket.send(request, val);
+  }
 }

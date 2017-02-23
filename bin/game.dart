@@ -14,7 +14,6 @@ class Game {
   Stopwatch stopwatch;
 
   ServerWebSocket currentArtist;
-
   String currentWord;
 
   var artistQueue = <ServerWebSocket>[];
@@ -116,10 +115,9 @@ class Game {
   }
 
   onGuess(ServerWebSocket socket, Guess guess) {
-    // current artist can't guess word
-    if (guess.username == currentArtist) return;
-
-    if (guess.guess.toLowerCase() == 'draw next') {
+    if (guess.guess.toLowerCase() != 'draw next') {
+      lobby.sendToAll(Message.guess, guess.toJson());
+    } else if (guess.username != currentArtist) {
       addToQueue(socket, guess.username);
 
       return;
@@ -127,7 +125,7 @@ class Game {
 
     ////////////// check for win //////////////////
 
-    if (currentWord == null) return;
+    if (currentWord.isNotEmpty) return;
 
     // not a match
     if (guess.guess.toLowerCase() != currentWord.toLowerCase()) return;

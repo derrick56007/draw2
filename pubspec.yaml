@@ -12,6 +12,7 @@ dependencies:
   dart_to_js_script_rewriter: '^1.0.1'
   args: 'any'
   http_server: 'any'
+  css_animation: 'any'
 
 transformers:
   - dart_to_js_script_rewriter

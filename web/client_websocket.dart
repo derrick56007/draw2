@@ -23,9 +23,8 @@ class ClientWebSocket extends DrawWebSocket {
 
     _scheduleReconnect() {
       if (!reconnectScheduled) {
-        new Timer(
-            new Duration(milliseconds: 1000 * retrySeconds),
-                () async => await start(retrySeconds * 2));
+        new Timer(new Duration(milliseconds: 1000 * retrySeconds),
+            () async => await start(retrySeconds * 2));
       }
       reconnectScheduled = true;
     }

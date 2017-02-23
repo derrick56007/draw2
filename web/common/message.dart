@@ -3,7 +3,6 @@ class Message {
   static const login                  = '1';
   static const loginSuccesful         = '2';
   static const createLobby            = '3';
-  static const createLobbySuccessful  = '4';
   static const enterLobby             = '5';
   static const enterLobbySuccessful   = '6';
   static const enterLobbyFailure      = '7';
@@ -24,6 +23,5 @@ class Message {
   static const clearDrawing           = 'm';
   static const changeColor            = 'n';
   static const changeSize             = 'o';
-  static const handshake              = 'p';
-  static const handshakeSuccessful    = 'q';
+  static const enterLobbyWithPassword = 'r';
 }

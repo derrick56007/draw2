@@ -63,8 +63,6 @@ class Lobby {
   }
 
   onGuess(ServerWebSocket socket, Guess guess) {
-    sendToAll(Message.guess, guess.toJson());
-
     game.onGuess(socket, guess);
   }
 

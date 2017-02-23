@@ -50,6 +50,10 @@ body {
     justify-content: center;
 }
 
+#play-card > .card {
+    margin-top: 0;
+}
+
 #chat-holder {
     margin-left: 10px;
     height: 665px;
@@ -128,6 +132,7 @@ body {
 
 #artist-options {
     padding: 7px;
+    margin-top: 10px;
 }
 
 .minicolors-panel {

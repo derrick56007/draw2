@@ -96,7 +96,7 @@ main() async {
           }
 
           drawPoint(x, y, brush.size, brush.color);
-          client.send(Message.drawPoint, brush.pos.toJson());
+          client.send(Message._drawPoint, brush.pos.toJson());
 
           const brushInterval = const Duration(milliseconds: 25);
           timer?.cancel();
@@ -104,7 +104,7 @@ main() async {
             if (brush.moved) {
               drawLine(brush.prevPos.x, brush.prevPos.y, brush.pos.x,
                   brush.pos.y, brush.size, brush.color);
-              client.send(Message.drawLine, brush.pos.toJson());
+              client.send(Message._drawLine, brush.pos.toJson());
 
               brush
                 ..prevPos.x = brush.pos.x
@@ -155,7 +155,7 @@ main() async {
     ..on(Message.timerUpdate, (String json) {
       currentTime.text = json;
     })
-    ..on(Message.drawPoint, (String json) {
+    ..on(Message._drawPoint, (String json) {
       var pos = new Point.fromJson(json);
 
       brush
@@ -166,7 +166,7 @@ main() async {
 
       drawPoint(brush.pos.x, brush.pos.y, brush.size, brush.color);
     })
-    ..on(Message.drawLine, (String json) {
+    ..on(Message._drawLine, (String json) {
       var pos = new Point.fromJson(json);
 
       brush
@@ -178,7 +178,7 @@ main() async {
       drawLine(brush.prevPos.x, brush.prevPos.y, brush.pos.x, brush.pos.y,
           brush.size, brush.color);
     })
-    ..on(Message.clearDrawing, (_) {
+    ..on(Message._clearDrawing, (_) {
       clearDrawing();
     })
     ..on(Message.changeColor, (String json) {
