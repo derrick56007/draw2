@@ -62,10 +62,6 @@ class Lobby {
     }
   }
 
-  onGuess(ServerWebSocket socket, Guess guess) {
-    game.onGuess(socket, guess);
-  }
-
   LobbyInfo getInfo() => new LobbyInfo()
     ..name = name
     ..hasPassword = hasPassword

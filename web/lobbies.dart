@@ -50,7 +50,7 @@ class Lobbies {
       ..on(Message.enterLobbySuccessful, (String lobbyName) {
         myInfo.lobbyName = lobbyName;
 
-        window.history.pushState(null, null, '/$lobbyName');
+        window.history.pushState(null, null, '/${Uri.encodeFull(lobbyName)}');
         changeState('play-card');
       })
       ..on(Message.enterLobbyFailure, (_) {

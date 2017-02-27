@@ -20,7 +20,6 @@ part 'data.dart';
 part 'game.dart';
 part 'lobby.dart';
 
-
 var lobbies = <String, Lobby>{};
 var players = <ServerWebSocket, String>{};
 var playerLobby = <ServerWebSocket, Lobby>{};
@@ -49,32 +48,36 @@ main(List<String> args) async {
       staticFiles.serveFile(new File(indexUri.toFilePath()), request);
     };
 
+  var regex = new RegExp(r"/^[a-zA-Z0-9_-]{4,16}$/");
+
   var server = await HttpServer.bind(InternetAddress.LOOPBACK_IP_V4, port);
 
+  print('Server started at ${server.address.address}:${server.port}');
+
   await for (HttpRequest request in server) {
-    var uri = request.uri.path;
+    request.response.headers.set('cache-control', 'no-cache');
 
-    if (uri == '/ws') {
+
+    if (WebSocketTransformer.isUpgradeRequest(request)) {
+      var path = request.uri.path;
+      var lobbyName = regex.firstMatch(path.substring(1, path.length));
+
+      if (lobbyName != null) {
+        // lobby
+      }
+
       var socket = new ServerWebSocket.ugradeRequest(request);
-      await socket.start();
-
-      // TODO
-      handleSocket(socket, false);
+      handleSocket(socket);
 
       continue;
-    } else if (uri.length > 1 &&
-        !uri.contains(' ') &&
-        !uri.contains('/', 1) &&
-        !uri.contains('.') &&
-        !uri.contains('\\')) {
-      // lobby
     }
 
     staticFiles.serveRequest(request);
   }
 }
 
-handleSocket(ServerWebSocket socket, bool onPlayPage) async {
+handleSocket(ServerWebSocket socket, {String urlLobbyName}) async {
+  await socket.start();
   socket
     ..on(Message.login, (String username) {
       /////////// check if username exists ///////////
@@ -160,7 +163,7 @@ handleSocket(ServerWebSocket socket, bool onPlayPage) async {
         ..username = players[socket]
         ..guess = json;
 
-      lobby.onGuess(socket, guess);
+      lobby.game.onGuess(socket, guess);
     })
     ..on(Message.drawPoint, (String json) {
       var lobby = playerLobby[socket];
@@ -179,20 +182,11 @@ handleSocket(ServerWebSocket socket, bool onPlayPage) async {
       lobby?.sendToAll(Message.changeSize, json, except: socket);
     });
 
-  if (onPlayPage) {
-    await socket.done;
+  await socket.done;
 
-    playerLobby.remove(socket);
-    print('${players.remove(socket)} logged out');
+  playerLobby.remove(socket);
+  print('${players.remove(socket)} logged out');
 
-    var lobby = playerLobby[socket];
-    if (lobby == null) return;
-    lobby.removePlayer(socket);
-  }
-}
-
-broadcast(String request, dynamic val) {
-  for (ServerWebSocket socket in players.keys) {
-    socket.send(request, val);
-  }
+  var lobby = playerLobby[socket];
+  lobby?.removePlayer(socket);
 }

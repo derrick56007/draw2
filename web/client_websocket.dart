@@ -18,8 +18,9 @@ class ClientWebSocket extends DrawWebSocket {
   start([int retrySeconds = 2]) async {
     var reconnectScheduled = false;
 
-    print('connecting');
-    _webSocket = new WebSocket('ws://localhost:8080/ws');
+    var host = window.location.host;
+    print('connecting to $host');
+    _webSocket = new WebSocket('ws://$host/');
 
     _scheduleReconnect() {
       if (!reconnectScheduled) {

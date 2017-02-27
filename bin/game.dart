@@ -115,17 +115,21 @@ class Game {
   }
 
   onGuess(ServerWebSocket socket, Guess guess) {
-    if (guess.guess.toLowerCase() != 'draw next') {
-      lobby.sendToAll(Message.guess, guess.toJson());
-    } else if (guess.username != currentArtist) {
+    if (socket == currentArtist) {
+      return;
+    }
+
+    if (guess.guess.toLowerCase() == 'draw next') {
       addToQueue(socket, guess.username);
 
       return;
     }
 
+    lobby.sendToAll(Message.guess, guess.toJson());
+
     ////////////// check for win //////////////////
 
-    if (currentWord.isNotEmpty) return;
+    if (currentWord == null) return;
 
     // not a match
     if (guess.guess.toLowerCase() != currentWord.toLowerCase()) return;

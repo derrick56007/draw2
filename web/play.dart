@@ -185,7 +185,7 @@ class Play {
     <a class="collection-item chat-item">
       <div class="chat-username">$username</div>
       <div class="chat-text">$text</div>
-     </a>''');
+    </a>''');
 
     chatList
       ..children.add(el)
