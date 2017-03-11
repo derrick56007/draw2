@@ -6,8 +6,8 @@ class Message {
   static const enterLobby             = '5';
   static const enterLobbySuccessful   = '6';
   static const enterLobbyFailure      = '7';
-  static const requestLobbyList       = '8';
-  static const lobbyOpened            = '9';
+  static const requestPassword        = '8';
+  static const lobbyInfo              = '9';
   static const lobbyClosed            = 'a';
   static const guess                  = 'b';
   static const existingPlayer         = 'c';
@@ -23,5 +23,10 @@ class Message {
   static const clearDrawing           = 'm';
   static const changeColor            = 'n';
   static const changeSize             = 'o';
-  static const enterLobbyWithPassword = 'r';
+  static const enterLobbyWithPassword = 'p';
+  static const drawNext               = 'q';
+  static const setQueue               = 'r';
+  static const enableDrawNext         = 's';
+  static const setPlayerOrder         = 't';
+  static const updatePlayerScore      = 'u';
 }

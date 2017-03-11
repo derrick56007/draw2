@@ -20,11 +20,7 @@ class Lobby {
       ..hasPassword = info.password.isNotEmpty
       ..hasTimer = info.hasTimer
       ..maxPlayers = info.maxPlayers
-      ..game = new Game(lobby, lobby.hasTimer);
-  }
-
-  String usernameFromSocket(ServerWebSocket socket) {
-    return players[socket];
+      ..game = new Game(lobby, info.hasTimer);
   }
 
   addPlayer(ServerWebSocket socket, String username) {
@@ -45,9 +41,10 @@ class Lobby {
   }
 
   removePlayer(ServerWebSocket socket) {
-    sendToAll(Message.removePlayer, usernameFromSocket(socket));
+    var username = gPlayers[socket];
+    sendToAll(Message.removePlayer, username);
 
-    print('$socket left lobby $name');
+    print('$username left lobby $name');
 
     game.removePlayer(socket);
 
@@ -55,17 +52,43 @@ class Lobby {
   }
 
   sendToAll(String request, dynamic val, {ServerWebSocket except}) {
-    for (ServerWebSocket socket in players.keys) {
+    for (var socket in players.keys) {
       if (socket != except) {
         socket.send(request, val);
       }
     }
   }
 
-  LobbyInfo getInfo() => new LobbyInfo()
+  getInfo() => new LobbyInfo()
     ..name = name
     ..hasPassword = hasPassword
     ..hasTimer = hasTimer
     ..numberOfPlayers = game.scores.length
     ..maxPlayers = maxPlayers;
+
+  sendQueueInfo() {
+    var list = [];
+
+    for (int i = 0; i < game.artistQueue.length; i++) {
+      var socket = game.artistQueue[i];
+
+      list.add([gPlayers[socket], i + 1]);
+    }
+
+    sendToAll(Message.setQueue, JSON.encode(list));
+  }
+
+  sendPlayerOrder() {
+    var list = [];
+
+    if (game.currentArtist != null) {
+      list.add(gPlayers[game.currentArtist]);
+    }
+
+    for (var socket in game.artistQueue) {
+      list.add(gPlayers[socket]);
+    }
+
+    sendToAll(Message.setPlayerOrder, JSON.encode(list));
+  }
 }

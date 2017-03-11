@@ -4,78 +4,59 @@ class Lobbies {
   static Element lobbyListCollection = querySelector('#lobby-list-collection');
 
   static init(ClientWebSocket client) {
+    StreamSubscription sub;
 
     client
-      ..onOpen.listen((_) {
-        if (!client.isConnected()) {
-          toast('Not connected');
-          return;
-        }
-
-        client.send(Message.requestLobbyList, '');
-      })
-      ..on(Message.lobbyOpened, (dynamic data) {
+      ..on(Message.lobbyInfo, (String json) {
         querySelector('#lobby-list-progress')?.remove();
 
-        var lobbyInfo = new LobbyInfo.fromJson(data);
+        var lobbyInfo = new LobbyInfo.fromJson(json);
 
         var el = new Element.html('''
-      <a id="lobby-${lobbyInfo.name}" class="collection-item lobby-list-item">
-          <span class="badge">${lobbyInfo.numberOfPlayers}/${lobbyInfo
-            .maxPlayers}</span>
-          ${lobbyInfo.name}
-      </a>''');
+        <a id="lobby-${lobbyInfo.name}" class="collection-item lobby-list-item">
+            <span class="badge">${lobbyInfo.numberOfPlayers}/${lobbyInfo.maxPlayers}</span>
+            ${lobbyInfo.name}
+        </a>''');
 
-        // TODO
-        el.onClick.listen((_) {
-          myInfo.lobbyName = lobbyInfo.name;
-
-          if (lobbyInfo.hasPassword) {
-            changeState('password-card');
-          } else {
-            client.send(Message.enterLobby, lobbyInfo.name);
-          }
-        });
+        el.onClick
+            .listen((_) => client.send(Message.enterLobby, lobbyInfo.name));
 
         lobbyListCollection.children.add(el);
       })
-      ..on(Message.lobbyClosed, (String json) {
-        querySelector('#lobby-${json}')?.remove();
+      ..on(Message.lobbyClosed, (String lobbyName) {
+        querySelector('#lobby-$lobbyName')?.remove();
+      })
+      ..on(Message.requestPassword, (String lobbyName) {
+        sub?.cancel();
 
-        if (lobbyListCollection.children.isEmpty) {
-          changeState('lobby-list-state');
-          client.send(Message.requestLobbyList, '');
-        }
+        sub = querySelector('#enter-lobby-password-btn').onClick.listen((_) {
+          var el = querySelector('#enter-lobby-password') as InputElement;
+          var password = el.value.trim();
+
+          if (password.isEmpty) {
+            toast('Invalid input');
+            return;
+          }
+
+          var loginInfo = new LoginInfo()
+            ..lobbyName = lobbyName
+            ..password = password;
+
+          client.send(Message.enterLobbyWithPassword, loginInfo.toJson());
+        });
+        changeCard('password-card');
       })
       ..on(Message.enterLobbySuccessful, (String lobbyName) {
-        myInfo.lobbyName = lobbyName;
-
-        window.history.pushState(null, null, '/${Uri.encodeFull(lobbyName)}');
-        changeState('play-card');
+        window.history.pushState(null, null, '/${lobbyName}');
+        changeCard('play-card');
       })
       ..on(Message.enterLobbyFailure, (_) {
-        changeState('lobby-list-state');
+        changeCard('lobby-list-card');
       });
-
-    querySelector('#enter-lobby-password-btn').onClick.listen((_) {
-      var el = querySelector('#enter-lobby-password') as InputElement;
-      var password = el.value.trim();
-
-      if (password.isEmpty) {
-        toast('Invalid input');
-        return;
-      }
-
-      var loginInfo = new LoginInfo()
-        ..lobbyName = myInfo.lobbyName
-        ..password = password;
-
-      client.send(Message.enterLobbyWithPassword, loginInfo.toJson());
-    });
 
     querySelector('#create-lobby-card-btn').onClick.listen((_) {
       window.history.pushState(null, null, '/create');
-      changeState('create-lobby-card');
+      changeCard('create-lobby-card');
     });
   }
 }

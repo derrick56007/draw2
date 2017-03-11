@@ -38,7 +38,7 @@ class Create {
 
     querySelector('#back-to-lobbies-list-btn').onClick.listen((_) {
       window.history.pushState(null, null, '/lobbies');
-      changeState('lobby-list-card');
+      changeCard('lobby-list-card');
     });
   }
 }

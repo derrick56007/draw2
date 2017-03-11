@@ -1,7 +1,7 @@
 part of server;
 
 class Game {
-  Lobby lobby;
+  final Lobby lobby;
 
   var scores = <ServerWebSocket, int>{};
 
@@ -9,7 +9,7 @@ class Game {
 
   var rand = new Random();
 
-  bool hasTimer;
+  final bool hasTimer;
   Timer timer;
   Stopwatch stopwatch;
 
@@ -41,6 +41,7 @@ class Game {
   removeArtist() {
     timer?.cancel();
 
+    currentArtist.send(Message.enableDrawNext, '');
     currentArtist = null;
     currentWord = null;
 
@@ -50,36 +51,39 @@ class Game {
   }
 
   nextArtist() {
-    const interval = const Duration(seconds: 1);
-    const nextArtistDelay = const Duration(seconds: 10);
+    const nextRoundDelay = const Duration(seconds: 10);
     const maxGameTime = const Duration(minutes: 5);
 
-    startTimer(interval, nextArtistDelay, (Duration elapsed) {
+    startTimer(nextRoundDelay, (Duration elapsed) {
       lobby.sendToAll(Message.timerUpdate,
-          'Next game in ${nextArtistDelay.inSeconds - elapsed.inSeconds}s');
+          'Next game in ${nextRoundDelay.inSeconds - elapsed.inSeconds}s');
     }, () {
       currentArtist = artistQueue.removeAt(0);
+
+      lobby.sendQueueInfo();
+      lobby.sendPlayerOrder();
 
       int randIndex = rand.nextInt(unusedWordIndices.length);
 
       currentWord = Data.words[unusedWordIndices.removeAt(randIndex)];
 
+      var currentArtistName = gPlayers[currentArtist];
+
       currentArtist.send(Message.setAsArtist, currentWord);
-      lobby.sendToAll(
-          Message.setArtist, lobby.usernameFromSocket(currentArtist),
+      lobby.sendToAll(Message.setArtist, currentArtistName,
           except: currentArtist);
 
       if (!hasTimer) return;
 
-      startTimer(interval, maxGameTime, (Duration elapsed) {
+      startTimer(maxGameTime, (Duration elapsed) {
         String twoDigits(int n) {
           if (n >= 10) return "$n";
           return "0$n";
         }
 
-        String twoDigitMinutes =
+        var twoDigitMinutes =
             twoDigits(maxGameTime.inMinutes - elapsed.inMinutes);
-        String twoDigitSeconds = twoDigits(
+        var twoDigitSeconds = twoDigits(
             (maxGameTime.inSeconds - elapsed.inSeconds)
                 .remainder(Duration.SECONDS_PER_MINUTE));
 
@@ -93,7 +97,7 @@ class Game {
     });
   }
 
-  addToQueue(ServerWebSocket socket, String username) {
+  addToQueue(ServerWebSocket socket) {
     // stop if already in queue
     if (artistQueue.contains(socket)) return;
 
@@ -102,11 +106,8 @@ class Game {
 
     artistQueue.add(socket);
 
-    var guess = new Guess()
-      ..username = 'Lobby'
-      ..guess = '$username added to queue';
-
-    lobby.sendToAll(Message.guess, guess.toJson());
+    lobby.sendQueueInfo();
+    lobby.sendPlayerOrder();
 
     // stop if user was not
     if (artistQueue.length > 1 || currentArtist != null) return;
@@ -115,19 +116,10 @@ class Game {
   }
 
   onGuess(ServerWebSocket socket, Guess guess) {
-    if (socket == currentArtist) {
-      return;
-    }
-
-    if (guess.guess.toLowerCase() == 'draw next') {
-      addToQueue(socket, guess.username);
-
-      return;
-    }
-
     lobby.sendToAll(Message.guess, guess.toJson());
 
     ////////////// check for win //////////////////
+    if (socket == currentArtist) return;
 
     if (currentWord == null) return;
 
@@ -142,24 +134,27 @@ class Game {
     scores[socket] += 1;
 
     lobby.sendToAll(Message.win, '$username guessed \"$word\" correctly!');
+    lobby.sendToAll(Message.updatePlayerScore, JSON.encode([username, scores[socket]]));
 
     removeArtist();
   }
 
-  startTimer(Duration interval, Duration duration, dynamic fn, dynamic done) {
+  startTimer(Duration duration, dynamic repeating, dynamic onFinish) {
+    const interval = const Duration(seconds: 1);
+
     timer?.cancel();
     stopwatch
       ..reset()
       ..start();
 
     timer = new Timer.periodic(interval, (_) {
-      fn(stopwatch.elapsed);
+      repeating(stopwatch.elapsed);
 
       if (stopwatch.elapsedMilliseconds > duration.inMilliseconds) {
         timer?.cancel();
         stopwatch.stop();
 
-        done();
+        onFinish();
       }
     });
   }

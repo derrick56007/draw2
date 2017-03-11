@@ -1,6 +1,7 @@
 library client;
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:html' hide Point;
 import 'dart:math' hide Point;
 
@@ -23,14 +24,6 @@ part 'lobbies.dart';
 part 'login.dart';
 part 'play.dart';
 
-class Info {
-  String username, lobbyName;
-
-  Info() {}
-}
-
-var myInfo = new Info();
-
 main() async {
   var client = new ClientWebSocket();
   await client.start();
@@ -40,22 +33,20 @@ main() async {
   Create.init(client);
   Play.init(client);
 
-  changeState('login-card');
+  changeCard('login-card');
 }
 
-changeState(String elementName) {
-  var els = <Element>[
-    querySelector('#login-card'),
-    querySelector('#play-card'),
-    querySelector('#password-card'),
-    querySelector('#lobby-list-card'),
-    querySelector('#create-lobby-card')
-  ];
+final cards = <Element>[
+  querySelector('#login-card'),
+  querySelector('#play-card'),
+  querySelector('#password-card'),
+  querySelector('#lobby-list-card'),
+  querySelector('#create-lobby-card')
+];
 
-  for (var el in els) {
-    if (el.id != elementName) {
-      el.style.display = 'none';
-    }
+changeCard(String elementName) {
+  for (var e in cards) {
+    e.style.display = 'none';
   }
 
   querySelector('#$elementName').style.display = '';

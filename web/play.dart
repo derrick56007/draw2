@@ -3,6 +3,7 @@ part of client;
 class Play {
   static Element playerListCollection =
       querySelector('#player-list-collection');
+  static Element drawNextBtn = querySelector('#draw-next-btn');
   static InputElement chatInput = querySelector('#chat-input');
   static Element currentArtist = querySelector('#current-artist');
   static Element currentWord = querySelector('#current-word');
@@ -26,31 +27,18 @@ class Play {
       ..on(Message.existingPlayer, (String json) {
         var existingPlayer = new ExistingPlayer.fromJson(json);
 
-        var el = new Element.html('''
-        <a id="player-${existingPlayer.username}" class="collection-item player-item">
-          <span class="badge">${existingPlayer.score}</span>
-          ${existingPlayer.username}
-        </a>''');
-
-        playerListCollection.children.add(el);
+        // TODO add queue number to existing info
+        _addPlayer(existingPlayer.username, existingPlayer.score, '');
       })
-      ..on(Message.newPlayer, (String json) {
-        var el = new Element.html('''
-        <a id="player-${json}" class="collection-item player-item">
-          <span class="badge">0</span>
-          ${json}
-        </a>''');
-
-        playerListCollection.children.add(el);
-
-        print('added new player');
+      ..on(Message.newPlayer, (String name) {
+        _addPlayer(name, 0, '');
       })
-      ..on(Message.removePlayer, (String json) {
-        querySelector('#player-${json}')?.remove();
+      ..on(Message.removePlayer, (String name) {
+        querySelector('#player-$name')?.remove();
       })
-      ..on(Message.setAsArtist, (String json) {
-        currentArtist.text = myInfo.username;
-        currentWord.text = json;
+      ..on(Message.setAsArtist, (String word) {
+        currentArtist.text = 'You are drawing';
+        currentWord.text = word;
         currentTime.text = '';
 
         _clearDrawing();
@@ -111,7 +99,7 @@ class Play {
           }));
       })
       ..on(Message.setArtist, (String json) {
-        currentArtist.text = json;
+        currentArtist.text = '$json is drawing';
         currentWord.text = '';
         currentTime.text = '';
 
@@ -165,6 +153,41 @@ class Play {
       })
       ..on(Message.changeSize, (String json) {
         brush.size = int.parse(json);
+      })
+      ..on(Message.setQueue, (String json) {
+        for (var el in playerListCollection.children) {
+          var queueNumber = el.querySelectorAll('.queue-number').first;
+          queueNumber.text = '';
+        }
+
+        // TODO make separate class for queueInfo
+        var queue = JSON.decode(json) as List;
+
+        for (var player in queue) {
+          var name = player[0];
+          querySelector('#player-$name-queue-number')?.text = '${player[1]}';
+        }
+      })
+      ..on(Message.setPlayerOrder, (String json) {
+        var order = JSON.decode(json) as List;
+        for (var name in order.reversed) {
+          var el = querySelector('#player-$name');
+
+          if (el == null) continue;
+
+          el.remove();
+          playerListCollection.children.insert(0, el);
+        }
+      })
+      ..on(Message.enableDrawNext, (_) {
+        drawNextBtn.classes.remove('disabled');
+      })
+      ..on(Message.updatePlayerScore, (String json) {
+        var playerScore = JSON.decode(json) as List;
+        var name = playerScore[0];
+        var score = playerScore[1];
+
+        querySelector('#player-$name-score')?.text = '$score';
       });
 
     document.onKeyPress.listen((KeyboardEvent e) {
@@ -178,6 +201,25 @@ class Play {
 
       chatInput.value = '';
     });
+
+    drawNextBtn.onClick.listen((_) {
+      if (drawNextBtn.classes.contains('disabled')) return;
+
+      drawNextBtn.classes.add('disabled');
+
+      client.send(Message.drawNext, '');
+    });
+  }
+
+  static void _addPlayer(String name, int score, var queueNumber) {
+    var el = new Element.html('''
+        <a id="player-$name" class="collection-item player-item">
+          <span id="player-$name-queue-number" class="queue-number">$queueNumber</span>
+          <span id="player-$name-score" class="player-score">$score</span>
+          $name
+        </a>''');
+
+    playerListCollection.children.add(el);
   }
 
   static void _addToChat(String username, String text) {

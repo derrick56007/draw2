@@ -75,6 +75,11 @@ body {
     padding: 5px !important;
 }
 
+.player-item {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+}
+
 .chat-item:hover,
 .player-item:hover {
     background: #fff !important;
@@ -97,6 +102,7 @@ body {
 #player-list-collection {
     text-align: left;
     overflow-y: auto;
+    margin-bottom: 10px;
 }
 
 #canvas-header {
@@ -149,4 +155,22 @@ body {
 
 #canvas {
     margin-bottom: -7px;
+}
+
+.queue-number {
+    float: left;
+    padding: 0;
+    width: 18px;
+    height: 20px;
+    margin: 0 2px 0 -7px;
+    text-align: center;
+}
+
+.player-score {
+    padding: 0;
+    width: 20px;
+    margin: 0;
+    float: right;
+    color: #757575;
+    text-align: right;
 }

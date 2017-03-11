@@ -3,16 +3,12 @@ part of client;
 class Login {
   static init(ClientWebSocket client) {
     client
-      ..on(Message.toast, (msg) {
+      ..on(Message.toast, (String msg) {
         toast(msg);
       })
-      ..on(Message.loginSuccesful, (String username) {
-        print('logged in!');
-
-        myInfo.username = username;
-
+      ..on(Message.loginSuccesful, (_) {
         window.history.pushState(null, null, '/lobbies');
-        changeState('lobby-list-card');
+        changeCard('lobby-list-card');
       });
 
     querySelector('#login-btn').onClick.listen((_) {

@@ -1,5 +1,6 @@
 library server;
 
+import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
 import 'dart:math';
@@ -20,9 +21,9 @@ part 'data.dart';
 part 'game.dart';
 part 'lobby.dart';
 
-var lobbies = <String, Lobby>{};
-var players = <ServerWebSocket, String>{};
-var playerLobby = <ServerWebSocket, Lobby>{};
+var gLobbies = <String, Lobby>{};
+var gPlayers = <ServerWebSocket, String>{};
+var gPlayerLobby = <ServerWebSocket, Lobby>{};
 
 main(List<String> args) async {
   int port;
@@ -52,11 +53,10 @@ main(List<String> args) async {
 
   var server = await HttpServer.bind(InternetAddress.LOOPBACK_IP_V4, port);
 
-  print('Server started at ${server.address.address}:${server.port}');
+  print('server started at ${server.address.address}:${server.port}');
 
   await for (HttpRequest request in server) {
     request.response.headers.set('cache-control', 'no-cache');
-
 
     if (WebSocketTransformer.isUpgradeRequest(request)) {
       var path = request.uri.path;
@@ -78,72 +78,79 @@ main(List<String> args) async {
 
 handleSocket(ServerWebSocket socket, {String urlLobbyName}) async {
   await socket.start();
+
   socket
     ..on(Message.login, (String username) {
       /////////// check if username exists ///////////
-      if (players.containsValue(username)) {
+      if (gPlayers.containsValue(username)) {
         socket.send(Message.toast, 'Username taken');
         return null;
       }
       ////////////////////////////////////////////////
 
-      players[socket] = username;
+      gPlayers[socket] = username;
 
-      socket.send(Message.loginSuccesful, username);
+      socket.send(Message.loginSuccesful, '');
 
       print('$username logged in');
-    })
-    ..on(Message.requestLobbyList, (_) {
-      // TODO cache data
-      for (Lobby lobby in lobbies.values) {
-        socket.send(Message.lobbyOpened, lobby.getInfo().toJson());
+
+      // send lobby info
+      for (var lobby in gLobbies.values) {
+        socket.send(Message.lobbyInfo, lobby.getInfo().toJson());
       }
     })
     ..on(Message.createLobby, (String json) {
       var createLobbyInfo = new CreateLobbyInfo.fromJson(json);
 
       ////////// check if lobby exists /////////////
-      if (lobbies.containsKey(createLobbyInfo.name)) {
+      if (gLobbies.containsKey(createLobbyInfo.name)) {
         socket.send(Message.toast, 'Lobby already exists');
         return null;
       }
       //////////////////////////////////////////////
 
-      print('Created lobby ${createLobbyInfo.toJson()}');
+      print('new lobby ${createLobbyInfo.toJson()}');
 
       var lobby = new Lobby(createLobbyInfo);
-      lobbies[createLobbyInfo.name] = lobby;
+      gLobbies[createLobbyInfo.name] = lobby;
 
-      lobby.sendToAll(Message.lobbyOpened, lobby.getInfo().toJson());
+      for (var otherSocket in gPlayers.keys) {
+        otherSocket.send(Message.lobbyInfo, lobby.getInfo().toJson());
+      }
 
-      playerLobby[socket] = lobby;
-      lobby.addPlayer(socket, players[socket]);
+      gPlayerLobby[socket] = lobby;
+      lobby.addPlayer(socket, gPlayers[socket]);
       socket.send(Message.enterLobbySuccessful, lobby.name);
     })
     ..on(Message.enterLobby, (String lobbyName) {
       ////////// check if lobby exists ////////////////
-      if (!lobbies.containsKey(lobbyName)) {
+      if (!gLobbies.containsKey(lobbyName)) {
         socket.send(Message.toast, 'Lobby doesn\'t exist');
         socket.send(Message.enterLobbyFailure, '');
         return null;
       }
 
-      var lobby = lobbies[lobbyName];
+      var lobby = gLobbies[lobbyName];
 
-      playerLobby[socket] = lobby;
-      lobby.addPlayer(socket, players[socket]);
+      if (lobby.hasPassword) {
+        socket.send(Message.requestPassword, lobbyName);
+        return null;
+      }
+
+      gPlayerLobby[socket] = lobby;
+      lobby.addPlayer(socket, gPlayers[socket]);
       socket.send(Message.enterLobbySuccessful, lobbyName);
     })
     ..on(Message.enterLobbyWithPassword, (String json) {
       var loginInfo = new LoginInfo.fromJson(json);
 
-      if (!lobbies.containsKey(loginInfo.lobbyName)) {
+      if (!gLobbies.containsKey(loginInfo.lobbyName)) {
         socket.send(Message.toast, 'Lobby doesn\'t exist');
         socket.send(Message.enterLobbyFailure, '');
         return null;
       }
 
-      var lobby = lobbies[loginInfo.lobbyName];
+      var lobby = gLobbies[loginInfo.lobbyName];
 
       if (lobby.hasPassword && lobby.password != loginInfo.password) {
         socket.send(Message.toast, 'Password is incorrect');
@@ -151,42 +158,63 @@ handleSocket(ServerWebSocket socket, {String urlLobbyName}) async {
         return null;
       }
 
-      playerLobby[socket] = lobby;
-      lobby.addPlayer(socket, players[socket]);
+      gPlayerLobby[socket] = lobby;
+      lobby.addPlayer(socket, gPlayers[socket]);
       socket.send(Message.enterLobbySuccessful, loginInfo.lobbyName);
     })
+    ..on(Message.drawNext, (_) {
+      if (!gPlayerLobby.containsKey(socket)) return null;
+
+      var lobby = gPlayerLobby[socket];
+      lobby.game.addToQueue(socket);
+    })
     ..on(Message.guess, (String json) {
-      var lobby = playerLobby[socket];
-      if (lobby == null) return null;
+      if (!gPlayerLobby.containsKey(socket)) return null;
+
+      var lobby = gPlayerLobby[socket];
 
       var guess = new Guess()
-        ..username = players[socket]
+        ..username = gPlayers[socket]
         ..guess = json;
 
       lobby.game.onGuess(socket, guess);
     })
     ..on(Message.drawPoint, (String json) {
-      var lobby = playerLobby[socket];
+      var lobby = gPlayerLobby[socket];
       lobby?.sendToAll(Message.drawPoint, json, except: socket);
     })
     ..on(Message.drawLine, (String json) {
-      var lobby = playerLobby[socket];
+      var lobby = gPlayerLobby[socket];
       lobby?.sendToAll(Message.drawLine, json, except: socket);
     })
     ..on(Message.changeColor, (String json) {
-      var lobby = playerLobby[socket];
+      var lobby = gPlayerLobby[socket];
       lobby?.sendToAll(Message.changeColor, json, except: socket);
     })
     ..on(Message.changeSize, (String json) {
-      var lobby = playerLobby[socket];
+      var lobby = gPlayerLobby[socket];
       lobby?.sendToAll(Message.changeSize, json, except: socket);
     });
 
   await socket.done;
 
-  playerLobby.remove(socket);
-  print('${players.remove(socket)} logged out');
+  // remove logged in player
+  if (!gPlayers.containsKey(socket)) return;
+  var username = gPlayers.remove(socket);
+  print('$username logged out');
 
-  var lobby = playerLobby[socket];
-  lobby?.removePlayer(socket);
+  // remove from lobby
+  if (!gPlayerLobby.containsKey(socket)) return;
+  var lobby = gPlayerLobby.remove(socket);
+  lobby.removePlayer(socket);
+
+  // close lobby if empty
+  if (lobby.players.isNotEmpty) return;
+  print('closed lobby ${lobby.name}');
+  gLobbies.remove(lobby.name);
+
+  // tell all players
+  for (var sk in gPlayers.keys) {
+    sk.send(Message.lobbyClosed, lobby.name);
+  }
 }
