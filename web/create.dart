@@ -1,44 +1,72 @@
 part of client;
 
 class Create {
-  static init(ClientWebSocket client) {
+  static Element createLobbyCard = querySelector('#create-lobby-card');
+  static InputElement lobbyNameElement = querySelector('#lobby-name');
+  static StreamSubscription submitSub;
+  static ClientWebSocket client;
+
+  static init(ClientWebSocket _client) {
+    client = _client;
+
     querySelector('#create-lobby-btn').onClick.listen((_) {
-      if (!client.isConnected()) {
-        toast('Not connected');
-        return;
-      }
-
-      var lobbyNameElement = querySelector('#lobby-name') as InputElement;
-      String lobbyName = lobbyNameElement.value.trim();
-
-      if (lobbyName.isEmpty) {
-        toast('Not a valid lobby name');
-        return;
-      }
-
-      var passwordElement =
-          querySelector('#create-lobby-password') as InputElement;
-      String password = passwordElement.value.trim();
-
-      var selectNumPlayersEl =
-          querySelector('#number-of-players') as SelectElement;
-      int maxPlayers = int.parse(selectNumPlayersEl.value);
-
-      var timerElement = querySelector('#timer-switch') as InputElement;
-      bool hasTimer = timerElement.checked;
-
-      var lobbyInfo = new CreateLobbyInfo()
-        ..name = lobbyName
-        ..password = password
-        ..hasTimer = hasTimer
-        ..maxPlayers = maxPlayers;
-
-      client.send(Message.createLobby, lobbyInfo.toJson());
+      submit();
     });
 
     querySelector('#back-to-lobbies-list-btn').onClick.listen((_) {
-      window.history.pushState(null, null, '/lobbies');
-      changeCard('lobby-list-card');
+      Lobbies.show();
     });
+  }
+
+  static void show() {
+    hideAllCards();
+    createLobbyCard.style.display = '';
+
+    lobbyNameElement.autofocus = true;
+
+    submitSub = window.onKeyPress.listen((KeyboardEvent e) {
+      if (e.keyCode == KeyCode.ENTER) {
+        submit();
+      }
+    });
+  }
+
+  static void hide() {
+    createLobbyCard.style.display = 'none';
+
+    submitSub?.cancel();
+  }
+
+  static void submit() {
+    if (!client.isConnected()) {
+      toast('Not connected');
+      return;
+    }
+
+    String lobbyName = lobbyNameElement.value.trim();
+
+    if (lobbyName.isEmpty) {
+      toast('Not a valid lobby name');
+      return;
+    }
+
+    var passwordElement =
+    querySelector('#create-lobby-password') as InputElement;
+    String password = passwordElement.value.trim();
+
+    var selectNumPlayersEl =
+    querySelector('#number-of-players') as SelectElement;
+    int maxPlayers = int.parse(selectNumPlayersEl.value);
+
+    var timerElement = querySelector('#timer-switch') as InputElement;
+    bool hasTimer = timerElement.checked;
+
+    var lobbyInfo = new CreateLobbyInfo()
+      ..name = lobbyName
+      ..password = password
+      ..hasTimer = hasTimer
+      ..maxPlayers = maxPlayers;
+
+    client.send(Message.createLobby, lobbyInfo.toJson());
   }
 }

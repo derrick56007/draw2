@@ -89,7 +89,7 @@
         </div>
     </div>
 
-    <div id="play-card" class="noselect" style="display: none">
+    <div id="play-card" class="noselect" style="">
         <div id="player-list-holder" class="card white darken-1">
             <div class="card-content black-text" style="text-align: center">
                 <div class="card-title">Players</div>
@@ -109,9 +109,15 @@
                 </canvas>
             </div>
             <div id="artist-options" class="z-depth-2 card white darken-1">
-                <input id="color-picker">
-                <label for="color-picker" style="display: none"></label>
-                <div id="color" style="display: none">#000000</div>
+                <div>
+                    <input id="color-picker">
+                    <label for="color-picker" style="display: none"></label>
+                    <div id="color" style="display: none">#000000</div>
+                </div>
+                <div id="artist-buttons">
+                    <a id="clear-btn" class="waves-effect waves-light btn">Clear</a>
+                    <a id="undo-btn" class="waves-effect waves-light btn">Undo</a>
+                </div>
             </div>
         </div>
         <div id="chat-holder" class="card white darken-1">

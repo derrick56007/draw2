@@ -1,10 +1,15 @@
 part of client;
 
 class Lobbies {
+  static Element lobbiesCard = querySelector('#lobby-list-card');
+
   static Element lobbyListCollection = querySelector('#lobby-list-collection');
 
+  static var lobbyNameRegex = new RegExp(DrawRegExp.lobbyName);
+
+  static StreamSubscription submitSub;
+
   static init(ClientWebSocket client) {
-    StreamSubscription sub;
 
     client
       ..on(Message.lobbyInfo, (String json) {
@@ -27,36 +32,41 @@ class Lobbies {
         querySelector('#lobby-$lobbyName')?.remove();
       })
       ..on(Message.requestPassword, (String lobbyName) {
-        sub?.cancel();
-
-        sub = querySelector('#enter-lobby-password-btn').onClick.listen((_) {
-          var el = querySelector('#enter-lobby-password') as InputElement;
-          var password = el.value.trim();
-
-          if (password.isEmpty) {
-            toast('Invalid input');
-            return;
-          }
-
-          var loginInfo = new LoginInfo()
-            ..lobbyName = lobbyName
-            ..password = password;
-
-          client.send(Message.enterLobbyWithPassword, loginInfo.toJson());
-        });
-        changeCard('password-card');
+        Password.show(lobbyName);
       })
       ..on(Message.enterLobbySuccessful, (String lobbyName) {
-        window.history.pushState(null, null, '/${lobbyName}');
-        changeCard('play-card');
+        window.history.pushState(null, null, '/$lobbyName');
+        Play.show();
       })
       ..on(Message.enterLobbyFailure, (_) {
-        changeCard('lobby-list-card');
+        window.history.pushState(null, null, '/');
+        Lobbies.show();
       });
 
     querySelector('#create-lobby-card-btn').onClick.listen((_) {
-      window.history.pushState(null, null, '/create');
-      changeCard('create-lobby-card');
+      Create.show();
     });
+  }
+
+  static void show() {
+    hideAllCards();
+    lobbiesCard.style.display = '';
+
+    submitSub = window.onKeyPress.listen((KeyboardEvent e) {
+      if (e.keyCode == KeyCode.ENTER) {
+        Create.show();
+      }
+    });
+  }
+
+  static void hide() {
+    lobbiesCard.style.display = 'none';
+    submitSub?.cancel();
+  }
+
+  static bool isValidLobbyName(String lobbyName) {
+    var lobbyMatches = lobbyNameRegex.firstMatch(lobbyName);
+
+    return lobbyMatches != null && lobbyMatches[0] == lobbyName;
   }
 }

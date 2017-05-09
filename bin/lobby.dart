@@ -14,6 +14,8 @@ class Lobby {
 
   factory Lobby(CreateLobbyInfo info) {
     var lobby = new Lobby._internal();
+
+    // create a lobby with info
     return lobby
       ..name = info.name
       ..password = info.password
@@ -24,7 +26,10 @@ class Lobby {
   }
 
   addPlayer(ServerWebSocket socket, String username) {
+    // send info of existing players to the new player
     players.forEach((ServerWebSocket existingSocket, String existingUsername) {
+
+      // player info
       var existingPlayer = new ExistingPlayer()
         ..username = existingUsername
         ..score = game.scores[existingSocket];
@@ -32,16 +37,21 @@ class Lobby {
       socket.send(Message.existingPlayer, existingPlayer.toJson());
     });
 
+    // add player to game
     players[socket] = username;
     game.addPlayer(socket);
 
+    // alert other players of new player
     sendToAll(Message.newPlayer, username);
 
     print('$username joined lobby $name');
+
+    sendPlayerOrder();
   }
 
   removePlayer(ServerWebSocket socket) {
-    var username = gPlayers[socket];
+    var username = players[socket];
+
     sendToAll(Message.removePlayer, username);
 
     print('$username left lobby $name');
@@ -72,7 +82,7 @@ class Lobby {
     for (int i = 0; i < game.artistQueue.length; i++) {
       var socket = game.artistQueue[i];
 
-      list.add([gPlayers[socket], i + 1]);
+      list.add([players[socket], i + 1]);
     }
 
     sendToAll(Message.setQueue, JSON.encode(list));
@@ -82,11 +92,11 @@ class Lobby {
     var list = [];
 
     if (game.currentArtist != null) {
-      list.add(gPlayers[game.currentArtist]);
+      list.add(players[game.currentArtist]);
     }
 
     for (var socket in game.artistQueue) {
-      list.add(gPlayers[socket]);
+      list.add(players[socket]);
     }
 
     sendToAll(Message.setPlayerOrder, JSON.encode(list));

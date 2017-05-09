@@ -56,7 +56,7 @@ body {
 
 #chat-holder {
     margin-left: 10px;
-    height: 665px;
+    height: 655px;
     width: 220px;
 }
 
@@ -65,7 +65,7 @@ body {
 }
 
 #chat-list {
-    height: 545px;
+    height: 530px;
     overflow-y: auto;
 }
 
@@ -173,4 +173,18 @@ body {
     float: right;
     color: #757575;
     text-align: right;
+}
+
+#artist-options {
+    display: flex;
+}
+
+#artist-buttons {
+    display: flex;
+    flex-direction: column;
+}
+
+#artist-buttons > a {
+    margin-left: 7px;
+    margin-bottom: 7px;
 }

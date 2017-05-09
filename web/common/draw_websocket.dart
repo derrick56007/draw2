@@ -16,12 +16,15 @@ abstract class DrawWebSocket {
     var msg = JSON.decode(data);
 
     // checks if is [request, data]
-    if (msg is List &&
-        msg.length == 2 &&
-        messageDisatchers.containsKey(msg[0])) {
-      messageDisatchers[msg[0]](msg[1]);
+    if (msg is List) {
+      // check if dispatch is valid
+      if (msg.length == 2 && messageDisatchers.containsKey(msg[0])) {
+        messageDisatchers[msg[0]](msg[1]);
+      } else {
+        print('No such dispatch exists!: $msg');
+      }
     } else {
-      // raw string
+      print('No such dispatch exists!: $msg');
     }
   }
 }

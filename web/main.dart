@@ -5,10 +5,9 @@ import 'dart:convert';
 import 'dart:html' hide Point;
 import 'dart:math' hide Point;
 
-//import 'package:css_animation/css_animation.dart';
-
 import 'common/brush.dart';
 import 'common/create_lobby_info.dart';
+import 'common/draw_regex.dart';
 import 'common/existing_player.dart';
 import 'common/guess.dart';
 import 'common/lobby_info.dart';
@@ -22,6 +21,7 @@ import 'toast.dart';
 part 'create.dart';
 part 'lobbies.dart';
 part 'login.dart';
+part 'password.dart';
 part 'play.dart';
 
 main() async {
@@ -32,22 +32,15 @@ main() async {
   Lobbies.init(client);
   Create.init(client);
   Play.init(client);
+  Password.init(client);
 
-  changeCard('login-card');
+  Login.show();
 }
 
-final cards = <Element>[
-  querySelector('#login-card'),
-  querySelector('#play-card'),
-  querySelector('#password-card'),
-  querySelector('#lobby-list-card'),
-  querySelector('#create-lobby-card')
-];
-
-changeCard(String elementName) {
-  for (var e in cards) {
-    e.style.display = 'none';
-  }
-
-  querySelector('#$elementName').style.display = '';
+hideAllCards() {
+  Login.hide();
+  Lobbies.hide();
+  Create.hide();
+  Play.hide();
+  Password.hide();
 }

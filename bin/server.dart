@@ -3,7 +3,6 @@ library server;
 import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
-import 'dart:math';
 
 import 'package:args/args.dart';
 import 'package:http_server/http_server.dart';
@@ -11,6 +10,7 @@ import 'package:http_server/http_server.dart';
 import 'server_websocket.dart';
 
 import '../web/common/create_lobby_info.dart';
+import '../web/common/draw_regex.dart';
 import '../web/common/existing_player.dart';
 import '../web/common/guess.dart';
 import '../web/common/lobby_info.dart';
@@ -24,6 +24,8 @@ part 'lobby.dart';
 var gLobbies = <String, Lobby>{};
 var gPlayers = <ServerWebSocket, String>{};
 var gPlayerLobby = <ServerWebSocket, Lobby>{};
+
+var lobbyNameRegex = new RegExp(DrawRegExp.lobbyName);
 
 main(List<String> args) async {
   int port;
@@ -43,13 +45,16 @@ main(List<String> args) async {
   var staticFiles = new VirtualDirectory(clientFiles);
   staticFiles
     ..allowDirectoryListing = true
-    ..directoryHandler = (dir, request) {
+    ..directoryHandler = (dir, request) async {
       var indexUri = new Uri.file(dir.path).resolve('index.html');
 
-      staticFiles.serveFile(new File(indexUri.toFilePath()), request);
-    };
+      var file = new File(indexUri.toFilePath());
 
-  var regex = new RegExp(r"/^[a-zA-Z0-9_-]{4,16}$/");
+      if (await file.exists()) {} else {
+        file = new File('web/index.html');
+      }
+      staticFiles.serveFile(file, request);
+    };
 
   var server = await HttpServer.bind(InternetAddress.LOOPBACK_IP_V4, port);
 
@@ -58,25 +63,26 @@ main(List<String> args) async {
   await for (HttpRequest request in server) {
     request.response.headers.set('cache-control', 'no-cache');
 
+    var path = request.uri.path;
+    var hasLobby = isValidLobbyName(path.substring(1));
+
     if (WebSocketTransformer.isUpgradeRequest(request)) {
-      var path = request.uri.path;
-      var lobbyName = regex.firstMatch(path.substring(1, path.length));
-
-      if (lobbyName != null) {
-        // lobby
-      }
-
       var socket = new ServerWebSocket.ugradeRequest(request);
+
       handleSocket(socket);
 
       continue;
     }
 
-    staticFiles.serveRequest(request);
+    if (hasLobby) {
+      staticFiles.serveFile(new File('web/index.html'), request);
+    } else {
+      staticFiles.serveRequest(request);
+    }
   }
 }
 
-handleSocket(ServerWebSocket socket, {String urlLobbyName}) async {
+handleSocket(ServerWebSocket socket) async {
   await socket.start();
 
   socket
@@ -87,6 +93,13 @@ handleSocket(ServerWebSocket socket, {String urlLobbyName}) async {
         return null;
       }
       ////////////////////////////////////////////////
+
+      ///////// check if valid name ////////////////
+      if (!isValidLobbyName(username)) {
+        socket.send(Message.toast, 'Invalid username');
+        return null;
+      }
+      //////////////////////////////////////////////
 
       gPlayers[socket] = username;
 
@@ -105,6 +118,13 @@ handleSocket(ServerWebSocket socket, {String urlLobbyName}) async {
       ////////// check if lobby exists /////////////
       if (gLobbies.containsKey(createLobbyInfo.name)) {
         socket.send(Message.toast, 'Lobby already exists');
+        return null;
+      }
+      //////////////////////////////////////////////
+
+      ///////// check if valid name ////////////////
+      if (!isValidLobbyName(createLobbyInfo.name)) {
+        socket.send(Message.toast, 'Invalid lobby name');
         return null;
       }
       //////////////////////////////////////////////
@@ -198,23 +218,29 @@ handleSocket(ServerWebSocket socket, {String urlLobbyName}) async {
 
   await socket.done;
 
-  // remove logged in player
   if (!gPlayers.containsKey(socket)) return;
-  var username = gPlayers.remove(socket);
-  print('$username logged out');
 
-  // remove from lobby
-  if (!gPlayerLobby.containsKey(socket)) return;
-  var lobby = gPlayerLobby.remove(socket);
-  lobby.removePlayer(socket);
+  if (gPlayerLobby.containsKey(socket)) {
+    var lobby = gPlayerLobby.remove(socket);
+    lobby.removePlayer(socket);
 
-  // close lobby if empty
-  if (lobby.players.isNotEmpty) return;
-  print('closed lobby ${lobby.name}');
-  gLobbies.remove(lobby.name);
+    // close lobby if empty
+    if (lobby.players.isEmpty) {
+      print('closed lobby ${lobby.name}');
+      gLobbies.remove(lobby.name);
 
-  // tell all players
-  for (var sk in gPlayers.keys) {
-    sk.send(Message.lobbyClosed, lobby.name);
+      // tell all players
+      for (var sk in gPlayers.keys) {
+        sk.send(Message.lobbyClosed, lobby.name);
+      }
+    }
   }
+
+  gPlayers.remove(socket);
+}
+
+bool isValidLobbyName(String lobbyName) {
+  var lobbyMatches = lobbyNameRegex.firstMatch(lobbyName);
+
+  return lobbyMatches != null && lobbyMatches[0] == lobbyName;
 }

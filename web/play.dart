@@ -1,6 +1,8 @@
 part of client;
 
 class Play {
+  static Element playCard = querySelector('#play-card');
+
   static Element playerListCollection =
       querySelector('#player-list-collection');
   static Element drawNextBtn = querySelector('#draw-next-btn');
@@ -209,6 +211,15 @@ class Play {
 
       client.send(Message.drawNext, '');
     });
+  }
+
+  static void show() {
+    hideAllCards();
+    playCard.style.display = '';
+  }
+
+  static void hide() {
+    playCard.style.display = 'none';
   }
 
   static void _addPlayer(String name, int score, var queueNumber) {

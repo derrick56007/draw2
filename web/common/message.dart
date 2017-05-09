@@ -22,11 +22,12 @@ class Message {
   static const drawLine               = 'l';
   static const clearDrawing           = 'm';
   static const changeColor            = 'n';
-  static const changeSize             = 'o';
-  static const enterLobbyWithPassword = 'p';
-  static const drawNext               = 'q';
-  static const setQueue               = 'r';
-  static const enableDrawNext         = 's';
-  static const setPlayerOrder         = 't';
-  static const updatePlayerScore      = 'u';
+  static const undoDrawing            = 'o';
+  static const updatePlayerScore      = 'p';
+  static const changeSize             = 'q';
+  static const enterLobbyWithPassword = 'r';
+  static const drawNext               = 's';
+  static const setQueue               = 't';
+  static const enableDrawNext         = 'u';
+  static const setPlayerOrder         = 'v';
 }

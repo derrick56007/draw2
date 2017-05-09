@@ -1,15 +1,17 @@
 part of server;
 
 class Game {
+  static const nextRoundDelay = const Duration(seconds: 10);
+  static const maxGameTime = const Duration(minutes: 5);
+  static const timerTickInterval = const Duration(seconds: 1);
+
   final Lobby lobby;
+  final bool hasTimer;
 
   var scores = <ServerWebSocket, int>{};
 
-  var unusedWordIndices = <int>[];
+  List<int> unusedWordIndices;
 
-  var rand = new Random();
-
-  final bool hasTimer;
   Timer timer;
   Stopwatch stopwatch;
 
@@ -19,9 +21,8 @@ class Game {
   var artistQueue = <ServerWebSocket>[];
 
   Game(this.lobby, this.hasTimer) {
-    for (int i = 0; i < Data.words.length; i++) {
-      unusedWordIndices.add(i);
-    }
+    unusedWordIndices = new List<int>.generate(Data.words.length, (i) => i);
+    unusedWordIndices.shuffle();
 
     stopwatch = new Stopwatch();
   }
@@ -33,9 +34,10 @@ class Game {
   removePlayer(ServerWebSocket socket) {
     scores.remove(socket);
 
-    if (currentArtist != socket) return;
-
-    removeArtist();
+    // check if leaving player is current artist
+    if (currentArtist == socket) {
+      removeArtist();
+    }
   }
 
   removeArtist() {
@@ -51,9 +53,6 @@ class Game {
   }
 
   nextArtist() {
-    const nextRoundDelay = const Duration(seconds: 10);
-    const maxGameTime = const Duration(minutes: 5);
-
     startTimer(nextRoundDelay, (Duration elapsed) {
       lobby.sendToAll(Message.timerUpdate,
           'Next game in ${nextRoundDelay.inSeconds - elapsed.inSeconds}s');
@@ -63,11 +62,9 @@ class Game {
       lobby.sendQueueInfo();
       lobby.sendPlayerOrder();
 
-      int randIndex = rand.nextInt(unusedWordIndices.length);
+      currentWord = Data.words[unusedWordIndices.removeLast()];
 
-      currentWord = Data.words[unusedWordIndices.removeAt(randIndex)];
-
-      var currentArtistName = gPlayers[currentArtist];
+      var currentArtistName = lobby.players[currentArtist];
 
       currentArtist.send(Message.setAsArtist, currentWord);
       lobby.sendToAll(Message.setArtist, currentArtistName,
@@ -77,8 +74,8 @@ class Game {
 
       startTimer(maxGameTime, (Duration elapsed) {
         String twoDigits(int n) {
-          if (n >= 10) return "$n";
-          return "0$n";
+          if (n >= 10) return '$n';
+          return '0$n';
         }
 
         var twoDigitMinutes =
@@ -134,20 +131,22 @@ class Game {
     scores[socket] += 1;
 
     lobby.sendToAll(Message.win, '$username guessed \"$word\" correctly!');
-    lobby.sendToAll(Message.updatePlayerScore, JSON.encode([username, scores[socket]]));
+    lobby.sendToAll(
+        Message.updatePlayerScore, JSON.encode([username, scores[socket]]));
 
     removeArtist();
   }
 
-  startTimer(Duration duration, dynamic repeating, dynamic onFinish) {
-    const interval = const Duration(seconds: 1);
+  startTimer(Duration duration, Function repeating(Duration elapsed),
+      Function onFinish()) {
 
     timer?.cancel();
+
     stopwatch
       ..reset()
       ..start();
 
-    timer = new Timer.periodic(interval, (_) {
+    timer = new Timer.periodic(timerTickInterval, (_) {
       repeating(stopwatch.elapsed);
 
       if (stopwatch.elapsedMilliseconds > duration.inMilliseconds) {
