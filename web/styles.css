@@ -188,3 +188,12 @@ body {
     margin-left: 7px;
     margin-bottom: 7px;
 }
+
+#canvas-layers, .canvas-layer {
+    position: absolute;
+    top: 0;
+}
+
+#canvas {
+    z-index: 0;
+}

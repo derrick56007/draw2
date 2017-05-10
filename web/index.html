@@ -89,7 +89,7 @@
         </div>
     </div>
 
-    <div id="play-card" class="noselect" style="">
+    <div id="play-card" class="noselect" style="display: none">
         <div id="player-list-holder" class="card white darken-1">
             <div class="card-content black-text" style="text-align: center">
                 <div class="card-title">Players</div>
@@ -107,6 +107,23 @@
                 <canvas id="canvas" width="640" height="480" moz-opaque>
                     Canvas is not supported in your browser.
                 </canvas>
+                <div id="canvas-layers">
+                    <canvas class="canvas-layer" width="640" height="480" moz-opaque>
+                        Canvas is not supported in your browser.
+                    </canvas>
+                    <canvas class="canvas-layer" width="640" height="480" moz-opaque>
+                        Canvas is not supported in your browser.
+                    </canvas>
+                    <canvas class="canvas-layer" width="640" height="480" moz-opaque>
+                        Canvas is not supported in your browser.
+                    </canvas>
+                    <canvas class="canvas-layer" width="640" height="480" moz-opaque>
+                        Canvas is not supported in your browser.
+                    </canvas>
+                    <canvas class="canvas-layer" width="640" height="480" moz-opaque>
+                        Canvas is not supported in your browser.
+                    </canvas>
+                </div>
             </div>
             <div id="artist-options" class="z-depth-2 card white darken-1">
                 <div>
@@ -115,8 +132,8 @@
                     <div id="color" style="display: none">#000000</div>
                 </div>
                 <div id="artist-buttons">
-                    <a id="clear-btn" class="waves-effect waves-light btn">Clear</a>
-                    <a id="undo-btn" class="waves-effect waves-light btn">Undo</a>
+                    <a id="clear-btn" class="waves-effect waves-light btn disabled">Clear</a>
+                    <a id="undo-btn" class="waves-effect waves-light btn disabled">Undo</a>
                 </div>
             </div>
         </div>

@@ -22,7 +22,7 @@ class Message {
   static const drawLine               = 'l';
   static const clearDrawing           = 'm';
   static const changeColor            = 'n';
-  static const undoDrawing            = 'o';
+  static const undoLast               = 'o';
   static const updatePlayerScore      = 'p';
   static const changeSize             = 'q';
   static const enterLobbyWithPassword = 'r';

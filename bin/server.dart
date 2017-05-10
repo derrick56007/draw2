@@ -207,6 +207,14 @@ handleSocket(ServerWebSocket socket) async {
       var lobby = gPlayerLobby[socket];
       lobby?.sendToAll(Message.drawLine, json, except: socket);
     })
+    ..on(Message.clearDrawing, (String json) {
+      var lobby = gPlayerLobby[socket];
+      lobby?.sendToAll(Message.clearDrawing, json, except: socket);
+    })
+    ..on(Message.undoLast, (String json) {
+      var lobby = gPlayerLobby[socket];
+      lobby?.sendToAll(Message.undoLast, json, except: socket);
+    })
     ..on(Message.changeColor, (String json) {
       var lobby = gPlayerLobby[socket];
       lobby?.sendToAll(Message.changeColor, json, except: socket);

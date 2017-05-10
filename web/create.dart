@@ -22,13 +22,13 @@ class Create {
     hideAllCards();
     createLobbyCard.style.display = '';
 
-    lobbyNameElement.autofocus = true;
-
     submitSub = window.onKeyPress.listen((KeyboardEvent e) {
       if (e.keyCode == KeyCode.ENTER) {
         submit();
       }
     });
+
+    lobbyNameElement.autofocus = true;
   }
 
   static void hide() {

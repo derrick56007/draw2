@@ -6,17 +6,22 @@ class Play {
   static Element playerListCollection =
       querySelector('#player-list-collection');
   static Element drawNextBtn = querySelector('#draw-next-btn');
+  static Element undoBtn = querySelector('#undo-btn');
+  static Element clearBtn = querySelector('#clear-btn');
   static InputElement chatInput = querySelector('#chat-input');
   static Element currentArtist = querySelector('#current-artist');
   static Element currentWord = querySelector('#current-word');
   static Element currentTime = querySelector('#current-time');
   static Element chatList = querySelector('#chat-list');
-  static CanvasElement canvas = querySelector('#canvas');
-  static CanvasRenderingContext2D ctx = canvas.context2D;
+  static CanvasElement mainCanvas = querySelector('#canvas');
+  static List<CanvasElement> canvasLayers =
+      querySelector('#canvas-layers').children;
+  static CanvasRenderingContext2D currentContext;
+  static int currentCanvasIndex = -1;
+  static const maxCanvasLayers = 5;
+  static List<StreamSubscription<MouseEvent>> streamSubscriptions = [];
 
   static init(ClientWebSocket client) {
-    var streamSubscriptions = <StreamSubscription<MouseEvent>>[];
-
     var brush = new Brush();
     Timer timer;
 
@@ -46,8 +51,10 @@ class Play {
         _clearDrawing();
 
         streamSubscriptions
-          ..add(canvas.onMouseDown.listen((MouseEvent e) {
-            var rect = canvas.getBoundingClientRect();
+          ..add(querySelector('#canvas-layers')
+              .onMouseDown
+              .listen((MouseEvent e) {
+            var rect = mainCanvas.getBoundingClientRect();
             num x = e.page.x - rect.left;
             num y = e.page.y - rect.top;
 
@@ -84,7 +91,7 @@ class Play {
           }))
           ..add(document.onMouseMove.listen((MouseEvent e) {
             if (brush.pressed) {
-              var rect = canvas.getBoundingClientRect();
+              var rect = mainCanvas.getBoundingClientRect();
 
               brush
                 ..pos.x = e.page.x - rect.left
@@ -98,6 +105,16 @@ class Play {
               ..moved = false;
 
             timer?.cancel();
+          }))
+          ..add(undoBtn.onClick.listen((_) {
+            if (undoBtn.classes.contains('disabled')) return;
+
+            client.send(Message.undoLast, '');
+            _undoLast();
+          }))
+          ..add(clearBtn.onClick.listen((_) {
+            client.send(Message.clearDrawing, '');
+            _clearDrawing();
           }));
       })
       ..on(Message.setArtist, (String json) {
@@ -112,6 +129,9 @@ class Play {
         streamSubscriptions.clear();
 
         timer?.cancel();
+
+        clearBtn.classes.add('disabled');
+        undoBtn.classes.add('disabled');
       })
       ..on(Message.win, (String json) {
         currentArtist.text = '';
@@ -149,6 +169,9 @@ class Play {
       })
       ..on(Message.clearDrawing, (_) {
         _clearDrawing();
+      })
+      ..on(Message.undoLast, (_) {
+        _undoLast();
       })
       ..on(Message.changeColor, (String json) {
         brush.color = json;
@@ -250,7 +273,9 @@ class Play {
   }
 
   static void _drawPoint(num x, num y, num size, String color) {
-    ctx
+    nextCanvasLayer();
+
+    currentContext
       ..beginPath()
       ..arc(x, y, size / 2, 0, 2 * PI)
       ..closePath()
@@ -260,7 +285,7 @@ class Play {
 
   static void _drawLine(
       num x1, num y1, num x2, num y2, num size, String color) {
-    ctx
+    currentContext
       ..beginPath()
       ..moveTo(x1, y1)
       ..lineTo(x2, y2)
@@ -273,6 +298,48 @@ class Play {
   }
 
   static void _clearDrawing() {
-    ctx.clearRect(0, 0, 640, 480);
+    mainCanvas.context2D.clearRect(0, 0, 640, 480);
+
+    for (CanvasElement layer in canvasLayers) {
+      layer.context2D.clearRect(0, 0, 640, 480);
+    }
+
+    currentCanvasIndex = 0;
+
+    undoBtn.classes.add('disabled');
+    clearBtn.classes.add('disabled');
+  }
+
+  static void _undoLast() {
+    currentContext.clearRect(0, 0, 640, 480);
+
+    if (currentCanvasIndex > 0) {
+      currentCanvasIndex--;
+
+      var prevLayer = canvasLayers[currentCanvasIndex % maxCanvasLayers];
+
+      currentContext = prevLayer.context2D;
+    }
+
+    if (currentCanvasIndex == 0) {
+      undoBtn.classes.add('disabled');
+    }
+  }
+
+  static void nextCanvasLayer() {
+    undoBtn.classes.remove('disabled');
+    clearBtn.classes.remove('disabled');
+
+    currentCanvasIndex++;
+
+    var nextLayer = canvasLayers[currentCanvasIndex % maxCanvasLayers]
+      ..style.zIndex = '${currentCanvasIndex + 1}';
+
+    currentContext = nextLayer.context2D;
+
+    if (currentCanvasIndex >= maxCanvasLayers) {
+      mainCanvas.context2D.drawImage(nextLayer, 0, 0);
+      currentContext.clearRect(0, 0, 640, 480);
+    }
   }
 }
