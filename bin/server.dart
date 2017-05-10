@@ -37,7 +37,7 @@ main(List<String> args) async {
   }
 
   var parser = new ArgParser();
-  parser.addOption('clientFiles', defaultsTo: 'web');
+  parser.addOption('clientFiles', defaultsTo: '../build/web');
 
   var results = parser.parse(args);
   var clientFiles = results['clientFiles'];
@@ -56,7 +56,7 @@ main(List<String> args) async {
       staticFiles.serveFile(file, request);
     };
 
-  var server = await HttpServer.bind(InternetAddress.LOOPBACK_IP_V4, port);
+  var server = await HttpServer.bind('0.0.0.0', port);
 
   print('server started at ${server.address.address}:${server.port}');
 
