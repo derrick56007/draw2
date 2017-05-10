@@ -110,7 +110,7 @@ body {
     height: 30px;
     margin-bottom: -30px;
     display: flex;
-    z-index: 1;
+    z-index: 999999999;
     position: relative;
 }
 
