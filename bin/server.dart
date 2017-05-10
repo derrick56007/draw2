@@ -224,10 +224,13 @@ handleSocket(ServerWebSocket socket) async {
       lobby?.sendToAll(Message.changeSize, json, except: socket);
     });
 
+  // on socket disconnect
   await socket.done;
 
+  // check if player was logged in
   if (!gPlayers.containsKey(socket)) return;
 
+  // check if player was in a lobby
   if (gPlayerLobby.containsKey(socket)) {
     var lobby = gPlayerLobby.remove(socket);
     lobby.removePlayer(socket);

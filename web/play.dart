@@ -19,9 +19,16 @@ class Play {
   static CanvasRenderingContext2D currentContext;
   static int currentCanvasIndex = -1;
   static const maxCanvasLayers = 5;
-  static List<StreamSubscription<MouseEvent>> streamSubscriptions = [];
+  static List<StreamSubscription<MouseEvent>> drawSubs = [];
+  static List<StreamSubscription> playSubs = [];
 
-  static init(ClientWebSocket client) {
+  static const brushInterval = const Duration(milliseconds: 25);
+
+  static ClientWebSocket client;
+
+  static init(ClientWebSocket _client) {
+    client = _client;
+
     var brush = new Brush();
     Timer timer;
 
@@ -50,7 +57,7 @@ class Play {
 
         _clearDrawing();
 
-        streamSubscriptions
+        drawSubs
           ..add(querySelector('#canvas-layers')
               .onMouseDown
               .listen((MouseEvent e) {
@@ -74,7 +81,6 @@ class Play {
             _drawPoint(x, y, brush.size, brush.color);
             client.send(Message.drawPoint, brush.pos.toJson());
 
-            const brushInterval = const Duration(milliseconds: 25);
             timer?.cancel();
             timer = new Timer.periodic(brushInterval, (_) {
               if (brush.moved) {
@@ -123,10 +129,10 @@ class Play {
         currentTime.text = '';
 
         _clearDrawing();
-        for (var sub in streamSubscriptions) {
+        for (var sub in drawSubs) {
           sub?.cancel();
         }
-        streamSubscriptions.clear();
+        drawSubs.clear();
 
         timer?.cancel();
 
@@ -214,54 +220,59 @@ class Play {
 
         querySelector('#player-$name-score')?.text = '$score';
       });
-
-    document.onKeyPress.listen((KeyboardEvent e) {
-      if (e.keyCode != KeyCode.ENTER) return;
-
-      String guess = chatInput.value.trim();
-
-      if (guess.isNotEmpty) {
-        client.send(Message.guess, guess);
-      }
-
-      chatInput.value = '';
-    });
-
-    drawNextBtn.onClick.listen((_) {
-      if (drawNextBtn.classes.contains('disabled')) return;
-
-      drawNextBtn.classes.add('disabled');
-
-      client.send(Message.drawNext, '');
-    });
   }
 
   static void show() {
     hideAllCards();
     playCard.style.display = '';
+
+    playSubs
+      ..add(document.onKeyPress.listen((KeyboardEvent e) {
+        if (e.keyCode != KeyCode.ENTER) return;
+
+        String guess = chatInput.value.trim();
+
+        if (guess.isNotEmpty) {
+          client.send(Message.guess, guess);
+        }
+
+        chatInput.value = '';
+      }))
+      ..add(drawNextBtn.onClick.listen((_) {
+        if (drawNextBtn.classes.contains('disabled')) return;
+
+        drawNextBtn.classes.add('disabled');
+
+        client.send(Message.drawNext, '');
+      }));
   }
 
   static void hide() {
     playCard.style.display = 'none';
+
+    for (var sub in playSubs) {
+      sub?.cancel();
+    }
+    playSubs.clear();
   }
 
   static void _addPlayer(String name, int score, var queueNumber) {
     var el = new Element.html('''
-        <a id="player-$name" class="collection-item player-item">
-          <span id="player-$name-queue-number" class="queue-number">$queueNumber</span>
-          <span id="player-$name-score" class="player-score">$score</span>
-          $name
-        </a>''');
+      <a id="player-$name" class="collection-item player-item">
+        <span id="player-$name-queue-number" class="queue-number">$queueNumber</span>
+        <span id="player-$name-score" class="player-score">$score</span>
+        $name
+      </a>''');
 
     playerListCollection.children.add(el);
   }
 
   static void _addToChat(String username, String text) {
     var el = new Element.html('''
-    <a class="collection-item chat-item">
-      <div class="chat-username">$username</div>
-      <div class="chat-text">$text</div>
-    </a>''');
+      <a class="collection-item chat-item">
+        <div class="chat-username">$username</div>
+        <div class="chat-text">$text</div>
+      </a>''');
 
     chatList
       ..children.add(el)

@@ -113,6 +113,7 @@ body {
     z-index: 999999999;
     position: relative;
     text-shadow: 0 0 7px white;
+    pointer-events: none;
 }
 
 .canvas-header-item {
