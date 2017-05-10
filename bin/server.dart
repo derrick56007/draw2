@@ -37,13 +37,14 @@ main(List<String> args) async {
   }
 
   var parser = new ArgParser();
-  parser.addOption('clientFiles', defaultsTo: '../build/web');
+  parser.addOption('clientFiles', defaultsTo: 'build/web/');
 
   var results = parser.parse(args);
   var clientFiles = results['clientFiles'];
 
   var staticFiles = new VirtualDirectory(clientFiles);
   staticFiles
+    ..jailRoot = false
     ..allowDirectoryListing = true
     ..directoryHandler = (dir, request) async {
       var indexUri = new Uri.file(dir.path).resolve('index.html');
@@ -51,7 +52,7 @@ main(List<String> args) async {
       var file = new File(indexUri.toFilePath());
 
       if (await file.exists()) {} else {
-        file = new File('web/index.html');
+        file = new File('index.html');
       }
       staticFiles.serveFile(file, request);
     };
