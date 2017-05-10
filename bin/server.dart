@@ -244,7 +244,8 @@ handleSocket(ServerWebSocket socket) async {
     }
   }
 
-  gPlayers.remove(socket);
+  var username = gPlayers.remove(socket);
+  print('$username logged out');
 }
 
 bool isValidLobbyName(String lobbyName) {

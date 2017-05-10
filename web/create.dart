@@ -28,7 +28,7 @@ class Create {
       }
     });
 
-    lobbyNameElement.autofocus = true;
+    lobbyNameElement.focus();
   }
 
   static void hide() {
