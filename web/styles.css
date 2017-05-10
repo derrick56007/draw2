@@ -112,6 +112,7 @@ body {
     display: flex;
     z-index: 999999999;
     position: relative;
+    text-shadow: 0 0 7px white;
 }
 
 .canvas-header-item {
