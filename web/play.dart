@@ -26,10 +26,12 @@ class Play {
 
   static ClientWebSocket client;
 
+  static List<Point> drawPoints = [];
+  static Brush brush = new Brush();
+
   static init(ClientWebSocket _client) {
     client = _client;
 
-    var brush = new Brush();
     Timer timer;
 
     client
@@ -68,8 +70,8 @@ class Play {
             brush
               ..pos.x = x
               ..pos.y = y
-              ..prevPos.x = x
-              ..prevPos.y = y
+//              ..prevPos.x = x
+//              ..prevPos.y = y
               ..pressed = true;
 
             var color = querySelector('#color').text;
@@ -78,19 +80,18 @@ class Play {
               client.send(Message.changeColor, brush.color);
             }
 
-            _drawPoint(x, y, brush.size, brush.color);
+            _drawPoint(x, y);
             client.send(Message.drawPoint, brush.pos.toJson());
 
             timer?.cancel();
             timer = new Timer.periodic(brushInterval, (_) {
               if (brush.moved) {
-                _drawLine(brush.prevPos.x, brush.prevPos.y, brush.pos.x,
-                    brush.pos.y, brush.size, brush.color);
+                _drawLine(brush.pos.x, brush.pos.y);
                 client.send(Message.drawLine, brush.pos.toJson());
 
                 brush
-                  ..prevPos.x = brush.pos.x
-                  ..prevPos.y = brush.pos.y
+//                  ..prevPos.x = brush.pos.x
+//                  ..prevPos.y = brush.pos.y
                   ..moved = false;
               }
             });
@@ -155,23 +156,18 @@ class Play {
 
         brush
           ..pos.x = pos.x
-          ..pos.y = pos.y
-          ..prevPos.x = pos.x
-          ..prevPos.y = pos.y;
+          ..pos.y = pos.y;
 
-        _drawPoint(brush.pos.x, brush.pos.y, brush.size, brush.color);
+        _drawPoint(brush.pos.x, brush.pos.y);
       })
       ..on(Message.drawLine, (String json) {
         var pos = new Point.fromJson(json);
 
         brush
-          ..prevPos.x = brush.pos.x
-          ..prevPos.y = brush.pos.y
           ..pos.x = pos.x
           ..pos.y = pos.y;
 
-        _drawLine(brush.prevPos.x, brush.prevPos.y, brush.pos.x, brush.pos.y,
-            brush.size, brush.color);
+        _drawLine(brush.pos.x, brush.pos.y);
       })
       ..on(Message.clearDrawing, (_) {
         _clearDrawing();
@@ -283,29 +279,57 @@ class Play {
     chatList.children.removeAt(0);
   }
 
-  static void _drawPoint(num x, num y, num size, String color) {
+  static void _drawPoint(num x, num y) {
     nextCanvasLayer();
 
-    currentContext
-      ..beginPath()
-      ..arc(x, y, size / 2, 0, 2 * PI)
-      ..closePath()
-      ..fillStyle = color
-      ..fill();
+    drawPoints.add(new Point(x, y));
+
+    _strokeDrawPoints();
   }
 
-  static void _drawLine(
-      num x1, num y1, num x2, num y2, num size, String color) {
-    currentContext
-      ..beginPath()
-      ..moveTo(x1, y1)
-      ..lineTo(x2, y2)
-      ..closePath()
-      ..lineWidth = size
-      ..strokeStyle = color
-      ..lineCap = 'round'
-      ..lineJoin = 'round'
-      ..stroke();
+  static void _drawLine(num x, num y) {
+    drawPoints.add(new Point(x, y));
+
+    _strokeDrawPoints();
+  }
+
+  // smooth draw path
+  static void _strokeDrawPoints() {
+    currentContext.clearRect(0, 0, 640, 480);
+
+    var p1 = drawPoints.first;
+
+    if (drawPoints.length == 1) {
+      currentContext
+        ..beginPath()
+        ..arc(p1.x, p1.y, brush.size / 2, 0, 2 * PI)
+        ..closePath()
+        ..fillStyle = brush.color
+        ..fill();
+    } else if (drawPoints.length > 1) {
+      var p2 = drawPoints[1];
+
+      currentContext
+        ..beginPath()
+        ..moveTo(p1.x, p1.y);
+
+      for (int i = 1; i < drawPoints.length - 1; i++) {
+        var midPoint = Point.midPoint(p1, p2);
+
+        currentContext.quadraticCurveTo(p1.x, p1.y, midPoint.x, midPoint.y);
+
+        p1 = drawPoints[i];
+        p2 = drawPoints[i + 1];
+      }
+
+      currentContext
+        ..lineTo(p1.x, p1.y)
+        ..lineWidth = brush.size
+        ..strokeStyle = brush.color
+        ..lineCap = 'round'
+        ..lineJoin = 'round'
+        ..stroke();
+    }
   }
 
   static void _clearDrawing() {
@@ -352,5 +376,7 @@ class Play {
       mainCanvas.context2D.drawImage(nextLayer, 0, 0);
       currentContext.clearRect(0, 0, 640, 480);
     }
+
+    drawPoints.clear();
   }
 }
