@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'point.dart';
 
 class Brush {
@@ -7,9 +6,9 @@ class Brush {
 
   bool pressed = false;
   bool moved = false;
-
-  Point pos = new Point.zero();
-  Point prevPos = new Point.zero();
+//
+  Point pos = new Point(0, 0);
+//  Point prevPos = new Point.zero();
 
   Brush();
 //
