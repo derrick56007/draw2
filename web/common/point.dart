@@ -1,13 +1,9 @@
 import 'dart:convert';
 
-class Point {
-  int x, y;
+class Point<T> {
+  T x, y;
 
-  Point();
-
-  Point.zero()
-      : x = 0,
-        y = 0;
+  Point([this.x, this.y]);
 
   String toJson() => JSON.encode([x, y]);
 
@@ -16,4 +12,7 @@ class Point {
     ..y = list[1];
 
   factory Point.fromJson(String json) => new Point.fromList(JSON.decode(json));
+
+  static Point midPoint(Point p1, Point p2) =>
+      new Point(p1.x + (p2.x - p1.x) / 2, p1.y + (p2.y - p1.y) / 2);
 }
