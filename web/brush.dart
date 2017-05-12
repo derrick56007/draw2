@@ -1,4 +1,4 @@
-import 'point.dart';
+import 'common/point.dart';
 
 class Brush {
   String color = '#000000';
