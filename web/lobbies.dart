@@ -18,10 +18,10 @@ class Lobbies {
         var lobbyInfo = new LobbyInfo.fromJson(json);
 
         var el = new Element.html('''
-        <a id="lobby-${lobbyInfo.name}" class="collection-item lobby-list-item">
+          <a id="lobby-${lobbyInfo.name}" class="collection-item lobby-list-item">
             <span class="badge">${lobbyInfo.numberOfPlayers}/${lobbyInfo.maxPlayers}</span>
             ${lobbyInfo.name}
-        </a>''');
+          </a>''');
 
         el.onClick
             .listen((_) => client.send(Message.enterLobby, lobbyInfo.name));
