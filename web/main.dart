@@ -5,7 +5,6 @@ import 'dart:convert';
 import 'dart:html' hide Point;
 import 'dart:math' hide Point;
 
-import 'common/brush.dart';
 import 'common/create_lobby_info.dart';
 import 'common/draw_regex.dart';
 import 'common/existing_player.dart';
@@ -15,6 +14,7 @@ import 'common/login_info.dart';
 import 'common/message.dart';
 import 'common/point.dart';
 
+import 'brush.dart';
 import 'client_websocket.dart';
 import 'toast.dart';
 
