@@ -100,9 +100,9 @@
         <div>
             <div class="z-depth-2 card white darken-1" style="margin: 0">
                 <div id="canvas-header" class="noselect">
-                    <div id="current-artist" class="canvas-header-item"></div>
-                    <div id="current-word" class="canvas-header-item"></div>
-                    <div id="current-time" class="canvas-header-item"></div>
+                    <div id="canvas-left-label" class="canvas-header-item"></div>
+                    <div id="canvas-middle-label" class="canvas-header-item"></div>
+                    <div id="canvas-right-label" class="canvas-header-item"></div>
                 </div>
                 <canvas id="canvas" width="640" height="480" moz-opaque>
                     Canvas is not supported in your browser.
@@ -125,7 +125,7 @@
                     </canvas>
                 </div>
             </div>
-            <div id="artist-options" class="z-depth-2 card white darken-1">
+            <div id="artist-options" class="z-depth-2 card white darken-1 scale-transition scale-out">
                 <div>
                     <input id="color-picker">
                     <label for="color-picker" style="display: none"></label>

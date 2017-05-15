@@ -123,15 +123,15 @@ body {
     flex-basis: 0;
 }
 
-#current-artist, #current-time {
+#canvas-left-label, #canvas-right-label {
     flex-grow: 1;
 }
 
-#current-time {
+#canvas-right-label {
     text-align: right;
 }
 
-#current-word {
+#canvas-middle-label {
     text-align: center;
     font-size: 2em;
     line-height: 50px;

@@ -13,10 +13,11 @@ class Play {
   Element drawNextBtn = querySelector('#draw-next-btn');
   Element undoBtn = querySelector('#undo-btn');
   Element clearBtn = querySelector('#clear-btn');
-  Element currentArtist = querySelector('#current-artist');
-  Element currentWord = querySelector('#current-word');
-  Element currentTime = querySelector('#current-time');
+  Element canvasLeftLabel = querySelector('#canvas-left-label');
+  Element canvasMiddleLabel = querySelector('#canvas-middle-label');
+  Element canvasRightLabel = querySelector('#canvas-right-label');
   Element chatList = querySelector('#chat-list');
+  Element artistOptions = querySelector('#artist-options');
 
   InputElement chatInput = querySelector('#chat-input');
 
@@ -55,17 +56,15 @@ class Play {
       ..on(Message.removePlayer, (String name) {
         querySelector('#player-$name')?.remove();
       })
-      ..on(Message.setAsArtist, (String word) {
-        currentArtist.text = 'You are drawing';
-        currentWord.text = word;
-        currentTime.text = '';
+      ..on(Message.setAsArtist, (_) {
+        artistOptions.classes
+          ..remove('scale-out')
+          ..add('scale-in');
 
         _clearDrawing();
 
-        drawSubs
-          ..add(querySelector('#canvas-layers')
-              .onMouseDown
-              .listen((MouseEvent e) {
+        drawSubs.addAll([
+          querySelector('#canvas-layers').onMouseDown.listen((MouseEvent e) {
             var rect = mainCanvas.getBoundingClientRect();
             num x = e.page.x - rect.left;
             num y = e.page.y - rect.top;
@@ -93,8 +92,8 @@ class Play {
                 brush.moved = false;
               }
             });
-          }))
-          ..add(document.onMouseMove.listen((MouseEvent e) {
+          }),
+          document.onMouseMove.listen((MouseEvent e) {
             if (brush.pressed) {
               var rect = mainCanvas.getBoundingClientRect();
 
@@ -103,29 +102,30 @@ class Play {
                 ..pos.y = e.page.y - rect.top
                 ..moved = true;
             }
-          }))
-          ..add(document.onMouseUp.listen((MouseEvent e) {
+          }),
+          document.onMouseUp.listen((MouseEvent e) {
             brush
               ..pressed = false
               ..moved = false;
 
             timer?.cancel();
-          }))
-          ..add(undoBtn.onClick.listen((_) {
+          }),
+          undoBtn.onClick.listen((_) {
             if (undoBtn.classes.contains('disabled')) return;
 
             client.send(Message.undoLast, '');
             _undoLast();
-          }))
-          ..add(clearBtn.onClick.listen((_) {
+          }),
+          clearBtn.onClick.listen((_) {
             client.send(Message.clearDrawing, '');
             _clearDrawing();
-          }));
+          })
+        ]);
       })
-      ..on(Message.setArtist, (String json) {
-        currentArtist.text = '$json is drawing';
-        currentWord.text = '';
-        currentTime.text = '';
+      ..on(Message.setArtist, (_) {
+        artistOptions.classes
+          ..remove('scale-in')
+          ..add('scale-out');
 
         _clearDrawing();
         for (var sub in drawSubs) {
@@ -138,16 +138,21 @@ class Play {
         clearBtn.classes.add('disabled');
         undoBtn.classes.add('disabled');
       })
-      ..on(Message.win, (String json) {
-        currentArtist.text = '';
-        currentWord.text = json;
-        currentTime.text = '';
+      ..on(Message.win, (_) {})
+      ..on(Message.lose, (String json) {})
+      ..on(Message.setCanvasLeftLabel, (String json) {
+        canvasLeftLabel.text = json;
       })
-      ..on(Message.lose, (String json) {
-        currentWord.text = json;
+      ..on(Message.setCanvasMiddleLabel, (String json) {
+        canvasMiddleLabel.text = json;
       })
-      ..on(Message.timerUpdate, (String json) {
-        currentTime.text = json;
+      ..on(Message.setCanvasRightLabel, (String json) {
+        canvasRightLabel.text = json;
+      })
+      ..on(Message.clearCanvasLabels, (String json) {
+        canvasLeftLabel.text = '';
+        canvasMiddleLabel.text = '';
+        canvasRightLabel.text = '';
       })
       ..on(Message.drawPoint, (String json) {
         var pos = new Point.fromJson(json);

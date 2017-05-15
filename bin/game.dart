@@ -47,28 +47,39 @@ class Game {
     currentArtist = null;
     currentWord = null;
 
-    if (artistQueue.isEmpty) return;
-
-    nextArtist();
+    if (artistQueue.isEmpty) {
+      lobby.sendToAll(Message.setCanvasRightLabel, 'Click draw next!');
+    } else {
+      nextArtist();
+    }
   }
 
   nextArtist() {
     startTimer(nextRoundDelay, (Duration elapsed) {
-      lobby.sendToAll(Message.timerUpdate,
+      lobby.sendToAll(Message.setCanvasRightLabel,
           'Next game in ${nextRoundDelay.inSeconds - elapsed.inSeconds}s');
     }, () {
       currentArtist = artistQueue.removeAt(0);
 
-      lobby.sendQueueInfo();
-      lobby.sendPlayerOrder();
+      lobby
+        ..sendQueueInfo()
+        ..sendPlayerOrder();
 
       currentWord = Data.words[unusedWordIndices.removeLast()];
 
       var currentArtistName = lobby.players[currentArtist];
 
-      currentArtist.send(Message.setAsArtist, currentWord);
-      lobby.sendToAll(Message.setArtist, currentArtistName,
-          except: currentArtist);
+      currentArtist
+        ..send(Message.clearCanvasLabels, '')
+        ..send(Message.setCanvasLeftLabel, 'You are drawing')
+        ..send(Message.setCanvasMiddleLabel, currentWord)
+        ..send(Message.setAsArtist, '');
+
+      lobby
+        ..sendToAll(Message.clearCanvasLabels, '', except: currentArtist)
+        ..sendToAll(Message.setCanvasLeftLabel, '$currentArtistName is drawing',
+            except: currentArtist)
+        ..sendToAll(Message.setArtist, '', except: currentArtist);
 
       if (!hasTimer) return;
 
@@ -84,10 +95,13 @@ class Game {
             (maxGameTime.inSeconds - elapsed.inSeconds)
                 .remainder(Duration.SECONDS_PER_MINUTE));
 
-        lobby.sendToAll(
-            Message.timerUpdate, 'Time left $twoDigitMinutes:$twoDigitSeconds');
+        lobby.sendToAll(Message.setCanvasRightLabel,
+            'Time left $twoDigitMinutes:$twoDigitSeconds');
       }, () {
-        lobby.sendToAll(Message.lose, 'The word was \"$currentWord\"');
+        lobby
+          ..sendToAll(Message.lose, '')
+          ..sendToAll(
+              Message.setCanvasMiddleLabel, 'The word was \"$currentWord\"');
 
         removeArtist();
       });
@@ -130,16 +144,19 @@ class Game {
     // TODO point system
     scores[socket] += 1;
 
-    lobby.sendToAll(Message.win, '$username guessed \"$word\" correctly!');
-    lobby.sendToAll(
-        Message.updatePlayerScore, JSON.encode([username, scores[socket]]));
+    lobby
+      ..sendToAll(Message.clearCanvasLabels, '')
+      ..sendToAll(Message.setCanvasMiddleLabel,
+          '$username guessed \"$word\" correctly!')
+      ..sendToAll(Message.win, '')
+      ..sendToAll(
+          Message.updatePlayerScore, JSON.encode([username, scores[socket]]));
 
     removeArtist();
   }
 
   startTimer(Duration duration, Function repeating(Duration elapsed),
       Function onFinish()) {
-
     timer?.cancel();
 
     stopwatch
