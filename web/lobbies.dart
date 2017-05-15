@@ -1,16 +1,14 @@
 part of client;
 
 class Lobbies {
-  static Element lobbiesCard = querySelector('#lobby-list-card');
-
-  static Element lobbyListCollection = querySelector('#lobby-list-collection');
-
   static var lobbyNameRegex = new RegExp(DrawRegExp.lobbyName);
 
-  static StreamSubscription submitSub;
+  Element lobbiesCard = querySelector('#lobby-list-card');
+  Element lobbyListCollection = querySelector('#lobby-list-collection');
 
-  static init(ClientWebSocket client) {
+  StreamSubscription submitSub;
 
+  Lobbies(ClientWebSocket client) {
     client
       ..on(Message.lobbyInfo, (String json) {
         querySelector('#lobby-list-progress')?.remove();
@@ -32,34 +30,34 @@ class Lobbies {
         querySelector('#lobby-$lobbyName')?.remove();
       })
       ..on(Message.requestPassword, (String lobbyName) {
-        Password.show(lobbyName);
+        password.show(lobbyName);
       })
       ..on(Message.enterLobbySuccessful, (String lobbyName) {
         window.history.pushState(null, null, '/$lobbyName');
-        Play.show();
+        play.show();
       })
       ..on(Message.enterLobbyFailure, (_) {
         window.history.pushState(null, null, '/');
-        Lobbies.show();
+        lobbies.show();
       });
 
     querySelector('#create-lobby-card-btn').onClick.listen((_) {
-      Create.show();
+      create.show();
     });
   }
 
-  static void show() {
+  show() {
     hideAllCards();
     lobbiesCard.style.display = '';
 
     submitSub = window.onKeyPress.listen((KeyboardEvent e) {
       if (e.keyCode == KeyCode.ENTER) {
-        Create.show();
+        create.show();
       }
     });
   }
 
-  static void hide() {
+  hide() {
     lobbiesCard.style.display = 'none';
     submitSub?.cancel();
   }

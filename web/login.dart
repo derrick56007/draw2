@@ -1,12 +1,12 @@
 part of client;
 
 class Login {
-  static Element loginCard = querySelector('#login-card');
-  static InputElement usernameElement = querySelector('#username');
-  static StreamSubscription submitSub;
-  static ClientWebSocket client;
+  Element loginCard = querySelector('#login-card');
+  InputElement usernameElement = querySelector('#username');
+  StreamSubscription submitSub;
+  ClientWebSocket client;
 
-  static init(ClientWebSocket _client) {
+  Login(ClientWebSocket _client) {
     client = _client;
 
     client
@@ -14,7 +14,7 @@ class Login {
         toast(msg);
       })
       ..on(Message.loginSuccesful, (_) {
-        Lobbies.show();
+        lobbies.show();
 
         var path = window.location.pathname.substring(1);
         if (Lobbies.isValidLobbyName(path)) {
@@ -27,7 +27,7 @@ class Login {
     });
   }
 
-  static void show() {
+  show() {
     hideAllCards();
     loginCard.style.display = '';
 
@@ -40,12 +40,12 @@ class Login {
     });
   }
 
-  static void hide() {
+  hide() {
     loginCard.style.display = 'none';
     submitSub?.cancel();
   }
 
-  static void submit() {
+  submit() {
     if (!client.isConnected()) {
       toast('Not connected');
       return;

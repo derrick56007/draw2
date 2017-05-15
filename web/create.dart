@@ -1,24 +1,22 @@
 part of client;
 
 class Create {
-  static Element createLobbyCard = querySelector('#create-lobby-card');
-  static InputElement lobbyNameElement = querySelector('#lobby-name');
-  static StreamSubscription submitSub;
-  static ClientWebSocket client;
+  Element createLobbyCard = querySelector('#create-lobby-card');
+  InputElement lobbyNameElement = querySelector('#lobby-name');
+  StreamSubscription submitSub;
+  ClientWebSocket client;
 
-  static init(ClientWebSocket _client) {
-    client = _client;
-
+  Create(this.client) {
     querySelector('#create-lobby-btn').onClick.listen((_) {
       submit();
     });
 
     querySelector('#back-to-lobbies-list-btn').onClick.listen((_) {
-      Lobbies.show();
+      lobbies.show();
     });
   }
 
-  static void show() {
+  show() {
     hideAllCards();
     createLobbyCard.style.display = '';
 
@@ -31,13 +29,13 @@ class Create {
     lobbyNameElement.focus();
   }
 
-  static void hide() {
+  hide() {
     createLobbyCard.style.display = 'none';
 
     submitSub?.cancel();
   }
 
-  static void submit() {
+  submit() {
     if (!client.isConnected()) {
       toast('Not connected');
       return;
@@ -51,11 +49,11 @@ class Create {
     }
 
     var passwordElement =
-    querySelector('#create-lobby-password') as InputElement;
+        querySelector('#create-lobby-password') as InputElement;
     String password = passwordElement.value.trim();
 
     var selectNumPlayersEl =
-    querySelector('#number-of-players') as SelectElement;
+        querySelector('#number-of-players') as SelectElement;
     int maxPlayers = int.parse(selectNumPlayersEl.value);
 
     var timerElement = querySelector('#timer-switch') as InputElement;

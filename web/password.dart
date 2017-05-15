@@ -1,27 +1,25 @@
 part of client;
 
 class Password {
-  static Element passwordCard = querySelector('#password-card');
-  static InputElement passwordField = querySelector('#enter-lobby-password');
-  static StreamSubscription submitSub;
-  static ClientWebSocket client;
-  static String lobbyName;
+  Element passwordCard = querySelector('#password-card');
+  InputElement passwordField = querySelector('#enter-lobby-password');
+  StreamSubscription submitSub;
+  ClientWebSocket client;
+  String lobbyName;
 
-  static void init(ClientWebSocket _client) {
-    client = _client;
-
+  Password(this.client) {
     querySelector('#enter-lobby-password-btn').onClick.listen((_) {
       submit();
     });
   }
 
-  static void show(String _lobbyName) {
+  show(String _lobbyName) {
+    lobbyName = _lobbyName;
+
     hideAllCards();
     passwordCard.style.display = '';
 
     passwordField.autofocus = true;
-
-    lobbyName = _lobbyName;
 
     submitSub = window.onKeyPress.listen((KeyboardEvent e) {
       if (e.keyCode == KeyCode.ENTER) {
@@ -30,12 +28,12 @@ class Password {
     });
   }
 
-  static void hide() {
+  hide() {
     passwordCard.style.display = 'none';
     submitSub?.cancel();
   }
 
-  static void submit() {
+  submit() {
     var password = passwordField.value.trim();
 
     if (password.isEmpty) {

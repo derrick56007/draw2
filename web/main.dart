@@ -24,23 +24,25 @@ part 'login.dart';
 part 'password.dart';
 part 'play.dart';
 
+var login, lobbies, create, play, password;
+
 main() async {
   var client = new ClientWebSocket();
   await client.start();
 
-  Login.init(client);
-  Lobbies.init(client);
-  Create.init(client);
-  Play.init(client);
-  Password.init(client);
+  login = new Login(client);
+  lobbies = new Lobbies(client);
+  create = new Create(client);
+  play = new Play(client);
+  password = new Password(client);
 
-  Login.show();
+  login.show();
 }
 
 hideAllCards() {
-  Login.hide();
-  Lobbies.hide();
-  Create.hide();
-  Play.hide();
-  Password.hide();
+  login.hide();
+  lobbies.hide();
+  create.hide();
+  play.hide();
+  password.hide();
 }

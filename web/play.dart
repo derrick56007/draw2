@@ -1,37 +1,40 @@
 part of client;
 
 class Play {
-  static Element playCard = querySelector('#play-card');
-
-  static Element playerListCollection =
-      querySelector('#player-list-collection');
-  static Element drawNextBtn = querySelector('#draw-next-btn');
-  static Element undoBtn = querySelector('#undo-btn');
-  static Element clearBtn = querySelector('#clear-btn');
-  static InputElement chatInput = querySelector('#chat-input');
-  static Element currentArtist = querySelector('#current-artist');
-  static Element currentWord = querySelector('#current-word');
-  static Element currentTime = querySelector('#current-time');
-  static Element chatList = querySelector('#chat-list');
-  static CanvasElement mainCanvas = querySelector('#canvas');
-  static List<CanvasElement> canvasLayers =
-      querySelector('#canvas-layers').children;
-  static CanvasRenderingContext2D currentContext;
-  static int currentCanvasIndex = -1;
   static const maxCanvasLayers = 5;
-  static List<StreamSubscription<MouseEvent>> drawSubs = [];
-  static List<StreamSubscription> playSubs = [];
+  static const canvasWidth = 640;
+  static const canvasHeight = 480;
+  static const maxChatLength = 200;
 
   static const brushInterval = const Duration(milliseconds: 25);
 
-  static ClientWebSocket client;
+  Element playCard = querySelector('#play-card');
+  Element playerListCollection = querySelector('#player-list-collection');
+  Element drawNextBtn = querySelector('#draw-next-btn');
+  Element undoBtn = querySelector('#undo-btn');
+  Element clearBtn = querySelector('#clear-btn');
+  Element currentArtist = querySelector('#current-artist');
+  Element currentWord = querySelector('#current-word');
+  Element currentTime = querySelector('#current-time');
+  Element chatList = querySelector('#chat-list');
 
-  static List<Point> drawPoints = [];
-  static Brush brush = new Brush();
+  InputElement chatInput = querySelector('#chat-input');
 
-  static init(ClientWebSocket _client) {
-    client = _client;
+  CanvasElement mainCanvas = querySelector('#canvas');
+  CanvasRenderingContext2D currentContext;
 
+  int currentCanvasIndex = -1;
+
+  List<CanvasElement> canvasLayers = querySelector('#canvas-layers').children;
+  List<StreamSubscription<MouseEvent>> drawSubs = [];
+  List<StreamSubscription> playSubs = [];
+  List<Point> drawPoints = [];
+
+  ClientWebSocket client;
+
+  Brush brush = new Brush();
+
+  Play(this.client) {
     Timer timer;
 
     client
@@ -70,8 +73,6 @@ class Play {
             brush
               ..pos.x = x
               ..pos.y = y
-//              ..prevPos.x = x
-//              ..prevPos.y = y
               ..pressed = true;
 
             var color = querySelector('#color').text;
@@ -89,10 +90,7 @@ class Play {
                 _drawLine(brush.pos.x, brush.pos.y);
                 client.send(Message.drawLine, brush.pos.toJson());
 
-                brush
-//                  ..prevPos.x = brush.pos.x
-//                  ..prevPos.y = brush.pos.y
-                  ..moved = false;
+                brush.moved = false;
               }
             });
           }))
@@ -218,7 +216,7 @@ class Play {
       });
   }
 
-  static void show() {
+  show() {
     hideAllCards();
     playCard.style.display = '';
 
@@ -243,7 +241,7 @@ class Play {
       }));
   }
 
-  static void hide() {
+  hide() {
     playCard.style.display = 'none';
 
     for (var sub in playSubs) {
@@ -252,7 +250,7 @@ class Play {
     playSubs.clear();
   }
 
-  static void _addPlayer(String name, int score, var queueNumber) {
+  _addPlayer(String name, int score, var queueNumber) {
     var el = new Element.html('''
       <a id="player-$name" class="collection-item player-item">
         <span id="player-$name-queue-number" class="queue-number">$queueNumber</span>
@@ -263,7 +261,7 @@ class Play {
     playerListCollection.children.add(el);
   }
 
-  static void _addToChat(String username, String text) {
+  _addToChat(String username, String text) {
     var el = new Element.html('''
       <a class="collection-item chat-item">
         <div class="chat-username">$username</div>
@@ -274,12 +272,12 @@ class Play {
       ..children.add(el)
       ..scrollTop = chatList.scrollHeight;
 
-    if (chatList.children.length < 200) return;
+    if (chatList.children.length < maxChatLength) return;
 
     chatList.children.removeAt(0);
   }
 
-  static void _drawPoint(num x, num y) {
+  _drawPoint(num x, num y) {
     nextCanvasLayer();
 
     drawPoints.add(new Point(x, y));
@@ -287,15 +285,15 @@ class Play {
     _strokeDrawPoints();
   }
 
-  static void _drawLine(num x, num y) {
+  _drawLine(num x, num y) {
     drawPoints.add(new Point(x, y));
 
     _strokeDrawPoints();
   }
 
   // smooth draw path
-  static void _strokeDrawPoints() {
-    currentContext.clearRect(0, 0, 640, 480);
+  _strokeDrawPoints() {
+    currentContext.clearRect(0, 0, canvasWidth, canvasHeight);
 
     var p1 = drawPoints.first;
 
@@ -332,11 +330,11 @@ class Play {
     }
   }
 
-  static void _clearDrawing() {
-    mainCanvas.context2D.clearRect(0, 0, 640, 480);
+  _clearDrawing() {
+    mainCanvas.context2D.clearRect(0, 0, canvasWidth, canvasHeight);
 
     for (CanvasElement layer in canvasLayers) {
-      layer.context2D.clearRect(0, 0, 640, 480);
+      layer.context2D.clearRect(0, 0, canvasWidth, canvasHeight);
     }
 
     currentCanvasIndex = 0;
@@ -345,8 +343,8 @@ class Play {
     clearBtn.classes.add('disabled');
   }
 
-  static void _undoLast() {
-    currentContext.clearRect(0, 0, 640, 480);
+  _undoLast() {
+    currentContext.clearRect(0, 0, canvasWidth, canvasHeight);
 
     if (currentCanvasIndex > 0) {
       currentCanvasIndex--;
@@ -361,7 +359,7 @@ class Play {
     }
   }
 
-  static void nextCanvasLayer() {
+  nextCanvasLayer() {
     undoBtn.classes.remove('disabled');
     clearBtn.classes.remove('disabled');
 
@@ -374,7 +372,7 @@ class Play {
 
     if (currentCanvasIndex >= maxCanvasLayers) {
       mainCanvas.context2D.drawImage(nextLayer, 0, 0);
-      currentContext.clearRect(0, 0, 640, 480);
+      currentContext.clearRect(0, 0, canvasWidth, canvasHeight);
     }
 
     drawPoints.clear();
