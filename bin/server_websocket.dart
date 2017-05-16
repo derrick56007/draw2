@@ -1,7 +1,7 @@
 part of server;
 
 class ServerWebSocket extends DrawWebSocket {
-  WebSocket _websocket;
+  WebSocket _webSocket;
   HttpRequest _req;
 
   Future<dynamic> done;
@@ -10,21 +10,19 @@ class ServerWebSocket extends DrawWebSocket {
     _req = req;
   }
 
-  factory ServerWebSocket.ugradeRequest(HttpRequest req) =>
-      new ServerWebSocket._internal(req);
+  factory ServerWebSocket.ugradeRequest(HttpRequest req) => new ServerWebSocket._internal(req);
 
   start() async {
-    _websocket = await WebSocketTransformer.upgrade(_req);
+    _webSocket = await WebSocketTransformer.upgrade(_req);
 
-    _websocket
-      ..listen((var data) {
-        onMessageToDispatch(data);
-      });
+    _webSocket.listen((var data) {
+      onMessageToDispatch(data);
+    });
 
-    done = _websocket.done;
+    done = _webSocket.done;
   }
 
-  send(String request, var val) {
-    _websocket.add(JSON.encode([request, val]));
+  send(String request, [var val = '']) {
+    _webSocket.add(JSON.encode([request, val]));
   }
 }

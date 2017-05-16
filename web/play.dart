@@ -4,8 +4,10 @@ class Play {
   static const maxCanvasLayers = 5;
   static const canvasWidth = 640;
   static const canvasHeight = 480;
-  static const maxChatLength = 200;
+  static const maxChatLength = 20;
   static const brushInterval = const Duration(milliseconds: 25);
+  static const defaultBrushColor = '#000000';
+  static const defaultBrushSize = 5;
 
   Element playCard = querySelector('#play-card');
   Element playerListCollection = querySelector('#player-list-collection');
@@ -55,6 +57,11 @@ class Play {
         querySelector('#player-$name')?.remove();
       })
       ..on(Message.setAsArtist, (_) {
+        querySelector('#color').text = defaultBrushColor;
+
+        // TODO add brush sizing
+        brush.size = defaultBrushSize;
+
         artistOptions.classes
           ..remove('scale-out')
           ..add('scale-in');
@@ -111,11 +118,11 @@ class Play {
           undoBtn.onClick.listen((_) {
             if (undoBtn.classes.contains('disabled')) return;
 
-            client.send(Message.undoLast, '');
+            client.send(Message.undoLast);
             _undoLast();
           }),
           clearBtn.onClick.listen((_) {
-            client.send(Message.clearDrawing, '');
+            client.send(Message.clearDrawing);
             _clearDrawing();
           })
         ]);
@@ -137,7 +144,7 @@ class Play {
         undoBtn.classes.add('disabled');
       })
       ..on(Message.win, (_) {})
-      ..on(Message.lose, (String json) {})
+      ..on(Message.lose, (_) {})
       ..on(Message.setCanvasLeftLabel, (String json) {
         canvasLeftLabel.text = json;
       })
@@ -147,7 +154,7 @@ class Play {
       ..on(Message.setCanvasRightLabel, (String json) {
         canvasRightLabel.text = json;
       })
-      ..on(Message.clearCanvasLabels, (String json) {
+      ..on(Message.clearCanvasLabels, (_) {
         canvasLeftLabel.text = '';
         canvasMiddleLabel.text = '';
         canvasRightLabel.text = '';
@@ -240,7 +247,7 @@ class Play {
 
         drawNextBtn.classes.add('disabled');
 
-        client.send(Message.drawNext, '');
+        client.send(Message.drawNext);
       }));
   }
 

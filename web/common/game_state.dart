@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'canvas_state.dart';
+import 'canvas_layer.dart';
 import 'existing_player.dart';
 import 'guess.dart';
 
@@ -8,54 +8,45 @@ class GameState {
   String currentArtist;
   List<Guess> guesses;
   List<ExistingPlayer> players;
-  CanvasState canvasState;
+  List<Layer> canvasLayers;
 
-  GameState._internal();
+  GameState();
 
-  factory GameState.fromJson(String json) {
-    var map = JSON.decode(json) as Map;
+  factory GameState.fromJson(var json) {
+    var map;
 
-    var guessesDecoded = [];
+    if (json is Map) {
+      map = json;
+    } else {
+      map = JSON.decode(json) as Map;
+    }
+
+    var guessesDecoded = <Guess>[];
 
     for (var guessJson in map['guesses']) {
       guessesDecoded.add(new Guess.fromJson(guessJson));
     }
 
-    var playersDecoded = [];
+    var playersDecoded = <ExistingPlayer>[];
 
     for (var playerJson in map['players']) {
       playersDecoded.add(new ExistingPlayer.fromJson(playerJson));
     }
 
-    var gameState = new GameState._internal()
+    var layersDecoded = <Layer>[];
+
+    for (var layer in map['canvasLayers']) {
+      layersDecoded.add(new Layer.fromJson(layer));
+    }
+
+    var gameState = new GameState()
       ..currentArtist = map['currentArtist']
       ..guesses = guessesDecoded
       ..players = playersDecoded
-      ..canvasState = new CanvasState.fromJson(map['canvasState']);
+      ..canvasLayers = layersDecoded;
 
     return gameState;
   }
 
-  String toJson() {
-    var guessesEncoded = [];
-
-    for (var guess in guesses) {
-      guessesEncoded.add(guess.toJson());
-    }
-
-    var playersEncoded = [];
-
-    for (var player in players) {
-      playersEncoded.add(player.toJson());
-    }
-
-    var json = JSON.encode({
-      'currentArtist': currentArtist,
-      'guesses': guessesEncoded,
-      'players': playersEncoded,
-      'canvasState': canvasState.toJson()
-    });
-
-    return json;
-  }
+  String toJson() => JSON.encode({'currentArtist': currentArtist, 'guesses': guesses, 'players': players, 'canvasLayers': canvasLayers});
 }

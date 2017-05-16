@@ -56,7 +56,6 @@ body {
 
 #chat-holder {
     margin-left: 10px;
-    height: 655px;
     width: 220px;
 }
 
@@ -65,7 +64,8 @@ body {
 }
 
 #chat-list {
-    height: 530px;
+    min-height: 350px;
+    height: calc(100vh - 160px);
     overflow-y: auto;
 }
 
@@ -103,6 +103,7 @@ body {
     text-align: left;
     overflow-y: auto;
     margin-bottom: 10px;
+    max-height: 372px;
 }
 
 #canvas-header {
@@ -198,4 +199,8 @@ body {
 
 #canvas {
     z-index: 0;
+}
+
+#chat-input {
+    margin-bottom: 10px;
 }

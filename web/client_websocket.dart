@@ -24,8 +24,7 @@ class ClientWebSocket extends DrawWebSocket {
 
     _scheduleReconnect() {
       if (!reconnectScheduled) {
-        new Timer(new Duration(seconds: retrySeconds),
-            () async => await start(retrySeconds * 2));
+        new Timer(new Duration(seconds: retrySeconds), () async => await start(retrySeconds * 2));
       }
       reconnectScheduled = true;
     }
@@ -54,7 +53,7 @@ class ClientWebSocket extends DrawWebSocket {
     onError = _webSocket.onError;
   }
 
-  send(String request, var val) {
+  send(String request, [var val = '']) {
     _webSocket.send(JSON.encode([request, val]));
   }
 }

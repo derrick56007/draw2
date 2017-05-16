@@ -25,18 +25,18 @@ class SocketReceiver {
 
   _onStart() {
     socket
-      ..on(Message.login, _login)
-      ..on(Message.createLobby, _createLobby)
-      ..on(Message.enterLobby, _enterLobby)
-      ..on(Message.enterLobbyWithPassword, _enterLobbyWithPassword)
-      ..on(Message.drawNext, _drawNext)
-      ..on(Message.guess, _guess)
-      ..on(Message.drawPoint, _drawPoint)
-      ..on(Message.drawLine, _drawLine)
-      ..on(Message.clearDrawing, _clearDrawing)
-      ..on(Message.undoLast, _undoLast)
-      ..on(Message.changeColor, _changeColor)
-      ..on(Message.changeSize, _changeSize);
+      ..on(Message.login, (x) => _login(x))
+      ..on(Message.createLobby, (x) => _createLobby(x))
+      ..on(Message.enterLobby, (x) => _enterLobby(x))
+      ..on(Message.enterLobbyWithPassword, (x) => _enterLobbyWithPassword(x))
+      ..on(Message.drawNext, (x) => _drawNext())
+      ..on(Message.guess, (x) => _guess(x))
+      ..on(Message.drawPoint, (x) => _drawPoint(x))
+      ..on(Message.drawLine, (x) => _drawLine(x))
+      ..on(Message.clearDrawing, (x) => _clearDrawing())
+      ..on(Message.undoLast, (x) => _undoLast())
+      ..on(Message.changeColor, (x) => _changeColor(x))
+      ..on(Message.changeSize, (x) => _changeSize(x));
   }
 
   _onClose() {
@@ -81,7 +81,7 @@ class SocketReceiver {
 
     gPlayers[socket] = username;
 
-    socket.send(Message.loginSuccesful, '');
+    socket.send(Message.loginSuccesful);
 
     print('$username logged in');
 
@@ -126,7 +126,7 @@ class SocketReceiver {
     ////////// check if lobby exists ////////////////
     if (!gLobbies.containsKey(lobbyName)) {
       socket.send(Message.toast, 'Lobby doesn\'t exist');
-      socket.send(Message.enterLobbyFailure, '');
+      socket.send(Message.enterLobbyFailure);
       return;
     }
 
@@ -147,7 +147,7 @@ class SocketReceiver {
 
     if (!gLobbies.containsKey(loginInfo.lobbyName)) {
       socket.send(Message.toast, 'Lobby doesn\'t exist');
-      socket.send(Message.enterLobbyFailure, '');
+      socket.send(Message.enterLobbyFailure);
       return;
     }
 
@@ -155,7 +155,7 @@ class SocketReceiver {
 
     if (lobby.hasPassword && lobby.password != loginInfo.password) {
       socket.send(Message.toast, 'Password is incorrect');
-      socket.send(Message.enterLobbyFailure, '');
+      socket.send(Message.enterLobbyFailure);
       return;
     }
 
@@ -164,7 +164,7 @@ class SocketReceiver {
     socket.send(Message.enterLobbySuccessful, loginInfo.lobbyName);
   }
 
-  _drawNext(_) {
+  _drawNext() {
     if (!gPlayerLobby.containsKey(socket)) return null;
 
     var lobby = gPlayerLobby[socket];
@@ -185,31 +185,37 @@ class SocketReceiver {
 
   _drawPoint(String json) {
     var lobby = gPlayerLobby[socket];
-    lobby?.sendToAll(Message.drawPoint, json, except: socket);
+    lobby?.sendToAll(Message.drawPoint, val: json, except: socket);
+    lobby?.game?.drawPoint(json);
   }
 
   _drawLine(String json) {
     var lobby = gPlayerLobby[socket];
-    lobby?.sendToAll(Message.drawLine, json, except: socket);
+    lobby?.sendToAll(Message.drawLine, val: json, except: socket);
+    lobby?.game?.drawLine(json);
   }
 
-  _clearDrawing(String json) {
+  _clearDrawing() {
     var lobby = gPlayerLobby[socket];
-    lobby?.sendToAll(Message.clearDrawing, json, except: socket);
+    lobby?.sendToAll(Message.clearDrawing, except: socket);
+    lobby?.game?.clearDrawing();
   }
 
-  _undoLast(String json) {
+  _undoLast() {
     var lobby = gPlayerLobby[socket];
-    lobby?.sendToAll(Message.undoLast, json, except: socket);
+    lobby?.sendToAll(Message.undoLast, except: socket);
+    lobby?.game?.undoLast();
   }
 
   _changeColor(String json) {
     var lobby = gPlayerLobby[socket];
-    lobby?.sendToAll(Message.changeColor, json, except: socket);
+    lobby?.sendToAll(Message.changeColor, val: json, except: socket);
+    lobby?.game?.changeColor(json);
   }
 
   _changeSize(String json) {
     var lobby = gPlayerLobby[socket];
-    lobby?.sendToAll(Message.changeSize, json, except: socket);
+    lobby?.sendToAll(Message.changeSize, val: json, except: socket);
+    lobby?.game?.changeSize(json);
   }
 }

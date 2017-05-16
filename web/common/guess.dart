@@ -6,8 +6,14 @@ class Guess {
 
   Guess();
 
-  factory Guess.fromJson(String json) {
-    var map = JSON.decode(json) as Map;
+  factory Guess.fromJson(var json) {
+    var map;
+
+    if (json is Map) {
+      map = json;
+    } else {
+      map = JSON.decode(json) as Map;
+    }
 
     return new Guess()
       ..username = map['username']

@@ -7,10 +7,12 @@ import 'dart:async';
 import 'package:args/args.dart';
 import 'package:http_server/http_server.dart';
 
+import '../web/common/canvas_layer.dart';
 import '../web/common/create_lobby_info.dart';
 import '../web/common/draw_regex.dart';
 import '../web/common/draw_websocket.dart';
 import '../web/common/existing_player.dart';
+import '../web/common/game_state.dart';
 import '../web/common/guess.dart';
 import '../web/common/lobby_info.dart';
 import '../web/common/login_info.dart';

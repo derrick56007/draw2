@@ -28,7 +28,6 @@ class Lobby {
   addPlayer(ServerWebSocket socket, String username) {
     // send info of existing players to the new player
     players.forEach((ServerWebSocket existingSocket, String existingUsername) {
-
       // player info
       var existingPlayer = new ExistingPlayer()
         ..username = existingUsername
@@ -42,7 +41,7 @@ class Lobby {
     game.addPlayer(socket);
 
     // alert other players of new player
-    sendToAll(Message.newPlayer, username);
+    sendToAll(Message.newPlayer, val: username);
 
     print('$username joined lobby $name');
 
@@ -52,7 +51,7 @@ class Lobby {
   removePlayer(ServerWebSocket socket) {
     var username = players[socket];
 
-    sendToAll(Message.removePlayer, username);
+    sendToAll(Message.removePlayer, val: username);
 
     print('$username left lobby $name');
 
@@ -61,10 +60,14 @@ class Lobby {
     players.remove(socket);
   }
 
-  sendToAll(String request, dynamic val, {ServerWebSocket except}) {
+  sendToAll(String request, {var val, ServerWebSocket except}) {
     for (var socket in players.keys) {
       if (socket != except) {
-        socket.send(request, val);
+        if (val != null) {
+          socket.send(request, val);
+        } else {
+          socket.send(request);
+        }
       }
     }
   }
@@ -85,7 +88,7 @@ class Lobby {
       list.add([players[socket], i + 1]);
     }
 
-    sendToAll(Message.setQueue, JSON.encode(list));
+    sendToAll(Message.setQueue, val: JSON.encode(list));
   }
 
   sendPlayerOrder() {
@@ -99,6 +102,6 @@ class Lobby {
       list.add(players[socket]);
     }
 
-    sendToAll(Message.setPlayerOrder, JSON.encode(list));
+    sendToAll(Message.setPlayerOrder, val: JSON.encode(list));
   }
 }

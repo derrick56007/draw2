@@ -8,8 +8,14 @@ class CreateLobbyInfo {
 
   CreateLobbyInfo();
 
-  factory CreateLobbyInfo.fromJson(String json) {
-    var map = JSON.decode(json) as Map;
+  factory CreateLobbyInfo.fromJson(var json) {
+    var map;
+
+    if (json is Map) {
+      map = json;
+    } else {
+      map = JSON.decode(json) as Map;
+    }
 
     return new CreateLobbyInfo()
       ..name = map['name']
