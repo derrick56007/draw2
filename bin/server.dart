@@ -43,6 +43,8 @@ main(List<String> args) async {
   var results = parser.parse(args);
   var clientFiles = results['clientFiles'];
 
+  var defaultPage = new File('index.html');
+
   var staticFiles = new VirtualDirectory(clientFiles);
   staticFiles
     ..jailRoot = false
@@ -52,8 +54,8 @@ main(List<String> args) async {
 
       var file = new File(indexUri.toFilePath());
 
-      if (await file.exists()) {} else {
-        file = new File('index.html');
+      if (!(await file.exists())) {
+        file = defaultPage;
       }
       staticFiles.serveFile(file, request);
     };
