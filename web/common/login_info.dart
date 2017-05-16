@@ -7,7 +7,7 @@ class LoginInfo {
   LoginInfo();
 
   factory LoginInfo.fromJson(String json) {
-    Map map = JSON.decode(json) as Map;
+    var map = JSON.decode(json) as Map;
 
     return new LoginInfo()
       ..lobbyName = map['lobbyName']

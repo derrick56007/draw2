@@ -5,22 +5,20 @@ class Play {
   static const canvasWidth = 640;
   static const canvasHeight = 480;
   static const maxChatLength = 200;
-
   static const brushInterval = const Duration(milliseconds: 25);
 
   Element playCard = querySelector('#play-card');
   Element playerListCollection = querySelector('#player-list-collection');
-  Element drawNextBtn = querySelector('#draw-next-btn');
-  Element undoBtn = querySelector('#undo-btn');
-  Element clearBtn = querySelector('#clear-btn');
   Element canvasLeftLabel = querySelector('#canvas-left-label');
   Element canvasMiddleLabel = querySelector('#canvas-middle-label');
   Element canvasRightLabel = querySelector('#canvas-right-label');
   Element chatList = querySelector('#chat-list');
   Element artistOptions = querySelector('#artist-options');
+  Element drawNextBtn = querySelector('#draw-next-btn');
+  Element undoBtn = querySelector('#undo-btn');
+  Element clearBtn = querySelector('#clear-btn');
 
   InputElement chatInput = querySelector('#chat-input');
-
   CanvasElement mainCanvas = querySelector('#canvas');
   CanvasRenderingContext2D currentContext;
 
@@ -370,8 +368,7 @@ class Play {
 
     currentCanvasIndex++;
 
-    var nextLayer = canvasLayers[currentCanvasIndex % maxCanvasLayers]
-      ..style.zIndex = '${currentCanvasIndex + 1}';
+    var nextLayer = canvasLayers[currentCanvasIndex % maxCanvasLayers]..style.zIndex = '${currentCanvasIndex + 1}';
 
     currentContext = nextLayer.context2D;
 

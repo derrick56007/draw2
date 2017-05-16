@@ -6,13 +6,13 @@ abstract class DrawWebSocket {
 
   Future start();
 
-  void on(String request, Function action(dynamic data)) {
+  void on(String request, dynamic action(var data)) {
     messageDisatchers[request] = action;
   }
 
-  void send(String request, dynamic val);
+  void send(String request, var val);
 
-  void onMessageToDispatch(dynamic data) {
+  void onMessageToDispatch(var data) {
     var msg = JSON.decode(data);
 
     // checks if is [request, data]

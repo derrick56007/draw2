@@ -54,7 +54,7 @@ class ClientWebSocket extends DrawWebSocket {
     onError = _webSocket.onError;
   }
 
-  send(String request, dynamic val) {
+  send(String request, var val) {
     _webSocket.send(JSON.encode([request, val]));
   }
 }

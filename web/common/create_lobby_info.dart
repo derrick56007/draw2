@@ -9,7 +9,7 @@ class CreateLobbyInfo {
   CreateLobbyInfo();
 
   factory CreateLobbyInfo.fromJson(String json) {
-    Map map = JSON.decode(json) as Map;
+    var map = JSON.decode(json) as Map;
 
     return new CreateLobbyInfo()
       ..name = map['name']

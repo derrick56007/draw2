@@ -1,8 +1,4 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
-
-import '../web/common/draw_websocket.dart';
+part of server;
 
 class ServerWebSocket extends DrawWebSocket {
   WebSocket _websocket;
@@ -21,14 +17,14 @@ class ServerWebSocket extends DrawWebSocket {
     _websocket = await WebSocketTransformer.upgrade(_req);
 
     _websocket
-      ..listen((dynamic data) {
+      ..listen((var data) {
         onMessageToDispatch(data);
       });
 
     done = _websocket.done;
   }
 
-  send(String request, dynamic val) {
+  send(String request, var val) {
     _websocket.add(JSON.encode([request, val]));
   }
 }
