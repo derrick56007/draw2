@@ -281,7 +281,7 @@ class Play {
   }
 
   _drawPoint(num x, num y) {
-    nextCanvasLayer();
+    _nextCanvasLayer();
 
     drawPoints.add(new Point(x, y));
 
@@ -362,7 +362,7 @@ class Play {
     }
   }
 
-  nextCanvasLayer() {
+  _nextCanvasLayer() {
     undoBtn.classes.remove('disabled');
     clearBtn.classes.remove('disabled');
 
