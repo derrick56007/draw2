@@ -1,37 +1,38 @@
 part of server;
 
 class Lobby {
-  String name;
-  String password;
-  bool hasPassword;
-  bool hasTimer;
-  int maxPlayers;
+  final String name;
+  final String password;
+  final bool hasPassword;
+  final bool hasTimer;
+  final int maxPlayers;
+  final Map<ServerWebSocket, String> players = {};
 
-  Map<ServerWebSocket, String> players = {};
-  Game game;
+  final Game game;
 
-  Lobby._internal() {}
+  Lobby._internal(this.name, this.password, this.hasPassword, this.hasTimer,
+      this.maxPlayers, this.game) {}
 
   factory Lobby(CreateLobbyInfo info) {
-    var lobby = new Lobby._internal();
+    var lobby;
+    lobby = new Lobby._internal(
+        info.name,
+        info.password,
+        info.password.isNotEmpty,
+        info.hasTimer,
+        info.maxPlayers,
+        new Game(lobby, info.hasTimer));
 
-    // create a lobby with info
-    return lobby
-      ..name = info.name
-      ..password = info.password
-      ..hasPassword = info.password.isNotEmpty
-      ..hasTimer = info.hasTimer
-      ..maxPlayers = info.maxPlayers
-      ..game = new Game(lobby, info.hasTimer);
+    return lobby;
   }
+
+  getInfo() => new LobbyInfo(name, hasPassword, hasTimer, maxPlayers, players.length);
 
   addPlayer(ServerWebSocket socket, String username) {
     // send info of existing players to the new player
     players.forEach((ServerWebSocket existingSocket, String existingUsername) {
       // player info
-      var existingPlayer = new ExistingPlayer()
-        ..username = existingUsername
-        ..score = game.scores[existingSocket];
+      var existingPlayer = new ExistingPlayer(existingUsername, game.scores[existingSocket]);
 
       socket.send(Message.existingPlayer, existingPlayer.toJson());
     });
@@ -71,13 +72,6 @@ class Lobby {
       }
     }
   }
-
-  getInfo() => new LobbyInfo()
-    ..name = name
-    ..hasPassword = hasPassword
-    ..hasTimer = hasTimer
-    ..numberOfPlayers = game.scores.length
-    ..maxPlayers = maxPlayers;
 
   sendQueueInfo() {
     var list = [];

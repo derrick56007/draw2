@@ -9,20 +9,21 @@ import 'package:http_server/http_server.dart';
 
 import '../web/common/canvas_layer.dart';
 import '../web/common/create_lobby_info.dart';
+import '../web/common/draw_point.dart';
 import '../web/common/draw_regex.dart';
 import '../web/common/draw_websocket.dart';
 import '../web/common/existing_player.dart';
-import '../web/common/game_state.dart';
 import '../web/common/guess.dart';
 import '../web/common/lobby_info.dart';
 import '../web/common/login_info.dart';
 import '../web/common/message.dart';
+import '../web/common/point.dart';
 
-part 'data.dart';
 part 'game.dart';
 part 'lobby.dart';
 part 'server_websocket.dart';
 part 'socket_receiver.dart';
+part 'words.dart';
 
 var gLobbies = <String, Lobby>{};
 var gPlayers = <ServerWebSocket, String>{};

@@ -59,11 +59,8 @@ class Create {
     var timerElement = querySelector('#timer-switch') as InputElement;
     bool hasTimer = timerElement.checked;
 
-    var lobbyInfo = new CreateLobbyInfo()
-      ..name = lobbyName
-      ..password = password
-      ..hasTimer = hasTimer
-      ..maxPlayers = maxPlayers;
+    var lobbyInfo =
+        new CreateLobbyInfo(lobbyName, password, hasTimer, maxPlayers);
 
     client.send(Message.createLobby, lobbyInfo.toJson());
   }

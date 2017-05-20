@@ -1,10 +1,10 @@
 import 'dart:convert';
 
 class ExistingPlayer {
-  String username;
-  int score;
+  final String username;
+  final int score;
 
-  ExistingPlayer();
+  const ExistingPlayer(this.username, this.score);
 
   factory ExistingPlayer.fromJson(var json) {
     var map;
@@ -15,9 +15,7 @@ class ExistingPlayer {
       map = JSON.decode(json) as Map;
     }
 
-    return new ExistingPlayer()
-      ..username = map['username']
-      ..score = map['score'];
+    return new ExistingPlayer(map['username'], map['score']);
   }
 
   String toJson() => JSON.encode({'username': username, 'score': score});

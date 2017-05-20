@@ -1,10 +1,10 @@
 import 'dart:convert';
 
 class LoginInfo {
-  String lobbyName;
-  String password;
+  final String lobbyName;
+  final String password;
 
-  LoginInfo();
+  const LoginInfo(this.lobbyName, this.password);
 
   factory LoginInfo.fromJson(var json) {
     var map;
@@ -15,9 +15,7 @@ class LoginInfo {
       map = JSON.decode(json) as Map;
     }
 
-    return new LoginInfo()
-      ..lobbyName = map['lobbyName']
-      ..password = map['password'];
+    return new LoginInfo(map['lobbyName'], map['password']);
   }
 
   String toJson() =>

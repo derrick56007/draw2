@@ -41,9 +41,7 @@ class Password {
       return;
     }
 
-    var loginInfo = new LoginInfo()
-      ..lobbyName = lobbyName
-      ..password = password;
+    var loginInfo = new LoginInfo(lobbyName, password);
 
     client.send(Message.enterLobbyWithPassword, loginInfo.toJson());
   }

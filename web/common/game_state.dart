@@ -5,12 +5,13 @@ import 'existing_player.dart';
 import 'guess.dart';
 
 class GameState {
-  String currentArtist;
-  List<Guess> guesses;
-  List<ExistingPlayer> players;
-  List<Layer> canvasLayers;
+  final String currentArtist;
+  final List<Guess> guesses;
+  final List<ExistingPlayer> players;
+  final List<Layer> canvasLayers;
 
-  GameState();
+  const GameState(
+      this.currentArtist, this.guesses, this.players, this.canvasLayers);
 
   factory GameState.fromJson(var json) {
     var map;
@@ -39,14 +40,16 @@ class GameState {
       layersDecoded.add(new Layer.fromJson(layer));
     }
 
-    var gameState = new GameState()
-      ..currentArtist = map['currentArtist']
-      ..guesses = guessesDecoded
-      ..players = playersDecoded
-      ..canvasLayers = layersDecoded;
+    var gameState = new GameState(
+        map['currentArtist'], guessesDecoded, playersDecoded, layersDecoded);
 
     return gameState;
   }
 
-  String toJson() => JSON.encode({'currentArtist': currentArtist, 'guesses': guesses, 'players': players, 'canvasLayers': canvasLayers});
+  String toJson() => JSON.encode({
+        'currentArtist': currentArtist,
+        'guesses': guesses,
+        'players': players,
+        'canvasLayers': canvasLayers
+      });
 }

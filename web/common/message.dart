@@ -24,13 +24,11 @@ class Message {
   static const drawPoint              = 'n';
   static const drawLine               = 'o';
   static const clearDrawing           = 'p';
-  static const changeColor            = 'q';
-  static const undoLast               = 'r';
-  static const updatePlayerScore      = 's';
-  static const changeSize             = 't';
-  static const enterLobbyWithPassword = 'u';
-  static const drawNext               = 'v';
-  static const setQueue               = 'w';
-  static const enableDrawNext         = 'x';
-  static const setPlayerOrder         = 'y';
+  static const undoLast               = 'q';
+  static const updatePlayerScore      = 'r';
+  static const enterLobbyWithPassword = 's';
+  static const drawNext               = 't';
+  static const setQueue               = 'u';
+  static const enableDrawNext         = 'v';
+  static const setPlayerOrder         = 'w';
 }

@@ -1,12 +1,13 @@
 import 'dart:convert';
 
 class CreateLobbyInfo {
-  String name;
-  String password;
-  bool hasTimer;
-  int maxPlayers;
+  final String name;
+  final String password;
+  final bool hasTimer;
+  final int maxPlayers;
 
-  CreateLobbyInfo();
+  const CreateLobbyInfo(
+      this.name, this.password, this.hasTimer, this.maxPlayers);
 
   factory CreateLobbyInfo.fromJson(var json) {
     var map;
@@ -17,11 +18,8 @@ class CreateLobbyInfo {
       map = JSON.decode(json) as Map;
     }
 
-    return new CreateLobbyInfo()
-      ..name = map['name']
-      ..password = map['password']
-      ..hasTimer = map['hasTimer']
-      ..maxPlayers = map['maxPlayers'];
+    return new CreateLobbyInfo(
+        map['name'], map['password'], map['hasTimer'], map['maxPlayers']);
   }
 
   String toJson() => JSON.encode({

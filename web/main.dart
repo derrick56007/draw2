@@ -6,6 +6,7 @@ import 'dart:html' hide Point;
 import 'dart:math' hide Point;
 
 import 'common/create_lobby_info.dart';
+import 'common/draw_point.dart';
 import 'common/draw_regex.dart';
 import 'common/existing_player.dart';
 import 'common/guess.dart';

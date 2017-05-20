@@ -1,10 +1,10 @@
 import 'dart:convert';
 
 class Guess {
-  String username;
-  String guess;
+  final String username;
+  final String guess;
 
-  Guess();
+  const Guess(this.username, this.guess);
 
   factory Guess.fromJson(var json) {
     var map;
@@ -15,9 +15,7 @@ class Guess {
       map = JSON.decode(json) as Map;
     }
 
-    return new Guess()
-      ..username = map['username']
-      ..guess = map['guess'];
+    return new Guess(map['username'], map['guess']);
   }
 
   String toJson() => JSON.encode({'username': username, 'guess': guess});

@@ -6,6 +6,8 @@ class Play {
   static const canvasHeight = 480;
   static const maxChatLength = 20;
   static const brushInterval = const Duration(milliseconds: 25);
+
+  // TODO move these
   static const defaultBrushColor = '#000000';
   static const defaultBrushSize = 5;
 
@@ -79,14 +81,12 @@ class Play {
               ..pos.y = y
               ..pressed = true;
 
-            var color = querySelector('#color').text;
-            if (color != null && brush.color != color) {
-              brush.color = '$color';
-              client.send(Message.changeColor, brush.color);
-            }
-
             _drawPoint(x, y);
-            client.send(Message.drawPoint, brush.pos.toJson());
+
+            var color = querySelector('#color').text;
+
+            var drawPoint = new DrawPoint(color, defaultBrushSize, brush.pos);
+            client.send(Message.drawPoint, drawPoint.toJson());
 
             timer?.cancel();
             timer = new Timer.periodic(brushInterval, (_) {
@@ -160,11 +160,13 @@ class Play {
         canvasRightLabel.text = '';
       })
       ..on(Message.drawPoint, (String json) {
-        var pos = new Point.fromJson(json);
+        var drawPoint = new DrawPoint.fromJson(json);
 
         brush
-          ..pos.x = pos.x
-          ..pos.y = pos.y;
+          ..color = drawPoint.color
+          ..size = drawPoint.size
+          ..pos.x = drawPoint.pos.x
+          ..pos.y = drawPoint.pos.y;
 
         _drawPoint(brush.pos.x, brush.pos.y);
       })
@@ -182,12 +184,6 @@ class Play {
       })
       ..on(Message.undoLast, (_) {
         _undoLast();
-      })
-      ..on(Message.changeColor, (String json) {
-        brush.color = json;
-      })
-      ..on(Message.changeSize, (String json) {
-        brush.size = int.parse(json);
       })
       ..on(Message.setQueue, (String json) {
         for (var el in playerListCollection.children) {

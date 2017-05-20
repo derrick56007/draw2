@@ -13,10 +13,8 @@ class Game {
 
   var scores = <ServerWebSocket, int>{};
 
-  List<int> unusedWordIndices;
-
   Timer timer;
-  Stopwatch stopwatch;
+  final Stopwatch stopwatch;
 
   ServerWebSocket currentArtist;
   String currentWord;
@@ -30,12 +28,12 @@ class Game {
   String brushColor = defaultBrushColor;
   int brushSize = defaultBrushSize;
 
-  Game(this.lobby, this.hasTimer) {
-    unusedWordIndices = new List<int>.generate(Data.words.length, (i) => i);
-    unusedWordIndices.shuffle();
+  final Words words;
 
-    stopwatch = new Stopwatch();
-  }
+  Game(this.lobby, this.hasTimer)
+      : stopwatch = new Stopwatch(),
+        // TODO word genres
+        words = new Words();
 
   addPlayer(ServerWebSocket socket) {
     scores[socket] = 0;
@@ -66,7 +64,8 @@ class Game {
 
   nextArtist() {
     startTimer(nextRoundDelay, (Duration elapsed) {
-      lobby.sendToAll(Message.setCanvasRightLabel, val: 'Next game in ${nextRoundDelay.inSeconds - elapsed.inSeconds}s');
+      lobby.sendToAll(Message.setCanvasRightLabel,
+          val: 'Next game in ${nextRoundDelay.inSeconds - elapsed.inSeconds}s');
     }, () {
       currentArtist = artistQueue.removeAt(0);
 
@@ -80,7 +79,8 @@ class Game {
         ..sendQueueInfo()
         ..sendPlayerOrder();
 
-      currentWord = Data.words[unusedWordIndices.removeLast()];
+      // TODO check for end game
+      currentWord = words.list.removeLast();
 
       var currentArtistName = lobby.players[currentArtist];
 
@@ -92,7 +92,8 @@ class Game {
 
       lobby
         ..sendToAll(Message.clearCanvasLabels, except: currentArtist)
-        ..sendToAll(Message.setCanvasLeftLabel, val: '$currentArtistName is drawing', except: currentArtist)
+        ..sendToAll(Message.setCanvasLeftLabel,
+            val: '$currentArtistName is drawing', except: currentArtist)
         ..sendToAll(Message.setArtist, except: currentArtist);
 
       if (!hasTimer) return;
@@ -103,12 +104,19 @@ class Game {
           return '0$n';
         }
 
-        var twoDigitMinutes = twoDigits(maxGameTime.inMinutes - elapsed.inMinutes);
-        var twoDigitSeconds = twoDigits((maxGameTime.inSeconds - elapsed.inSeconds).remainder(Duration.SECONDS_PER_MINUTE));
+        var twoDigitMinutes =
+            twoDigits(maxGameTime.inMinutes - elapsed.inMinutes);
+        var twoDigitSeconds = twoDigits(
+            (maxGameTime.inSeconds - elapsed.inSeconds)
+                .remainder(Duration.SECONDS_PER_MINUTE));
 
-        lobby.sendToAll(Message.setCanvasRightLabel, val: 'Time left $twoDigitMinutes:$twoDigitSeconds');
+        lobby.sendToAll(Message.setCanvasRightLabel,
+            val: 'Time left $twoDigitMinutes:$twoDigitSeconds');
       }, () {
-        lobby..sendToAll(Message.lose)..sendToAll(Message.setCanvasMiddleLabel, val: 'The word was \"$currentWord\"');
+        lobby
+          ..sendToAll(Message.lose)
+          ..sendToAll(Message.setCanvasMiddleLabel,
+              val: 'The word was \"$currentWord\"');
 
         removeArtist();
       });
@@ -159,14 +167,17 @@ class Game {
 
     lobby
       ..sendToAll(Message.clearCanvasLabels)
-      ..sendToAll(Message.setCanvasMiddleLabel, val: '$username guessed \"$word\" correctly!')
+      ..sendToAll(Message.setCanvasMiddleLabel,
+          val: '$username guessed \"$word\" correctly!')
       ..sendToAll(Message.win)
-      ..sendToAll(Message.updatePlayerScore, val: JSON.encode([username, scores[socket]]));
+      ..sendToAll(Message.updatePlayerScore,
+          val: JSON.encode([username, scores[socket]]));
 
     removeArtist();
   }
 
-  startTimer(Duration duration, Function repeating(Duration elapsed), Function onFinish()) {
+  startTimer(Duration duration, Function repeating(Duration elapsed),
+      Function onFinish()) {
     timer?.cancel();
 
     stopwatch
@@ -185,35 +196,29 @@ class Game {
     });
   }
 
-  drawPoint(String json) {}
+  drawPoint(String json) {
+    var drawPoint = new DrawPoint.fromJson(json);
 
-  drawLine(String json) {}
+    var layer = new Layer([drawPoint.pos], drawPoint.color, drawPoint.size);
 
-  clearDrawing() {}
+    canvasLayers.add(layer);
+  }
 
-  undoLast() {}
+  drawLine(String json) {
+    if (canvasLayers.length > 0) {
+      var point = new Point.fromJson(json);
 
-  changeColor(String json) {}
+      canvasLayers.last.points.add(point);
+    }
+  }
 
-  changeSize(String json) {}
+  clearDrawing() {
+    canvasLayers.clear();
+  }
 
-  getGameState() {
-    var players = <ExistingPlayer>[];
-
-    lobby.players.forEach((ServerWebSocket existingSocket, String existingUsername) {
-      var existingPlayer = new ExistingPlayer()
-        ..username = existingUsername
-        ..score = scores[existingSocket];
-
-      players.add(existingPlayer);
-    });
-
-    var gameState = new GameState()
-      ..currentArtist = lobby.players[currentArtist]
-      ..guesses = guesses
-      ..players = players
-      ..canvasLayers = canvasLayers;
-
-    return gameState;
+  undoLast() {
+    if (canvasLayers.length > 0) {
+      canvasLayers.removeLast();
+    }
   }
 }

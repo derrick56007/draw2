@@ -34,9 +34,7 @@ class SocketReceiver {
       ..on(Message.drawPoint, (x) => _drawPoint(x))
       ..on(Message.drawLine, (x) => _drawLine(x))
       ..on(Message.clearDrawing, (x) => _clearDrawing())
-      ..on(Message.undoLast, (x) => _undoLast())
-      ..on(Message.changeColor, (x) => _changeColor(x))
-      ..on(Message.changeSize, (x) => _changeSize(x));
+      ..on(Message.undoLast, (x) => _undoLast());
   }
 
   _onClose() {
@@ -176,9 +174,7 @@ class SocketReceiver {
 
     var lobby = gPlayerLobby[socket];
 
-    var guess = new Guess()
-      ..username = gPlayers[socket]
-      ..guess = json;
+    var guess = new Guess(gPlayers[socket], json);
 
     lobby.game.onGuess(socket, guess);
   }
@@ -205,17 +201,5 @@ class SocketReceiver {
     var lobby = gPlayerLobby[socket];
     lobby?.sendToAll(Message.undoLast, except: socket);
     lobby?.game?.undoLast();
-  }
-
-  _changeColor(String json) {
-    var lobby = gPlayerLobby[socket];
-    lobby?.sendToAll(Message.changeColor, val: json, except: socket);
-    lobby?.game?.changeColor(json);
-  }
-
-  _changeSize(String json) {
-    var lobby = gPlayerLobby[socket];
-    lobby?.sendToAll(Message.changeSize, val: json, except: socket);
-    lobby?.game?.changeSize(json);
   }
 }
