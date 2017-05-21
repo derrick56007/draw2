@@ -18,7 +18,8 @@ class DrawPoint {
       map = JSON.decode(json) as Map;
     }
 
-    return new DrawPoint(map['color'], map['size'], map['pos']);
+    return new DrawPoint(
+        map['color'], map['size'], new Point.fromJson(map['pos']));
   }
 
   String toJson() => JSON.encode({'color': color, 'size': size, 'pos': pos});

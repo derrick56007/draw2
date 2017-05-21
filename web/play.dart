@@ -81,9 +81,10 @@ class Play {
               ..pos.y = y
               ..pressed = true;
 
-            _drawPoint(x, y);
-
+            // TODO move this
             var color = querySelector('#color').text;
+
+            _drawPoint(color, defaultBrushSize, x, y);
 
             var drawPoint = new DrawPoint(color, defaultBrushSize, brush.pos);
             client.send(Message.drawPoint, drawPoint.toJson());
@@ -168,7 +169,7 @@ class Play {
           ..pos.x = drawPoint.pos.x
           ..pos.y = drawPoint.pos.y;
 
-        _drawPoint(brush.pos.x, brush.pos.y);
+        _drawPoint(drawPoint.color, drawPoint.size, brush.pos.x, brush.pos.y);
       })
       ..on(Message.drawLine, (String json) {
         var pos = new Point.fromJson(json);
@@ -283,7 +284,7 @@ class Play {
     chatList.children.removeAt(0);
   }
 
-  _drawPoint(num x, num y) {
+  _drawPoint(String color, int size, num x, num y) {
     _nextCanvasLayer();
 
     drawPoints.add(new Point(x, y));

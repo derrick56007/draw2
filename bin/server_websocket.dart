@@ -10,14 +10,12 @@ class ServerWebSocket extends DrawWebSocket {
     _req = req;
   }
 
-  factory ServerWebSocket.ugradeRequest(HttpRequest req) => new ServerWebSocket._internal(req);
+  factory ServerWebSocket.ugradeRequest(HttpRequest req) =>
+      new ServerWebSocket._internal(req);
 
   start() async {
-    _webSocket = await WebSocketTransformer.upgrade(_req);
-
-    _webSocket.listen((var data) {
-      onMessageToDispatch(data);
-    });
+    _webSocket = await WebSocketTransformer.upgrade(_req)
+      ..listen(onMessageToDispatch);
 
     done = _webSocket.done;
   }

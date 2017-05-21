@@ -8,31 +8,30 @@ class Lobby {
   final int maxPlayers;
   final Map<ServerWebSocket, String> players = {};
 
-  final Game game;
+  Game game;
 
   Lobby._internal(this.name, this.password, this.hasPassword, this.hasTimer,
-      this.maxPlayers, this.game) {}
+      this.maxPlayers) {
+    game = new Game(this, hasTimer);
+  }
 
   factory Lobby(CreateLobbyInfo info) {
     var lobby;
-    lobby = new Lobby._internal(
-        info.name,
-        info.password,
-        info.password.isNotEmpty,
-        info.hasTimer,
-        info.maxPlayers,
-        new Game(lobby, info.hasTimer));
+    lobby = new Lobby._internal(info.name, info.password,
+        info.password.isNotEmpty, info.hasTimer, info.maxPlayers);
 
     return lobby;
   }
 
-  getInfo() => new LobbyInfo(name, hasPassword, hasTimer, maxPlayers, players.length);
+  getInfo() =>
+      new LobbyInfo(name, hasPassword, hasTimer, maxPlayers, players.length);
 
   addPlayer(ServerWebSocket socket, String username) {
     // send info of existing players to the new player
     players.forEach((ServerWebSocket existingSocket, String existingUsername) {
       // player info
-      var existingPlayer = new ExistingPlayer(existingUsername, game.scores[existingSocket]);
+      var existingPlayer =
+          new ExistingPlayer(existingUsername, game.scores[existingSocket]);
 
       socket.send(Message.existingPlayer, existingPlayer.toJson());
     });
