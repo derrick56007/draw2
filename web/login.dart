@@ -1,13 +1,14 @@
 part of client;
 
 class Login {
-  Element loginCard = querySelector('#login-card');
-  InputElement usernameElement = querySelector('#username');
-  StreamSubscription submitSub;
-  ClientWebSocket client;
+  final Element loginCard = querySelector('#login-card');
+  final InputElement usernameElement = querySelector('#username');
 
-  Login(ClientWebSocket _client) {
-    client = _client;
+  final ClientWebSocket client;
+
+  StreamSubscription submitSub;
+
+  Login(this.client) {
 
     client
       ..on(Message.toast, (String msg) {

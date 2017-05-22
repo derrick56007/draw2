@@ -1,8 +1,8 @@
 part of client;
 
 class Create {
-  Element createLobbyCard = querySelector('#create-lobby-card');
-  InputElement lobbyNameElement = querySelector('#lobby-name');
+  final Element createLobbyCard = querySelector('#create-lobby-card');
+  final InputElement lobbyNameElement = querySelector('#lobby-name');
   StreamSubscription submitSub;
   ClientWebSocket client;
 

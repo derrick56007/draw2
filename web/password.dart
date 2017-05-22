@@ -1,10 +1,13 @@
 part of client;
 
 class Password {
-  Element passwordCard = querySelector('#password-card');
-  InputElement passwordField = querySelector('#enter-lobby-password');
+  final Element passwordCard = querySelector('#password-card');
+  final InputElement passwordField = querySelector('#enter-lobby-password');
+
+  final ClientWebSocket client;
+
   StreamSubscription submitSub;
-  ClientWebSocket client;
+
   String lobbyName;
 
   Password(this.client) {

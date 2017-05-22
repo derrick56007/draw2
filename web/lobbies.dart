@@ -1,10 +1,11 @@
 part of client;
 
 class Lobbies {
+  // TODO fix this
   static var lobbyNameRegex = new RegExp(DrawRegExp.lobbyName);
 
-  Element lobbiesCard = querySelector('#lobby-list-card');
-  Element lobbyListCollection = querySelector('#lobby-list-collection');
+  final Element lobbiesCard = querySelector('#lobby-list-card');
+  final Element lobbyListCollection = querySelector('#lobby-list-collection');
 
   StreamSubscription submitSub;
 
