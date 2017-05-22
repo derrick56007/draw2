@@ -7,35 +7,28 @@ class Play {
   static const maxChatLength = 20;
   static const brushInterval = const Duration(milliseconds: 25);
 
-  // TODO move these
-  static const defaultBrushColor = '#000000';
-  static const defaultBrushSize = 5;
+  final Element playCard = querySelector('#play-card');
+  final Element playerListCollection = querySelector('#player-list-collection');
+  final Element canvasLeftLabel = querySelector('#canvas-left-label');
+  final Element canvasMiddleLabel = querySelector('#canvas-middle-label');
+  final Element canvasRightLabel = querySelector('#canvas-right-label');
+  final Element chatList = querySelector('#chat-list');
+  final Element artistOptions = querySelector('#artist-options');
+  final Element drawNextBtn = querySelector('#draw-next-btn');
+  final Element undoBtn = querySelector('#undo-btn');
+  final Element clearBtn = querySelector('#clear-btn');
 
-  Element playCard = querySelector('#play-card');
-  Element playerListCollection = querySelector('#player-list-collection');
-  Element canvasLeftLabel = querySelector('#canvas-left-label');
-  Element canvasMiddleLabel = querySelector('#canvas-middle-label');
-  Element canvasRightLabel = querySelector('#canvas-right-label');
-  Element chatList = querySelector('#chat-list');
-  Element artistOptions = querySelector('#artist-options');
-  Element drawNextBtn = querySelector('#draw-next-btn');
-  Element undoBtn = querySelector('#undo-btn');
-  Element clearBtn = querySelector('#clear-btn');
+  final InputElement chatInput = querySelector('#chat-input');
 
-  InputElement chatInput = querySelector('#chat-input');
-  CanvasElement mainCanvas = querySelector('#canvas');
-  CanvasRenderingContext2D currentContext;
+  static final CanvasElement canvas = querySelector('#canvas');
+  final CanvasRenderingContext2D ctx = canvas.context2D;
 
-  int currentCanvasIndex = -1;
+  final List<StreamSubscription<MouseEvent>> drawSubs = [];
+  final List<StreamSubscription> playSubs = [];
 
-  List<CanvasElement> canvasLayers = querySelector('#canvas-layers').children;
-  List<StreamSubscription<MouseEvent>> drawSubs = [];
-  List<StreamSubscription> playSubs = [];
-  List<Point> drawPoints = [];
+  final ClientWebSocket client;
 
-  ClientWebSocket client;
-
-  Brush brush = new Brush();
+  final List<CanvasLayer> canvasLayers = [];
 
   Play(this.client) {
     Timer timer;
@@ -59,10 +52,8 @@ class Play {
         querySelector('#player-$name')?.remove();
       })
       ..on(Message.setAsArtist, (_) {
-        querySelector('#color').text = defaultBrushColor;
-
-        // TODO add brush sizing
-        brush.size = defaultBrushSize;
+        querySelector('#color').text = Brush.defaultColor;
+        // TODO set default size
 
         artistOptions.classes
           ..remove('scale-out')
@@ -70,9 +61,11 @@ class Play {
 
         _clearDrawing();
 
+        var brush = new Brush();
+
         drawSubs.addAll([
-          querySelector('#canvas-layers').onMouseDown.listen((MouseEvent e) {
-            var rect = mainCanvas.getBoundingClientRect();
+          canvas.onMouseDown.listen((MouseEvent e) {
+            var rect = canvas.getBoundingClientRect();
             num x = e.page.x - rect.left;
             num y = e.page.y - rect.top;
 
@@ -81,12 +74,11 @@ class Play {
               ..pos.y = y
               ..pressed = true;
 
-            // TODO move this
             var color = querySelector('#color').text;
 
-            _drawPoint(color, defaultBrushSize, x, y);
+            _drawPoint(color, Brush.defaultSize, x, y);
 
-            var drawPoint = new DrawPoint(color, defaultBrushSize, brush.pos);
+            var drawPoint = new DrawPoint(color, Brush.defaultSize, brush.pos);
             client.send(Message.drawPoint, drawPoint.toJson());
 
             timer?.cancel();
@@ -101,7 +93,7 @@ class Play {
           }),
           document.onMouseMove.listen((MouseEvent e) {
             if (brush.pressed) {
-              var rect = mainCanvas.getBoundingClientRect();
+              var rect = canvas.getBoundingClientRect();
 
               brush
                 ..pos.x = e.page.x - rect.left
@@ -115,6 +107,11 @@ class Play {
               ..moved = false;
 
             timer?.cancel();
+
+            if (canvasLayers.length > 0) {
+              undoBtn.classes.remove('disabled');
+              clearBtn.classes.remove('disabled');
+            }
           }),
           undoBtn.onClick.listen((_) {
             if (undoBtn.classes.contains('disabled')) return;
@@ -163,22 +160,13 @@ class Play {
       ..on(Message.drawPoint, (String json) {
         var drawPoint = new DrawPoint.fromJson(json);
 
-        brush
-          ..color = drawPoint.color
-          ..size = drawPoint.size
-          ..pos.x = drawPoint.pos.x
-          ..pos.y = drawPoint.pos.y;
-
-        _drawPoint(drawPoint.color, drawPoint.size, brush.pos.x, brush.pos.y);
+        _drawPoint(
+            drawPoint.color, drawPoint.size, drawPoint.pos.x, drawPoint.pos.y);
       })
       ..on(Message.drawLine, (String json) {
         var pos = new Point.fromJson(json);
 
-        brush
-          ..pos.x = pos.x
-          ..pos.y = pos.y;
-
-        _drawLine(brush.pos.x, brush.pos.y);
+        _drawLine(pos.x, pos.y);
       })
       ..on(Message.clearDrawing, (_) {
         _clearDrawing();
@@ -192,7 +180,6 @@ class Play {
           queueNumber.text = '';
         }
 
-        // TODO make separate class for queueInfo
         var queue = JSON.decode(json) as List;
 
         for (var player in queue) {
@@ -285,102 +272,81 @@ class Play {
   }
 
   _drawPoint(String color, int size, num x, num y) {
-    _nextCanvasLayer();
-
-    drawPoints.add(new Point(x, y));
+    var layer = new CanvasLayer([new Point(x, y)], color, size);
+    canvasLayers.add(layer);
 
     _strokeDrawPoints();
   }
 
   _drawLine(num x, num y) {
-    drawPoints.add(new Point(x, y));
-
+    if (canvasLayers.length > 0) {
+      canvasLayers.last.points.add(new Point(x, y));
+    }
     _strokeDrawPoints();
   }
 
   // smooth draw path
   _strokeDrawPoints() {
-    currentContext.clearRect(0, 0, canvasWidth, canvasHeight);
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-    var p1 = drawPoints.first;
+    for (var layer in canvasLayers) {
+      var p1 = layer.points.first;
 
-    if (drawPoints.length == 1) {
-      currentContext
-        ..beginPath()
-        ..arc(p1.x, p1.y, brush.size / 2, 0, 2 * PI)
-        ..closePath()
-        ..fillStyle = brush.color
-        ..fill();
-    } else if (drawPoints.length > 1) {
-      var p2 = drawPoints[1];
+      if (layer.points.length == 1) {
+        ctx
+          ..beginPath()
+          ..arc(p1.x, p1.y, layer.brushSize / 2, 0, 2 * PI)
+          ..closePath()
+          ..fillStyle = layer.brushColor
+          ..fill();
+      } else if (layer.points.length > 1) {
+        var p2 = layer.points[1];
 
-      currentContext
-        ..beginPath()
-        ..moveTo(p1.x, p1.y);
+        ctx
+          ..beginPath()
+          ..moveTo(p1.x, p1.y);
 
-      for (int i = 1; i < drawPoints.length - 1; i++) {
-        var midPoint = Point.midPoint(p1, p2);
+        for (int i = 1; i < layer.points.length - 1; i++) {
+          var midPoint = Point.midPoint(p1, p2);
 
-        currentContext.quadraticCurveTo(p1.x, p1.y, midPoint.x, midPoint.y);
+          ctx.quadraticCurveTo(p1.x, p1.y, midPoint.x, midPoint.y);
 
-        p1 = drawPoints[i];
-        p2 = drawPoints[i + 1];
+          p1 = layer.points[i];
+          p2 = layer.points[i + 1];
+        }
+
+        ctx
+          ..lineTo(p1.x, p1.y)
+          ..lineWidth = layer.brushSize
+          ..strokeStyle = layer.brushColor
+          ..lineCap = 'round'
+          ..lineJoin = 'round'
+          ..stroke();
       }
-
-      currentContext
-        ..lineTo(p1.x, p1.y)
-        ..lineWidth = brush.size
-        ..strokeStyle = brush.color
-        ..lineCap = 'round'
-        ..lineJoin = 'round'
-        ..stroke();
     }
   }
 
   _clearDrawing() {
-    mainCanvas.context2D.clearRect(0, 0, canvasWidth, canvasHeight);
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-    for (CanvasElement layer in canvasLayers) {
-      layer.context2D.clearRect(0, 0, canvasWidth, canvasHeight);
-    }
-
-    currentCanvasIndex = 0;
+    canvasLayers.clear();
 
     undoBtn.classes.add('disabled');
     clearBtn.classes.add('disabled');
   }
 
   _undoLast() {
-    currentContext.clearRect(0, 0, canvasWidth, canvasHeight);
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-    if (currentCanvasIndex > 0) {
-      currentCanvasIndex--;
+    if (canvasLayers.length > 0) {
+      canvasLayers.removeLast();
 
-      var prevLayer = canvasLayers[currentCanvasIndex % maxCanvasLayers];
+      _strokeDrawPoints();
 
-      currentContext = prevLayer.context2D;
+      if (canvasLayers.length == 0) {
+        undoBtn.classes.add('disabled');
+        clearBtn.classes.add('disabled');
+      }
     }
-
-    if (currentCanvasIndex == 0) {
-      undoBtn.classes.add('disabled');
-    }
-  }
-
-  _nextCanvasLayer() {
-    undoBtn.classes.remove('disabled');
-    clearBtn.classes.remove('disabled');
-
-    currentCanvasIndex++;
-
-    var nextLayer = canvasLayers[currentCanvasIndex % maxCanvasLayers]..style.zIndex = '${currentCanvasIndex + 1}';
-
-    currentContext = nextLayer.context2D;
-
-    if (currentCanvasIndex >= maxCanvasLayers) {
-      mainCanvas.context2D.drawImage(nextLayer, 0, 0);
-      currentContext.clearRect(0, 0, canvasWidth, canvasHeight);
-    }
-
-    drawPoints.clear();
   }
 }

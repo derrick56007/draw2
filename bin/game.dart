@@ -23,7 +23,7 @@ class Game {
 
   List<Guess> guesses = [];
 
-  List<Layer> canvasLayers = [];
+  List<CanvasLayer> canvasLayers = [];
 
   String brushColor = defaultBrushColor;
   int brushSize = defaultBrushSize;
@@ -199,7 +199,7 @@ class Game {
   drawPoint(String json) {
     var drawPoint = new DrawPoint.fromJson(json);
 
-    var layer = new Layer([drawPoint.pos], drawPoint.color, drawPoint.size);
+    var layer = new CanvasLayer([drawPoint.pos], drawPoint.color, drawPoint.size);
 
     canvasLayers.add(layer);
   }

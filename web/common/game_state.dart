@@ -8,7 +8,7 @@ class GameState {
   final String currentArtist;
   final List<Guess> guesses;
   final List<ExistingPlayer> players;
-  final List<Layer> canvasLayers;
+  final List<CanvasLayer> canvasLayers;
 
   const GameState(
       this.currentArtist, this.guesses, this.players, this.canvasLayers);
@@ -34,10 +34,10 @@ class GameState {
       playersDecoded.add(new ExistingPlayer.fromJson(playerJson));
     }
 
-    var layersDecoded = <Layer>[];
+    var layersDecoded = <CanvasLayer>[];
 
     for (var layer in map['canvasLayers']) {
-      layersDecoded.add(new Layer.fromJson(layer));
+      layersDecoded.add(new CanvasLayer.fromJson(layer));
     }
 
     var gameState = new GameState(

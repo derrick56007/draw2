@@ -1,14 +1,14 @@
 import 'dart:convert';
 import 'point.dart';
 
-class Layer {
+class CanvasLayer {
   final List<Point> points;
   final String brushColor;
   final int brushSize;
 
-  const Layer(this.points, this.brushColor, this.brushSize);
+  const CanvasLayer(this.points, this.brushColor, this.brushSize);
 
-  factory Layer.fromJson(var json) {
+  factory CanvasLayer.fromJson(var json) {
     var map;
 
     if (json is Map) {
@@ -17,7 +17,7 @@ class Layer {
       map = JSON.decode(json) as Map;
     }
 
-    return new Layer(map['points'], map['brushColor'], map['brushSize']);
+    return new CanvasLayer(map['points'], map['brushColor'], map['brushSize']);
   }
 
   String toJson() => JSON.encode(

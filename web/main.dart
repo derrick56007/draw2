@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'dart:html' hide Point;
 import 'dart:math' hide Point;
 
+import 'common/canvas_layer.dart';
 import 'common/create_lobby_info.dart';
 import 'common/draw_point.dart';
 import 'common/draw_regex.dart';
