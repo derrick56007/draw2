@@ -46,7 +46,7 @@ main(List<String> args) async {
   var results = parser.parse(args);
   var clientFiles = results['clientFiles'];
 
-  var defaultPage = new File('index.html');
+  var defaultPage = new File('$clientFiles/index.html');
 
   var staticFiles = new VirtualDirectory(clientFiles);
   staticFiles

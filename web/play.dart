@@ -41,11 +41,10 @@ class Play {
       ..on(Message.existingPlayer, (String json) {
         var existingPlayer = new ExistingPlayer.fromJson(json);
 
-        // TODO add queue number to existing info
-        _addPlayer(existingPlayer.username, existingPlayer.score, '');
+        _addPlayer(existingPlayer.username, existingPlayer.score);
       })
       ..on(Message.newPlayer, (String name) {
-        _addPlayer(name, 0, '');
+        _addPlayer(name, 0);
       })
       ..on(Message.removePlayer, (String name) {
         querySelector('#player-$name')?.remove();
@@ -89,6 +88,9 @@ class Play {
                 brush.moved = false;
               }
             });
+
+            undoBtn.classes.remove('disabled');
+            clearBtn.classes.remove('disabled');
           }),
           document.onMouseMove.listen((MouseEvent e) {
             if (brush.pressed) {
@@ -106,11 +108,6 @@ class Play {
               ..moved = false;
 
             timer?.cancel();
-
-            if (canvasLayers.length > 0) {
-              undoBtn.classes.remove('disabled');
-              clearBtn.classes.remove('disabled');
-            }
           }),
           undoBtn.onClick.listen((_) {
             if (undoBtn.classes.contains('disabled')) return;
@@ -243,10 +240,10 @@ class Play {
     playSubs.clear();
   }
 
-  _addPlayer(String name, int score, var queueNumber) {
+  _addPlayer(String name, int score) {
     var el = new Element.html('''
       <a id="player-$name" class="collection-item player-item">
-        <span id="player-$name-queue-number" class="queue-number">$queueNumber</span>
+        <span id="player-$name-queue-number" class="queue-number"></span>
         <span id="player-$name-score" class="player-score">$score</span>
         $name
       </a>''');

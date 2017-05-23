@@ -37,6 +37,11 @@ class Password {
   }
 
   submit() {
+    if (!client.isConnected()) {
+      toast('Not connected');
+      return;
+    }
+
     var password = passwordField.value.trim();
 
     if (password.isEmpty) {

@@ -45,6 +45,7 @@ class Lobby {
 
     print('$username joined lobby $name');
 
+    sendQueueInfo();
     sendPlayerOrder();
   }
 

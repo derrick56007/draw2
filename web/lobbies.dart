@@ -1,15 +1,16 @@
 part of client;
 
 class Lobbies {
-  // TODO fix this
-  static var lobbyNameRegex = new RegExp(DrawRegExp.lobbyName);
+  static RegExp lobbyNameRegex = new RegExp(DrawRegExp.lobbyName);
 
   final Element lobbiesCard = querySelector('#lobby-list-card');
   final Element lobbyListCollection = querySelector('#lobby-list-collection');
 
+  final ClientWebSocket client;
+
   StreamSubscription submitSub;
 
-  Lobbies(ClientWebSocket client) {
+  Lobbies(this.client) {
     client
       ..on(Message.lobbyInfo, (String json) {
         querySelector('#lobby-list-progress')?.remove();
@@ -52,15 +53,24 @@ class Lobbies {
     lobbiesCard.style.display = '';
 
     submitSub = window.onKeyPress.listen((KeyboardEvent e) {
-      if (e.keyCode == KeyCode.ENTER) {
-        create.show();
-      }
+      submit();
     });
   }
 
   hide() {
     lobbiesCard.style.display = 'none';
     submitSub?.cancel();
+  }
+
+  submit() {
+    if (!client.isConnected()) {
+      toast('Not connected');
+      return;
+    }
+
+    if (e.keyCode == KeyCode.ENTER) {
+      create.show();
+    }
   }
 
   static bool isValidLobbyName(String lobbyName) {
