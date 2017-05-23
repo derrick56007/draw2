@@ -53,7 +53,9 @@ class Lobbies {
     lobbiesCard.style.display = '';
 
     submitSub = window.onKeyPress.listen((KeyboardEvent e) {
-      submit();
+      if (e.keyCode == KeyCode.ENTER) {
+        submit();
+      }
     });
   }
 
@@ -68,9 +70,7 @@ class Lobbies {
       return;
     }
 
-    if (e.keyCode == KeyCode.ENTER) {
-      create.show();
-    }
+    create.show();
   }
 
   static bool isValidLobbyName(String lobbyName) {
