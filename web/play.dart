@@ -1,7 +1,6 @@
 part of client;
 
 class Play {
-  static const maxCanvasLayers = 5;
   static const canvasWidth = 640;
   static const canvasHeight = 480;
   static const maxChatLength = 20;
