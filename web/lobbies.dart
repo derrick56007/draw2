@@ -1,6 +1,6 @@
 part of client;
 
-class Lobbies {
+class Lobbies extends Card {
   static RegExp lobbyNameRegex = new RegExp(DrawRegExp.lobbyName);
 
   final Element lobbiesCard = querySelector('#lobby-list-card');
@@ -12,36 +12,11 @@ class Lobbies {
 
   Lobbies(this.client) {
     client
-      ..on(Message.lobbyInfo, (String json) {
-        querySelector('#lobby-list-progress')?.remove();
-
-        var lobbyInfo = new LobbyInfo.fromJson(json);
-
-        var el = new Element.html('''
-          <a id="lobby-${lobbyInfo.name}" class="collection-item lobby-list-item">
-            <span class="badge">${lobbyInfo.numberOfPlayers}/${lobbyInfo.maxPlayers}</span>
-            ${lobbyInfo.name}
-          </a>''');
-
-        el.onClick
-            .listen((_) => client.send(Message.enterLobby, lobbyInfo.name));
-
-        lobbyListCollection.children.add(el);
-      })
-      ..on(Message.lobbyClosed, (String lobbyName) {
-        querySelector('#lobby-$lobbyName')?.remove();
-      })
-      ..on(Message.requestPassword, (String lobbyName) {
-        password.show(lobbyName);
-      })
-      ..on(Message.enterLobbySuccessful, (String lobbyName) {
-        window.history.pushState(null, null, '/$lobbyName');
-        play.show();
-      })
-      ..on(Message.enterLobbyFailure, (_) {
-        window.history.pushState(null, null, '/');
-        lobbies.show();
-      });
+      ..on(Message.lobbyInfo, (x) => _lobbyInfo(x))
+      ..on(Message.lobbyClosed, (x) => _lobbyClosed(x))
+      ..on(Message.requestPassword, (x) => _requestPassword(x))
+      ..on(Message.enterLobbySuccessful, (x) => _enterLobbySuccessful(x))
+      ..on(Message.enterLobbyFailure, (_) => _enterLobbyFailure());
 
     querySelector('#create-lobby-card-btn').onClick.listen((_) {
       create.show();
@@ -77,5 +52,38 @@ class Lobbies {
     var lobbyMatches = lobbyNameRegex.firstMatch(lobbyName);
 
     return lobbyMatches != null && lobbyMatches[0] == lobbyName;
+  }
+
+  _lobbyInfo(String json) {
+    querySelector('#lobby-list-progress')?.remove();
+
+    var lobbyInfo = new LobbyInfo.fromJson(json);
+
+    var el = new Element.html('''
+          <a id="lobby-${lobbyInfo.name}" class="collection-item lobby-list-item">
+            <span class="badge">${lobbyInfo.numberOfPlayers}/${lobbyInfo.maxPlayers}</span>
+            ${lobbyInfo.name}
+          </a>''')
+      ..onClick.listen((_) => client.send(Message.enterLobby, lobbyInfo.name));
+
+    lobbyListCollection.children.add(el);
+  }
+
+  _lobbyClosed(String lobbyName) {
+    querySelector('#lobby-$lobbyName')?.remove();
+  }
+
+  _requestPassword(String lobbyName) {
+    password.show(lobbyName);
+  }
+
+  _enterLobbySuccessful(String lobbyName) {
+    window.history.pushState(null, null, '/$lobbyName');
+    play.show();
+  }
+
+  _enterLobbyFailure() {
+    window.history.pushState(null, null, '/');
+    lobbies.show();
   }
 }

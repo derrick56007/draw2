@@ -1,6 +1,6 @@
 part of client;
 
-class Create {
+class Create extends Card {
   final Element createLobbyCard = querySelector('#create-lobby-card');
   final InputElement lobbyNameElement = querySelector('#lobby-name');
   StreamSubscription submitSub;

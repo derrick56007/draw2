@@ -29,12 +29,12 @@ class SocketReceiver {
       ..on(Message.createLobby, (x) => _createLobby(x))
       ..on(Message.enterLobby, (x) => _enterLobby(x))
       ..on(Message.enterLobbyWithPassword, (x) => _enterLobbyWithPassword(x))
-      ..on(Message.drawNext, (x) => _drawNext())
+      ..on(Message.drawNext, (_) => _drawNext())
       ..on(Message.guess, (x) => _guess(x))
       ..on(Message.drawPoint, (x) => _drawPoint(x))
       ..on(Message.drawLine, (x) => _drawLine(x))
-      ..on(Message.clearDrawing, (x) => _clearDrawing())
-      ..on(Message.undoLast, (x) => _undoLast());
+      ..on(Message.clearDrawing, (_) => _clearDrawing())
+      ..on(Message.undoLast, (_) => _undoLast());
   }
 
   _onClose() {

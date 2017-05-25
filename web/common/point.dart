@@ -17,4 +17,6 @@ class Point<T> {
 
   static Point midPoint(Point p1, Point p2) =>
       new Point(p1.x + (p2.x - p1.x) / 2, p1.y + (p2.y - p1.y) / 2);
+
+  Point clone() => new Point(x, y);
 }

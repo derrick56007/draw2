@@ -20,6 +20,7 @@ import 'brush.dart';
 import 'client_websocket.dart';
 import 'toast.dart';
 
+part 'card.dart';
 part 'create.dart';
 part 'lobbies.dart';
 part 'login.dart';
@@ -39,6 +40,8 @@ main() async {
   password = new Password(client);
 
   login.show();
+
+  client.on(Message.toast, (x) => toast(x));
 }
 
 hideAllCards() {

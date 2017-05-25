@@ -1,6 +1,6 @@
 part of client;
 
-class Play {
+class Play extends Card {
   static const canvasWidth = 640;
   static const canvasHeight = 480;
   static const maxChatLength = 20;
@@ -29,181 +29,30 @@ class Play {
 
   final List<CanvasLayer> canvasLayers = [];
 
+  Timer timer;
+
   Play(this.client) {
-    Timer timer;
-
     client
-      ..on(Message.guess, (String json) {
-        var guess = new Guess.fromJson(json);
-
-        _addToChat(guess.username, guess.guess);
-      })
-      ..on(Message.existingPlayer, (String json) {
-        var existingPlayer = new ExistingPlayer.fromJson(json);
-
-        _addPlayer(existingPlayer.username, existingPlayer.score);
-      })
-      ..on(Message.newPlayer, (String name) {
-        _addPlayer(name, 0);
-      })
-      ..on(Message.removePlayer, (String name) {
-        querySelector('#player-$name')?.remove();
-      })
-      ..on(Message.setAsArtist, (_) {
-        querySelector('#color').text = Brush.defaultColor;
-        // TODO set default size
-
-        artistOptions.classes
-          ..remove('scale-out')
-          ..add('scale-in');
-
-        _clearDrawing();
-
-        var brush = new Brush();
-
-        drawSubs.addAll([
-          canvas.onMouseDown.listen((MouseEvent e) {
-            var rect = canvas.getBoundingClientRect();
-            num x = e.page.x - rect.left;
-            num y = e.page.y - rect.top;
-
-            brush
-              ..pos.x = x
-              ..pos.y = y
-              ..pressed = true;
-
-            var color = querySelector('#color').text;
-
-            _drawPoint(color, Brush.defaultSize, x, y);
-
-            var drawPoint = new DrawPoint(color, Brush.defaultSize, brush.pos);
-            client.send(Message.drawPoint, drawPoint.toJson());
-
-            timer?.cancel();
-            timer = new Timer.periodic(brushInterval, (_) {
-              if (brush.moved) {
-                _drawLine(brush.pos.x, brush.pos.y);
-                client.send(Message.drawLine, brush.pos.toJson());
-
-                brush.moved = false;
-              }
-            });
-
-            undoBtn.classes.remove('disabled');
-            clearBtn.classes.remove('disabled');
-          }),
-          document.onMouseMove.listen((MouseEvent e) {
-            if (brush.pressed) {
-              var rect = canvas.getBoundingClientRect();
-
-              brush
-                ..pos.x = e.page.x - rect.left
-                ..pos.y = e.page.y - rect.top
-                ..moved = true;
-            }
-          }),
-          document.onMouseUp.listen((MouseEvent e) {
-            brush
-              ..pressed = false
-              ..moved = false;
-
-            timer?.cancel();
-          }),
-          undoBtn.onClick.listen((_) {
-            if (undoBtn.classes.contains('disabled')) return;
-
-            client.send(Message.undoLast);
-            _undoLast();
-          }),
-          clearBtn.onClick.listen((_) {
-            client.send(Message.clearDrawing);
-            _clearDrawing();
-          })
-        ]);
-      })
-      ..on(Message.setArtist, (_) {
-        artistOptions.classes
-          ..remove('scale-in')
-          ..add('scale-out');
-
-        _clearDrawing();
-        for (var sub in drawSubs) {
-          sub?.cancel();
-        }
-        drawSubs.clear();
-
-        timer?.cancel();
-
-        clearBtn.classes.add('disabled');
-        undoBtn.classes.add('disabled');
-      })
-      ..on(Message.win, (_) {})
-      ..on(Message.lose, (_) {})
-      ..on(Message.setCanvasLeftLabel, (String json) {
-        canvasLeftLabel.text = json;
-      })
-      ..on(Message.setCanvasMiddleLabel, (String json) {
-        canvasMiddleLabel.text = json;
-      })
-      ..on(Message.setCanvasRightLabel, (String json) {
-        canvasRightLabel.text = json;
-      })
-      ..on(Message.clearCanvasLabels, (_) {
-        canvasLeftLabel.text = '';
-        canvasMiddleLabel.text = '';
-        canvasRightLabel.text = '';
-      })
-      ..on(Message.drawPoint, (String json) {
-        var drawPoint = new DrawPoint.fromJson(json);
-
-        _drawPoint(
-            drawPoint.color, drawPoint.size, drawPoint.pos.x, drawPoint.pos.y);
-      })
-      ..on(Message.drawLine, (String json) {
-        var pos = new Point.fromJson(json);
-
-        _drawLine(pos.x, pos.y);
-      })
-      ..on(Message.clearDrawing, (_) {
-        _clearDrawing();
-      })
-      ..on(Message.undoLast, (_) {
-        _undoLast();
-      })
-      ..on(Message.setQueue, (String json) {
-        for (var el in playerListCollection.children) {
-          var queueNumber = el.querySelectorAll('.queue-number').first;
-          queueNumber.text = '';
-        }
-
-        var queue = JSON.decode(json) as List;
-
-        for (var player in queue) {
-          var name = player[0];
-          querySelector('#player-$name-queue-number')?.text = '${player[1]}';
-        }
-      })
-      ..on(Message.setPlayerOrder, (String json) {
-        var order = JSON.decode(json) as List;
-        for (var name in order.reversed) {
-          var el = querySelector('#player-$name');
-
-          if (el == null) continue;
-
-          el.remove();
-          playerListCollection.children.insert(0, el);
-        }
-      })
-      ..on(Message.enableDrawNext, (_) {
-        drawNextBtn.classes.remove('disabled');
-      })
-      ..on(Message.updatePlayerScore, (String json) {
-        var playerScore = JSON.decode(json) as List;
-        var name = playerScore[0];
-        var score = playerScore[1];
-
-        querySelector('#player-$name-score')?.text = '$score';
-      });
+      ..on(Message.guess, (x) => _guess(x))
+      ..on(Message.existingPlayer, (x) => _existingPlayer(x))
+      ..on(Message.newPlayer, (x) => _newPlayer(x))
+      ..on(Message.removePlayer, (x) => _removePlayer(x))
+      ..on(Message.setAsArtist, (_) => _setAsArtist())
+      ..on(Message.setArtist, (_) => _setArtist())
+      ..on(Message.win, (_) => _win())
+      ..on(Message.lose, (_) => _lose())
+      ..on(Message.setCanvasLeftLabel, (x) => _setCanvasLeftLabel(x))
+      ..on(Message.setCanvasMiddleLabel, (x) => _setCanvasMiddleLabel(x))
+      ..on(Message.setCanvasRightLabel, (x) => _setCanvasRightLabel(x))
+      ..on(Message.clearCanvasLabels, (_) => _clearCanvasLabels())
+      ..on(Message.drawPoint, (x) => _drawPoint(new DrawPoint.fromJson(x)))
+      ..on(Message.drawLine, (x) => _drawLine(new Point.fromJson(x)))
+      ..on(Message.clearDrawing, (_) => _clearDrawing())
+      ..on(Message.undoLast, (_) => _undoLast())
+      ..on(Message.setQueue, (x) => _setQueue(x))
+      ..on(Message.setPlayerOrder, (x) => _setPlayerOrder(x))
+      ..on(Message.enableDrawNext, (x) => _enableDrawNext())
+      ..on(Message.updatePlayerScore, (x) => _updatePlayerScore(x));
   }
 
   show() {
@@ -267,16 +116,17 @@ class Play {
     chatList.children.removeAt(0);
   }
 
-  _drawPoint(String color, int size, num x, num y) {
-    var layer = new CanvasLayer([new Point(x, y)], color, size);
+  _drawPoint(DrawPoint drawPoint) {
+    var layer =
+        new CanvasLayer([drawPoint.pos], drawPoint.color, drawPoint.size);
     canvasLayers.add(layer);
 
     _strokeDrawPoints();
   }
 
-  _drawLine(num x, num y) {
+  _drawLine(Point pos) {
     if (canvasLayers.length > 0) {
-      canvasLayers.last.points.add(new Point(x, y));
+      canvasLayers.last.points.add(pos.clone());
     }
     _strokeDrawPoints();
   }
@@ -344,5 +194,175 @@ class Play {
         clearBtn.classes.add('disabled');
       }
     }
+  }
+
+  _guess(String json) {
+    var guess = new Guess.fromJson(json);
+
+    _addToChat(guess.username, guess.guess);
+  }
+
+  _existingPlayer(String json) {
+    var existingPlayer = new ExistingPlayer.fromJson(json);
+
+    _addPlayer(existingPlayer.username, existingPlayer.score);
+  }
+
+  _newPlayer(String name) {
+    _addPlayer(name, 0);
+  }
+
+  _removePlayer(String name) {
+    querySelector('#player-$name')?.remove();
+  }
+
+  _setAsArtist() {
+    querySelector('#color').text = Brush.defaultColor;
+    // TODO set default size
+
+    artistOptions.classes
+      ..remove('scale-out')
+      ..add('scale-in');
+
+    _clearDrawing();
+
+    var brush = new Brush();
+
+    drawSubs.addAll([
+      canvas.onMouseDown.listen((MouseEvent e) {
+        var rect = canvas.getBoundingClientRect();
+        num x = e.page.x - rect.left;
+        num y = e.page.y - rect.top;
+
+        brush
+          ..pos.x = x
+          ..pos.y = y
+          ..pressed = true;
+
+        var color = querySelector('#color').text;
+
+        var drawPoint = new DrawPoint(color, Brush.defaultSize, brush.pos);
+
+        _drawPoint(drawPoint);
+        client.send(Message.drawPoint, drawPoint.toJson());
+
+        timer?.cancel();
+        timer = new Timer.periodic(brushInterval, (_) {
+          if (brush.moved) {
+            _drawLine(brush.pos);
+            client.send(Message.drawLine, brush.pos.toJson());
+
+            brush.moved = false;
+          }
+        });
+
+        undoBtn.classes.remove('disabled');
+        clearBtn.classes.remove('disabled');
+      }),
+      document.onMouseMove.listen((MouseEvent e) {
+        if (brush.pressed) {
+          var rect = canvas.getBoundingClientRect();
+
+          brush
+            ..pos.x = e.page.x - rect.left
+            ..pos.y = e.page.y - rect.top
+            ..moved = true;
+        }
+      }),
+      document.onMouseUp.listen((MouseEvent e) {
+        brush
+          ..pressed = false
+          ..moved = false;
+
+        timer?.cancel();
+      }),
+      undoBtn.onClick.listen((_) {
+        if (undoBtn.classes.contains('disabled')) return;
+
+        client.send(Message.undoLast);
+        _undoLast();
+      }),
+      clearBtn.onClick.listen((_) {
+        client.send(Message.clearDrawing);
+        _clearDrawing();
+      })
+    ]);
+  }
+
+  _setArtist() {
+    artistOptions.classes
+      ..remove('scale-in')
+      ..add('scale-out');
+
+    _clearDrawing();
+    for (var sub in drawSubs) {
+      sub?.cancel();
+    }
+    drawSubs.clear();
+
+    timer?.cancel();
+
+    clearBtn.classes.add('disabled');
+    undoBtn.classes.add('disabled');
+  }
+
+  _win() {}
+
+  _lose() {}
+
+  _setCanvasLeftLabel(String json) {
+    canvasLeftLabel.text = json;
+  }
+
+  _setCanvasMiddleLabel(String json) {
+    canvasMiddleLabel.text = json;
+  }
+
+  _setCanvasRightLabel(String json) {
+    canvasRightLabel.text = json;
+  }
+
+  _clearCanvasLabels() {
+    canvasLeftLabel.text = '';
+    canvasMiddleLabel.text = '';
+    canvasRightLabel.text = '';
+  }
+
+  _setQueue(String json) {
+    for (var el in playerListCollection.children) {
+      var queueNumber = el.querySelectorAll('.queue-number').first;
+      queueNumber.text = '';
+    }
+
+    var queue = JSON.decode(json) as List;
+
+    for (var player in queue) {
+      var name = player[0];
+      querySelector('#player-$name-queue-number')?.text = '${player[1]}';
+    }
+  }
+
+  _setPlayerOrder(String json) {
+    var order = JSON.decode(json) as List;
+    for (var name in order.reversed) {
+      var el = querySelector('#player-$name');
+
+      if (el == null) continue;
+
+      el.remove();
+      playerListCollection.children.insert(0, el);
+    }
+  }
+
+  _enableDrawNext() {
+    drawNextBtn.classes.remove('disabled');
+  }
+
+  _updatePlayerScore(String json) {
+    var playerScore = JSON.decode(json) as List;
+    var name = playerScore[0];
+    var score = playerScore[1];
+
+    querySelector('#player-$name-score')?.text = '$score';
   }
 }

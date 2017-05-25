@@ -1,6 +1,6 @@
 part of client;
 
-class Login {
+class Login extends Card {
   final Element loginCard = querySelector('#login-card');
   final InputElement usernameElement = querySelector('#username');
 
@@ -9,19 +9,7 @@ class Login {
   StreamSubscription submitSub;
 
   Login(this.client) {
-
-    client
-      ..on(Message.toast, (String msg) {
-        toast(msg);
-      })
-      ..on(Message.loginSuccesful, (_) {
-        lobbies.show();
-
-        var path = window.location.pathname.substring(1);
-        if (Lobbies.isValidLobbyName(path)) {
-          client.send(Message.enterLobby, path);
-        }
-      });
+    client.on(Message.loginSuccesful, (_) => _loginSuccesful());
 
     querySelector('#login-btn').onClick.listen((_) {
       submit();
@@ -60,5 +48,14 @@ class Login {
     }
 
     client.send(Message.login, username);
+  }
+
+  _loginSuccesful() {
+    lobbies.show();
+
+    var path = window.location.pathname.substring(1);
+    if (Lobbies.isValidLobbyName(path)) {
+      client.send(Message.enterLobby, path);
+    }
   }
 }
