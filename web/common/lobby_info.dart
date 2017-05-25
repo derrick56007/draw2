@@ -7,7 +7,8 @@ class LobbyInfo {
   final int maxPlayers;
   final int numberOfPlayers;
 
-  const LobbyInfo(this.name, this.hasPassword, this.hasTimer, this.maxPlayers, this.numberOfPlayers);
+  const LobbyInfo(this.name, this.hasPassword, this.hasTimer, this.maxPlayers,
+      this.numberOfPlayers);
 
   factory LobbyInfo.fromJson(var json) {
     var map;
@@ -18,8 +19,8 @@ class LobbyInfo {
       map = JSON.decode(json) as Map;
     }
 
-    return new LobbyInfo(
-        map['name'], map['hasPassword'], map['hasTimer'], map['maxPlayers'], map['numberOfPlayers']);
+    return new LobbyInfo(map['name'], map['hasPassword'], map['hasTimer'],
+        map['maxPlayers'], map['numberOfPlayers']);
   }
 
   String toJson() => JSON.encode({

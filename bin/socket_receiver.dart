@@ -181,25 +181,37 @@ class SocketReceiver {
 
   _drawPoint(String json) {
     var lobby = gPlayerLobby[socket];
-    lobby?.sendToAll(Message.drawPoint, val: json, except: socket);
-    lobby?.game?.drawPoint(json);
+
+    if (lobby == null || lobby.game.currentArtist != socket) return;
+
+    lobby.sendToAll(Message.drawPoint, val: json, except: socket);
+    lobby.game.drawPoint(json);
   }
 
   _drawLine(String json) {
     var lobby = gPlayerLobby[socket];
-    lobby?.sendToAll(Message.drawLine, val: json, except: socket);
-    lobby?.game?.drawLine(json);
+
+    if (lobby == null || lobby.game.currentArtist != socket) return;
+
+    lobby.sendToAll(Message.drawLine, val: json, except: socket);
+    lobby.game.drawLine(json);
   }
 
   _clearDrawing() {
     var lobby = gPlayerLobby[socket];
-    lobby?.sendToAll(Message.clearDrawing, except: socket);
-    lobby?.game?.clearDrawing();
+
+    if (lobby == null || lobby.game.currentArtist != socket) return;
+
+    lobby.sendToAll(Message.clearDrawing, except: socket);
+    lobby.game.clearDrawing();
   }
 
   _undoLast() {
     var lobby = gPlayerLobby[socket];
-    lobby?.sendToAll(Message.undoLast, except: socket);
-    lobby?.game?.undoLast();
+
+    if (lobby == null || lobby.game.currentArtist != socket) return;
+
+    lobby.sendToAll(Message.undoLast, except: socket);
+    lobby.game.undoLast();
   }
 }
