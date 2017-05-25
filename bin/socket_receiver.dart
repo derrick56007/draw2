@@ -121,17 +121,13 @@ class SocketReceiver {
   }
 
   _enterLobby(String lobbyName) {
-    var lobby = gLobbies[lobbyName];
-
-    // create lobby
-    if (lobby == null) {
-      var createLobbyInfo = new CreateLobbyInfo(lobbyName, '', false, 5);
-
-      lobby = new Lobby(createLobbyInfo);
+    ////////// check if lobby exists ////////////////
+    if (!gLobbies.containsKey(lobbyName)) {
+      var lobby = new Lobby(createLobbyInfo);
       gLobbies[lobbyName] = lobby;
-
-      print('new lobby $lobbyName');
     }
+
+    var lobby = gLobbies[lobbyName];
 
     if (lobby.hasPassword) {
       socket.send(Message.requestPassword, lobbyName);
