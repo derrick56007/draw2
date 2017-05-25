@@ -199,29 +199,29 @@ class Game {
   }
 
   drawPoint(String json) {
-    var drawPoint = new DrawPoint.fromJson(json);
-
-    var layer =
-        new CanvasLayer([drawPoint.pos], drawPoint.color, drawPoint.size);
-
-    canvasLayers.add(layer);
+//    var drawPoint = new DrawPoint.fromJson(json);
+//
+//    var layer =
+//        new CanvasLayer([drawPoint.pos], drawPoint.color, drawPoint.size);
+//
+//    canvasLayers.add(layer);
   }
 
   drawLine(String json) {
-    if (canvasLayers.length > 0) {
-      var point = new Point.fromJson(json);
-
-      canvasLayers.last.points.add(point);
-    }
+//    if (canvasLayers.length > 0) {
+//      var point = new Point.fromJson(json);
+//
+//      canvasLayers.last.points.add(point);
+//    }
   }
 
   clearDrawing() {
-    canvasLayers.clear();
+//    canvasLayers.clear();
   }
 
   undoLast() {
-    if (canvasLayers.length > 0) {
-      canvasLayers.removeLast();
-    }
+//    if (canvasLayers.length > 0) {
+//      canvasLayers.removeLast();
+//    }
   }
 }
