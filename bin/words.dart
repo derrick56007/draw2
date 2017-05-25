@@ -7,12 +7,12 @@ class Words {
   Words({path: defaultPath}) {
     new File(path).readAsLines()
       ..then((words) {
-        list.addAll(words);
+        list
+          ..addAll(words)
+          ..shuffle();
       })
       ..catchError((e) {
         print('Error reading file path: $path');
       });
-
-    list.shuffle();
   }
 }

@@ -117,8 +117,8 @@ class Play extends Card {
   }
 
   _drawPoint(DrawPoint drawPoint) {
-    var layer =
-        new CanvasLayer([drawPoint.pos], drawPoint.color, drawPoint.size);
+    var layer = new CanvasLayer(
+        [drawPoint.pos.clone()], drawPoint.color, drawPoint.size);
     canvasLayers.add(layer);
 
     _strokeCanvasLayers();

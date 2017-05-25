@@ -121,14 +121,17 @@ class SocketReceiver {
   }
 
   _enterLobby(String lobbyName) {
-    ////////// check if lobby exists ////////////////
-    if (!gLobbies.containsKey(lobbyName)) {
-      socket.send(Message.toast, 'Lobby doesn\'t exist');
-      socket.send(Message.enterLobbyFailure);
-      return;
-    }
-
     var lobby = gLobbies[lobbyName];
+
+    // create lobby
+    if (lobby == null) {
+      var createLobbyInfo = new CreateLobbyInfo(lobbyName, '', false, 5);
+
+      lobby = new Lobby(createLobbyInfo);
+      gLobbies[lobbyName] = lobby;
+
+      print('new lobby $lobbyName');
+    }
 
     if (lobby.hasPassword) {
       socket.send(Message.requestPassword, lobbyName);
@@ -163,14 +166,14 @@ class SocketReceiver {
   }
 
   _drawNext() {
-    if (!gPlayerLobby.containsKey(socket)) return null;
+    if (!gPlayerLobby.containsKey(socket)) return;
 
     var lobby = gPlayerLobby[socket];
     lobby.game.addToQueue(socket);
   }
 
   _guess(String json) {
-    if (!gPlayerLobby.containsKey(socket)) return null;
+    if (!gPlayerLobby.containsKey(socket)) return;
 
     var lobby = gPlayerLobby[socket];
 

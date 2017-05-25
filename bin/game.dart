@@ -151,17 +151,21 @@ class Game {
     lobby.sendToAll(Message.guess, val: guess.toJson());
 
     ////////////// check for win //////////////////
+
     if (socket == currentArtist) return;
 
     if (currentWord == null) return;
 
     // not a match
-    if (guess.guess.toLowerCase() != currentWord.toLowerCase()) return;
+    if (guess.guess.trim().toLowerCase() != currentWord.trim().toLowerCase())
+      return;
 
     onWin(socket, guess.username, currentWord);
   }
 
   onWin(ServerWebSocket socket, String username, String word) {
+    print('Win');
+
     // TODO point system
     scores[socket] += 1;
 
@@ -199,7 +203,8 @@ class Game {
   drawPoint(String json) {
     var drawPoint = new DrawPoint.fromJson(json);
 
-    var layer = new CanvasLayer([drawPoint.pos], drawPoint.color, drawPoint.size);
+    var layer =
+        new CanvasLayer([drawPoint.pos], drawPoint.color, drawPoint.size);
 
     canvasLayers.add(layer);
   }
