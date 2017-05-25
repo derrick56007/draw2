@@ -164,8 +164,6 @@ class Game {
   }
 
   onWin(ServerWebSocket socket, String username, String word) {
-    print('Win');
-
     // TODO point system
     scores[socket] += 1;
 
