@@ -215,7 +215,7 @@ class Game {
 //    }
   }
 
-  clearDrawing() {
+  clearDrawing() { 
 //    canvasLayers.clear();
   }
 
