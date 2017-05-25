@@ -231,8 +231,8 @@ class Play extends Card {
     drawSubs.addAll([
       canvas.onMouseDown.listen((MouseEvent e) {
         var rect = canvas.getBoundingClientRect();
-        num x = e.page.x - rect.left;
-        num y = e.page.y - rect.top;
+        num x = e.page.x - (rect.left + window.pageXOffset);
+        num y = e.page.y - (rect.top + window.pageYOffset);
 
         brush
           ..pos.x = x
@@ -263,9 +263,10 @@ class Play extends Card {
         if (brush.pressed) {
           var rect = canvas.getBoundingClientRect();
 
+          // TODO scrolled pages
           brush
-            ..pos.x = e.page.x - rect.left
-            ..pos.y = e.page.y - rect.top
+            ..pos.x = e.page.x - (rect.left + window.pageXOffset)
+            ..pos.y = e.page.y - (rect.top + window.pageYOffset)
             ..moved = true;
         }
       }),

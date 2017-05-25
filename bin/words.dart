@@ -1,7 +1,7 @@
 part of server;
 
 class Words {
-  static const defaultPath = 'data/data.txt';
+  static const defaultPath = 'data.txt';
   final List<String> list = [];
 
   Words({path: defaultPath}) {
