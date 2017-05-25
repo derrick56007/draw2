@@ -121,18 +121,18 @@ class Play extends Card {
         new CanvasLayer([drawPoint.pos], drawPoint.color, drawPoint.size);
     canvasLayers.add(layer);
 
-    _strokeDrawPoints();
+    _strokeCanvasLayers();
   }
 
   _drawLine(Point pos) {
     if (canvasLayers.length > 0) {
       canvasLayers.last.points.add(pos.clone());
     }
-    _strokeDrawPoints();
+    _strokeCanvasLayers();
   }
 
   // smooth draw path
-  _strokeDrawPoints() {
+  _strokeCanvasLayers() {
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
     for (var layer in canvasLayers) {
@@ -187,7 +187,7 @@ class Play extends Card {
     if (canvasLayers.length > 0) {
       canvasLayers.removeLast();
 
-      _strokeDrawPoints();
+      _strokeCanvasLayers();
 
       if (canvasLayers.length == 0) {
         undoBtn.classes.add('disabled');
