@@ -123,8 +123,9 @@ class SocketReceiver {
   _enterLobby(String lobbyName) {
     ////////// check if lobby exists ////////////////
     if (!gLobbies.containsKey(lobbyName)) {
-      var lobby = new Lobby(createLobbyInfo);
-      gLobbies[lobbyName] = lobby;
+      socket.send(Message.toast, 'Lobby doesn\'t exist');
+      socket.send(Message.enterLobbyFailure);
+      return;
     }
 
     var lobby = gLobbies[lobbyName];
@@ -181,7 +182,7 @@ class SocketReceiver {
   _drawPoint(String json) {
     var lobby = gPlayerLobby[socket];
 
-    if (lobby == null || lobby.game.currentArtist != socket) return;
+    if (lobby == null) return;
 
     lobby.sendToAll(Message.drawPoint, val: json, except: socket);
     lobby.game.drawPoint(json);
@@ -190,7 +191,7 @@ class SocketReceiver {
   _drawLine(String json) {
     var lobby = gPlayerLobby[socket];
 
-    if (lobby == null || lobby.game.currentArtist != socket) return;
+    if (lobby == null) return;
 
     lobby.sendToAll(Message.drawLine, val: json, except: socket);
     lobby.game.drawLine(json);
@@ -199,7 +200,7 @@ class SocketReceiver {
   _clearDrawing() {
     var lobby = gPlayerLobby[socket];
 
-    if (lobby == null || lobby.game.currentArtist != socket) return;
+    if (lobby == null) return;
 
     lobby.sendToAll(Message.clearDrawing, except: socket);
     lobby.game.clearDrawing();
@@ -208,7 +209,7 @@ class SocketReceiver {
   _undoLast() {
     var lobby = gPlayerLobby[socket];
 
-    if (lobby == null || lobby.game.currentArtist != socket) return;
+    if (lobby == null) return;
 
     lobby.sendToAll(Message.undoLast, except: socket);
     lobby.game.undoLast();

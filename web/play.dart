@@ -263,7 +263,6 @@ class Play extends Card {
         if (brush.pressed) {
           var rect = canvas.getBoundingClientRect();
 
-          // TODO scrolled pages
           brush
             ..pos.x = e.page.x - (rect.left + window.pageXOffset)
             ..pos.y = e.page.y - (rect.top + window.pageYOffset)

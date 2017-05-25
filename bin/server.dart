@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:args/args.dart';
 import 'package:http_server/http_server.dart';
+import 'package:firebase/firebase.dart' as fb;
 
 import '../web/common/canvas_layer.dart';
 import '../web/common/create_lobby_info.dart';
@@ -32,6 +33,13 @@ var gPlayerLobby = <ServerWebSocket, Lobby>{};
 var lobbyNameRegex = new RegExp(DrawRegExp.lobbyName);
 
 main(List<String> args) async {
+  fb.initializeApp(
+    apiKey: '',
+    authDomain: '',
+    databaseURL: '',
+    storageBucket: ''
+  );
+
   int port;
 
   if (Platform.environment['PORT'] == null) {
