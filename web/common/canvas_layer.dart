@@ -17,7 +17,13 @@ class CanvasLayer {
       map = JSON.decode(json) as Map;
     }
 
-    return new CanvasLayer(map['points'], map['brushColor'], map['brushSize']);
+    var decodedPoints = <Point>[];
+
+    for (var point in map['points']) {
+      decodedPoints.add(new Point.fromJson(point));
+    }
+
+    return new CanvasLayer(decodedPoints, map['brushColor'], map['brushSize']);
   }
 
   String toJson() => JSON.encode(

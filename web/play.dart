@@ -52,7 +52,8 @@ class Play extends Card {
       ..on(Message.setQueue, (x) => _setQueue(x))
       ..on(Message.setPlayerOrder, (x) => _setPlayerOrder(x))
       ..on(Message.enableDrawNext, (x) => _enableDrawNext())
-      ..on(Message.updatePlayerScore, (x) => _updatePlayerScore(x));
+      ..on(Message.updatePlayerScore, (x) => _updatePlayerScore(x))
+      ..on(Message.existingCanvasLayers, (x) => _existingCanvasLayers(x));
   }
 
   show() {
@@ -364,5 +365,17 @@ class Play extends Card {
     var score = playerScore[1];
 
     querySelector('#player-$name-score')?.text = '$score';
+  }
+
+  _existingCanvasLayers(String json) {
+    canvasLayers.clear();
+
+    var layers = JSON.decode(json) as List;
+
+    for (var layer in layers) {
+      canvasLayers.add(new CanvasLayer.fromJson(layer));
+    }
+
+    _strokeCanvasLayers();
   }
 }

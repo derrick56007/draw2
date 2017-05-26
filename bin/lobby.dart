@@ -47,6 +47,24 @@ class Lobby {
 
     sendQueueInfo();
     sendPlayerOrder();
+
+    socket.send(Message.clearCanvasLabels);
+
+    if (game.currentArtist != null) {
+      var currentArtistName = players[socket];
+
+      socket.send(Message.setCanvasLeftLabel, '$currentArtistName is drawing');
+    }
+
+    if (game.guesses.isNotEmpty) {
+      for (var guess in game.guesses) {
+        socket.send(Message.guess, guess.toJson());
+      }
+    }
+
+    if (game.canvasLayers.isNotEmpty) {
+      socket.send(Message.existingCanvasLayers, JSON.encode(game.canvasLayers));
+    }
   }
 
   removePlayer(ServerWebSocket socket) {

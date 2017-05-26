@@ -31,4 +31,5 @@ class Message {
   static const setQueue               = 'u';
   static const enableDrawNext         = 'v';
   static const setPlayerOrder         = 'w';
+  static const existingCanvasLayers   = 'x';
 }

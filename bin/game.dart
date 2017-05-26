@@ -208,7 +208,7 @@ class Game {
   }
 
   drawLine(String json) {
-    if (canvasLayers.length > 0) {
+    if (canvasLayers.isNotEmpty) {
       var point = new Point.fromJson(json);
 
       canvasLayers.last.points.add(point);
@@ -220,7 +220,7 @@ class Game {
   }
 
   undoLast() {
-    if (canvasLayers.length > 0) {
+    if (canvasLayers.isNotEmpty) {
       canvasLayers.removeLast();
     }
   }
