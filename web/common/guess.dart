@@ -7,16 +7,19 @@ class Guess {
   const Guess(this.username, this.guess);
 
   factory Guess.fromJson(var json) {
-    var map;
+    var list;
 
-    if (json is Map) {
-      map = json;
+    if (json is List) {
+      list = json;
     } else {
-      map = JSON.decode(json) as Map;
+      list = JSON.decode(json) as List;
     }
 
-    return new Guess(map['username'], map['guess']);
+    return new Guess(list[usernameIndex], list[guessIndex]);
   }
 
-  String toJson() => JSON.encode({'username': username, 'guess': guess});
+  static const usernameIndex = 0;
+  static const guessIndex = 1;
+
+  String toJson() => JSON.encode([username, guess]);
 }

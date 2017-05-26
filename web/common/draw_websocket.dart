@@ -2,6 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 
 abstract class DrawWebSocket {
+  static const defaultMessageLength = 2;
+  static const requestIndex = 0;
+  static const valueIndex = 1;
+
   Map<String, Function> messageDisatchers = {};
 
   Future start();
@@ -18,8 +22,9 @@ abstract class DrawWebSocket {
     // checks if is [request, data]
     if (msg is List) {
       // check if dispatch is valid
-      if (msg.length == 2 && messageDisatchers.containsKey(msg[0])) {
-        messageDisatchers[msg[0]](msg[1]);
+      if (msg.length == defaultMessageLength &&
+          messageDisatchers.containsKey(msg[requestIndex])) {
+        messageDisatchers[msg[requestIndex]](msg[valueIndex]);
       } else {
         print('No such dispatch exists!: $msg');
       }

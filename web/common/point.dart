@@ -5,9 +5,14 @@ class Point<T> {
 
   Point(this.x, this.y);
 
+  Point clone() => new Point(x, y);
+
   String toJson() => JSON.encode([x, y]);
 
-  factory Point.fromList(List list) => new Point(list[0], list[1]);
+  static const xIndex = 0;
+  static const yIndex = 1;
+
+  factory Point.fromList(List list) => new Point(list[xIndex], list[yIndex]);
 
   factory Point.fromJson(var json) {
     if (json is List) return new Point.fromList(json);
@@ -17,6 +22,4 @@ class Point<T> {
 
   static Point midPoint(Point p1, Point p2) =>
       new Point(p1.x + (p2.x - p1.x) / 2, p1.y + (p2.y - p1.y) / 2);
-
-  Point clone() => new Point(x, y);
 }

@@ -9,23 +9,27 @@ class CanvasLayer {
   const CanvasLayer(this.points, this.brushColor, this.brushSize);
 
   factory CanvasLayer.fromJson(var json) {
-    var map;
+    var list;
 
-    if (json is Map) {
-      map = json;
+    if (json is List) {
+      list = json;
     } else {
-      map = JSON.decode(json) as Map;
+      list = JSON.decode(json) as List;
     }
 
     var decodedPoints = <Point>[];
 
-    for (var point in map['points']) {
+    for (var point in list[pointsIndex]) {
       decodedPoints.add(new Point.fromJson(point));
     }
 
-    return new CanvasLayer(decodedPoints, map['brushColor'], map['brushSize']);
+    return new CanvasLayer(
+        decodedPoints, list[brushColorIndex], list[brushSizeIndex]);
   }
 
-  String toJson() => JSON.encode(
-      {'points': points, 'brushColor': brushColor, 'brushSize': brushSize});
+  static const pointsIndex = 0;
+  static const brushColorIndex = 1;
+  static const brushSizeIndex = 2;
+
+  String toJson() => JSON.encode([points, brushColor, brushSize]);
 }

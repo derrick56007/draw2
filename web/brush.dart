@@ -6,6 +6,7 @@ class Brush {
 
   bool pressed = false;
   bool moved = false;
+
   final Point pos = new Point(0, 0);
 
   Brush();

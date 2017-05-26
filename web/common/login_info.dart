@@ -7,17 +7,19 @@ class LoginInfo {
   const LoginInfo(this.lobbyName, this.password);
 
   factory LoginInfo.fromJson(var json) {
-    var map;
+    var list;
 
-    if (json is Map) {
-      map = json;
+    if (json is List) {
+      list = json;
     } else {
-      map = JSON.decode(json) as Map;
+      list = JSON.decode(json) as List;
     }
 
-    return new LoginInfo(map['lobbyName'], map['password']);
+    return new LoginInfo(list[lobbyNameIndex], list[passwordIndex]);
   }
 
-  String toJson() =>
-      JSON.encode({'lobbyName': lobbyName, 'password': password});
+  static const lobbyNameIndex = 0;
+  static const passwordIndex = 1;
+
+  String toJson() => JSON.encode([lobbyName, password]);
 }

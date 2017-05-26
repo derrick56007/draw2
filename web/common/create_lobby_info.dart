@@ -10,22 +10,22 @@ class CreateLobbyInfo {
       this.name, this.password, this.hasTimer, this.maxPlayers);
 
   factory CreateLobbyInfo.fromJson(var json) {
-    var map;
+    var list;
 
-    if (json is Map) {
-      map = json;
+    if (json is List) {
+      list = json;
     } else {
-      map = JSON.decode(json) as Map;
+      list = JSON.decode(json) as List;
     }
 
-    return new CreateLobbyInfo(
-        map['name'], map['password'], map['hasTimer'], map['maxPlayers']);
+    return new CreateLobbyInfo(list[nameIndex], list[passwordIndex],
+        list[hasTimerIndex], list[maxPlayersIndex]);
   }
 
-  String toJson() => JSON.encode({
-        'name': name,
-        'password': password,
-        'hasTimer': hasTimer,
-        'maxPlayers': maxPlayers
-      });
+  static const nameIndex = 0;
+  static const passwordIndex = 1;
+  static const hasTimerIndex = 2;
+  static const maxPlayersIndex = 3;
+
+  String toJson() => JSON.encode([name, password, hasTimer, maxPlayers]);
 }

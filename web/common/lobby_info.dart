@@ -11,23 +11,24 @@ class LobbyInfo {
       this.numberOfPlayers);
 
   factory LobbyInfo.fromJson(var json) {
-    var map;
+    var list;
 
-    if (json is Map) {
-      map = json;
+    if (json is List) {
+      list = json;
     } else {
-      map = JSON.decode(json) as Map;
+      list = JSON.decode(json) as List;
     }
 
-    return new LobbyInfo(map['name'], map['hasPassword'], map['hasTimer'],
-        map['maxPlayers'], map['numberOfPlayers']);
+    return new LobbyInfo(list[nameIndex], list[hasPasswordIndex],
+        list[hasTimerIndex], list[maxPlayersIndex], list[numberOfPlayersIndex]);
   }
 
-  String toJson() => JSON.encode({
-        'name': name,
-        'hasPassword': hasPassword,
-        'hasTimer': hasTimer,
-        'maxPlayers': maxPlayers,
-        'numberOfPlayers': numberOfPlayers
-      });
+  static const nameIndex = 0;
+  static const hasPasswordIndex = 1;
+  static const hasTimerIndex = 2;
+  static const maxPlayersIndex = 3;
+  static const numberOfPlayersIndex = 4;
+
+  String toJson() =>
+      JSON.encode([name, hasPassword, hasTimer, maxPlayers, numberOfPlayers]);
 }

@@ -7,16 +7,19 @@ class ExistingPlayer {
   const ExistingPlayer(this.username, this.score);
 
   factory ExistingPlayer.fromJson(var json) {
-    var map;
+    var list;
 
-    if (json is Map) {
-      map = json;
+    if (json is List) {
+      list = json;
     } else {
-      map = JSON.decode(json) as Map;
+      list = JSON.decode(json) as List;
     }
 
-    return new ExistingPlayer(map['username'], map['score']);
+    return new ExistingPlayer(list[usernameIndex], list[scoreIndex]);
   }
 
-  String toJson() => JSON.encode({'username': username, 'score': score});
+  static const usernameIndex = 0;
+  static const scoreIndex = 1;
+
+  String toJson() => JSON.encode([username, score]);
 }

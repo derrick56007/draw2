@@ -10,17 +10,21 @@ class DrawPoint {
   const DrawPoint(this.color, this.size, this.pos);
 
   factory DrawPoint.fromJson(var json) {
-    var map;
+    var list;
 
-    if (json is Map) {
-      map = json;
+    if (json is List) {
+      list = json;
     } else {
-      map = JSON.decode(json) as Map;
+      list = JSON.decode(json) as List;
     }
 
     return new DrawPoint(
-        map['color'], map['size'], new Point.fromJson(map['pos']));
+        list[colorIndex], list[sizeIndex], new Point.fromJson(list[posIndex]));
   }
 
-  String toJson() => JSON.encode({'color': color, 'size': size, 'pos': pos});
+  static const colorIndex = 0;
+  static const sizeIndex = 1;
+  static const posIndex = 2;
+
+  String toJson() => JSON.encode([color, size, pos]);
 }
