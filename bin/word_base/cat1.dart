@@ -1,3 +1,7 @@
+part of word_base;
+
+const cat1 = '''
+cat1
 cat  
 sun  
 cup  
@@ -58,3 +62,4 @@ circle
 spoon  
 worm  
 spider web
+''';

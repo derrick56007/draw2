@@ -7,23 +7,24 @@ import 'dart:async';
 import 'package:args/args.dart';
 import 'package:http_server/http_server.dart';
 
-import '../web/common/canvas_layer.dart';
-import '../web/common/create_lobby_info.dart';
-import '../web/common/draw_point.dart';
-import '../web/common/draw_regex.dart';
-import '../web/common/draw_websocket.dart';
-import '../web/common/existing_player.dart';
-import '../web/common/guess.dart';
-import '../web/common/lobby_info.dart';
-import '../web/common/login_info.dart';
-import '../web/common/message.dart';
-import '../web/common/point.dart';
+import '../word_base/word_base.dart';
 
-part 'game.dart';
-part 'lobby.dart';
-part 'server_websocket.dart';
-part 'socket_receiver.dart';
-part 'words.dart';
+import '../../web/common/canvas_layer.dart';
+import '../../web/common/create_lobby_info.dart';
+import '../../web/common/draw_point.dart';
+import '../../web/common/draw_regex.dart';
+import '../../web/common/draw_websocket.dart';
+import '../../web/common/existing_player.dart';
+import '../../web/common/guess.dart';
+import '../../web/common/lobby_info.dart';
+import '../../web/common/login_info.dart';
+import '../../web/common/message.dart';
+import '../../web/common/point.dart';
+
+part '../logic/game.dart';
+part '../logic/lobby.dart';
+part '../server/server_websocket.dart';
+part '../server/socket_receiver.dart';
 
 var gLobbies = <String, Lobby>{};
 var gPlayers = <ServerWebSocket, String>{};
@@ -39,6 +40,8 @@ main(List<String> args) async {
   } else {
     port = int.parse(Platform.environment['PORT']);
   }
+
+  WordBase.init();
 
   var parser = new ArgParser();
   parser.addOption('clientFiles', defaultsTo: 'build/web/');

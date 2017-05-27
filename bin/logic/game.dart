@@ -33,7 +33,7 @@ class Game {
   Game(this.lobby, this.hasTimer)
       : stopwatch = new Stopwatch(),
         // TODO word genres
-        words = new Words();
+        words = new Words('cat1');
 
   addPlayer(ServerWebSocket socket) {
     scores[socket] = 0;
