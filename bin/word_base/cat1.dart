@@ -61,5 +61,4 @@ drum
 circle  
 spoon  
 worm  
-spider web
-''';
+spider web''';

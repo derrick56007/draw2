@@ -17,10 +17,14 @@ class WordBase {
       var trimmed = [];
 
       for (var word in list) {
-        trimmed.add(word.trim());
+        var trimmedWord = word.trim();
+
+        if (trimmedWord.isNotEmpty) {
+          trimmed.add(trimmedWord);
+        }
       }
 
-      mappedCategories[list.removeAt(categoryNameIndex)] = trimmed;
+      mappedCategories[trimmed.removeAt(categoryNameIndex)] = trimmed;
     }
   }
 }
