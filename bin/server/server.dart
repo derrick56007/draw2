@@ -73,7 +73,8 @@ main(List<String> args) async {
   await for (HttpRequest request in server) {
     request.response.headers.set('cache-control', 'no-cache');
 
-    var path = request.uri.path;
+    var path = request.uri.path.trim();
+
     var hasLobby = isValidLobbyName(path.substring(1));
 
     if (WebSocketTransformer.isUpgradeRequest(request)) {
@@ -85,7 +86,7 @@ main(List<String> args) async {
     }
 
     if (hasLobby) {
-      staticFiles.serveFile(new File('web/index.html'), request);
+      staticFiles.serveFile(defaultPage, request);
     } else {
       staticFiles.serveRequest(request);
     }
