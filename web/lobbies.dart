@@ -62,6 +62,15 @@ class Lobbies extends Card {
     var el = new Element.html('''
           <a id="lobby-${lobbyInfo.name}" class="collection-item lobby-list-item">
             <span class="badge">${lobbyInfo.numberOfPlayers}/${lobbyInfo.maxPlayers}</span>
+            
+            ${lobbyInfo.hasPassword ?
+                '<i class="material-icons lock">lock</i>' :
+                '<i class="material-icons lock">lock_open</i>'}
+                
+            ${lobbyInfo.hasTimer ?
+                '<i class="material-icons hourglass">hourglass_empty</i>' :
+                ''}
+            
             ${lobbyInfo.name}
           </a>''')
       ..onClick.listen((_) => client.send(Message.enterLobby, lobbyInfo.name));

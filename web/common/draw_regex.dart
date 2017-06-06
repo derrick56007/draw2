@@ -1,3 +1,6 @@
 class DrawRegExp {
-  static const lobbyName = r'^[a-zA-Z0-9_-]{4,16}$';
+  static const minLength = 4;
+  static const maxLength = 16;
+
+  static const lobbyName = '^[a-zA-Z0-9_-]{$minLength,$maxLength}\$';
 }

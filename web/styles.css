@@ -40,6 +40,10 @@ body {
     text-align: left;
 }
 
+.lobby-list-item:hover {
+    cursor: pointer;
+}
+
 .input-field {
     text-align: left;
 }
@@ -203,4 +207,14 @@ body {
 
 #chat-input {
     margin-bottom: 10px;
+}
+
+.lock, .hourglass {
+    float: right;
+    font-size: 1em;
+    margin-top: 3px;
+}
+
+span.badge {
+    margin-left: 0;
 }

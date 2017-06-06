@@ -32,7 +32,7 @@
         <div class="card-content black-text" style="text-align: center">
             <div class="card-title">Enter Username</div>
             <div class="input-field col s6">
-                <input id="username" type="text" class="validate">
+                <input id="username" type="text" class="validate" data-length="16">
                 <label for="username">Username</label>
             </div>
             <a id="login-btn" class="waves-effect waves-light btn">Login</a>
@@ -62,7 +62,7 @@
         <div class="card-content black-text" style="text-align: center">
             <div class="card-title"><a id="back-to-lobbies-list-btn" class="btn-floating btn-medium waves-effect waves-light left" style="margin-right: -100%;"><i class="material-icons" style="line-height: 40px">arrow_back</i></a>Create Lobby</div>
             <div class="input-field col s6" style="margin-top: 25px;">
-                <input id="lobby-name" type="text" class="validate">
+                <input id="lobby-name" type="text" class="validate" data-length="16">
                 <label for="lobby-name">Lobby Name</label>
             </div>
             <div class="input-field col s12">
@@ -134,6 +134,7 @@
 
     <script>
         $(document).ready(function () {
+            $('input#username, input#lobby-name').characterCounter();
             $('#number-of-players').material_select();
             $('#color-picker').minicolors({
                 inline: true,
