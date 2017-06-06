@@ -106,14 +106,9 @@ bool isValidLobbyName(String lobbyName) {
 }
 
 initDefaultLobbies() {
-  var lobbyInfo1 = '["lobby1","",true,15]';
-  var lobbyInfo2 = '["lobby2","",true,15]';
-  var lobbyInfo3 = '["lobby3","derp",true,15]';
-
-  var createLobbyInfo1 = new CreateLobbyInfo.fromJson(lobbyInfo1);
-  var createLobbyInfo2 = new CreateLobbyInfo.fromJson(lobbyInfo2);
-  var createLobbyInfo3 = new CreateLobbyInfo.fromJson(lobbyInfo3);
-
+  var createLobbyInfo1 = const CreateLobbyInfo('lobby1', '', true, 15);
+  var createLobbyInfo2 = const CreateLobbyInfo('lobby2', '', true, 15);
+  var createLobbyInfo3 = const CreateLobbyInfo('lobby3', '', true, 15);
 
   var lobby1 = new Lobby(createLobbyInfo1);
   var lobby2 = new Lobby(createLobbyInfo2);
