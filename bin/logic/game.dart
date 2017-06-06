@@ -42,6 +42,9 @@ class Game {
   removePlayer(ServerWebSocket socket) {
     scores.remove(socket);
 
+    // remove from queue
+    artistQueue.remove(socket);
+
     // check if leaving player is current artist
     if (currentArtist == socket) {
       removeArtist();
