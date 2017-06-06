@@ -33,6 +33,8 @@ var gLobbies = <String, Lobby>{};
 var gPlayers = <ServerWebSocket, String>{};
 var gPlayerLobby = <ServerWebSocket, Lobby>{};
 
+var defaultLobbies = <Lobby>[];
+
 var lobbyNameRegex = new RegExp(DrawRegExp.lobbyName);
 
 main(List<String> args) async {
@@ -45,6 +47,7 @@ main(List<String> args) async {
   }
 
   WordBase.init();
+  initDefaultLobbies();
 
   var parser = new ArgParser();
   parser.addOption('clientFiles', defaultsTo: 'build/web/');
@@ -100,4 +103,25 @@ bool isValidLobbyName(String lobbyName) {
   var lobbyMatches = lobbyNameRegex.firstMatch(lobbyName);
 
   return lobbyMatches != null && lobbyMatches[0] == lobbyName;
+}
+
+initDefaultLobbies() {
+  var lobbyInfo1 = '["lobby1","",true,15]';
+  var lobbyInfo2 = '["lobby2","",true,15]';
+  var lobbyInfo3 = '["lobby3","derp",true,15]';
+
+  var createLobbyInfo1 = new CreateLobbyInfo.fromJson(lobbyInfo1);
+  var createLobbyInfo2 = new CreateLobbyInfo.fromJson(lobbyInfo2);
+  var createLobbyInfo3 = new CreateLobbyInfo.fromJson(lobbyInfo3);
+
+
+  var lobby1 = new Lobby(createLobbyInfo1);
+  var lobby2 = new Lobby(createLobbyInfo2);
+  var lobby3 = new Lobby(createLobbyInfo3);
+
+  gLobbies[createLobbyInfo1.name] = lobby1;
+  gLobbies[createLobbyInfo2.name] = lobby2;
+  gLobbies[createLobbyInfo3.name] = lobby3;
+
+  defaultLobbies.addAll([lobby1, lobby2, lobby3]);
 }

@@ -46,8 +46,8 @@ class SocketReceiver {
       var lobby = gPlayerLobby.remove(socket);
       lobby.removePlayer(socket);
 
-      // close lobby if empty
-      if (lobby.players.isEmpty) {
+      // close lobby if empty and is not default lobby
+      if (lobby.players.isEmpty && !defaultLobbies.contains(lobby)) {
         print('closed lobby ${lobby.name}');
         gLobbies.remove(lobby.name);
 
