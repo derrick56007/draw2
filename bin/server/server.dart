@@ -110,13 +110,9 @@ initDefaultLobbies() {
   var createLobbyInfo2 = const CreateLobbyInfo('lobby2', '', true, 15);
   var createLobbyInfo3 = const CreateLobbyInfo('lobby3', '', true, 15);
 
-  var lobby1 = new Lobby(createLobbyInfo1);
-  var lobby2 = new Lobby(createLobbyInfo2);
-  var lobby3 = new Lobby(createLobbyInfo3);
+  gLobbies[createLobbyInfo1.name] = new Lobby(createLobbyInfo1);
+  gLobbies[createLobbyInfo2.name] = new Lobby(createLobbyInfo2);
+  gLobbies[createLobbyInfo3.name] = new Lobby(createLobbyInfo3);
 
-  gLobbies[createLobbyInfo1.name] = lobby1;
-  gLobbies[createLobbyInfo2.name] = lobby2;
-  gLobbies[createLobbyInfo3.name] = lobby3;
-
-  defaultLobbies.addAll([lobby1, lobby2, lobby3]);
+  defaultLobbies.addAll(gLobbies.values);
 }
