@@ -7,6 +7,7 @@ class Game {
   static const maxChatLength = 20;
   static const defaultBrushColor = '#000000';
   static const defaultBrushSize = 5;
+  static const similarityThreshold = .75;
 
   final Lobby lobby;
   final bool hasTimer;
@@ -159,11 +160,20 @@ class Game {
 
     if (currentWord == null) return;
 
-    // not a match
-    if (guess.guess.trim().toLowerCase() != currentWord.trim().toLowerCase())
-      return;
+    // check for match
+    if (guess.guess.trim().toLowerCase() == currentWord.trim().toLowerCase()) {
+      onWin(socket, guess.username, currentWord);
+    } else {
+      // check similarity
+      num similarity = WordSimilarity.similarity(guess.guess, currentWord);
 
-    onWin(socket, guess.username, currentWord);
+      if (similarity >= similarityThreshold) {
+        var serverMsg =
+            new Guess('Server', '${guess.username}\'s guess was close!');
+
+        lobby.sendToAll(Message.guess, val: serverMsg.toJson());
+      }
+    }
   }
 
   onWin(ServerWebSocket socket, String username, String word) {

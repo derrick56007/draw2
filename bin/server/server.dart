@@ -1,8 +1,10 @@
 library server;
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:async';
+import 'dart:math';
+
 
 import 'package:args/args.dart';
 import 'package:http_server/http_server.dart';
@@ -23,6 +25,7 @@ import '../../web/common/point.dart';
 
 part '../logic/game.dart';
 part '../logic/lobby.dart';
+part '../logic/word_similarity.dart';
 part '../server/server_websocket.dart';
 part '../server/socket_receiver.dart';
 
