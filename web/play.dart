@@ -1,10 +1,9 @@
 part of client;
 
 class Play extends Card {
-  static const canvasWidth = 640;
-  static const canvasHeight = 480;
   static const maxChatLength = 20;
   static const brushInterval = const Duration(milliseconds: 25);
+  static const defaultToolType = ToolType.BRUSH;
 
   final Element playCard = querySelector('#play-card');
   final Element playerListCollection = querySelector('#player-list-collection');
@@ -16,22 +15,25 @@ class Play extends Card {
   final Element drawNextBtn = querySelector('#draw-next-btn');
   final Element undoBtn = querySelector('#undo-btn');
   final Element clearBtn = querySelector('#clear-btn');
-
-  final InputElement chatInput = querySelector('#chat-input');
+  final Element brushBtn = querySelector('#brush-btn');
+  final Element fillBtn = querySelector('#fill-btn');
 
   static final CanvasElement canvas = querySelector('#canvas');
-  final CanvasRenderingContext2D ctx = canvas.context2D;
+
+  final InputElement chatInput = querySelector('#chat-input');
 
   final List<StreamSubscription<MouseEvent>> drawSubs = [];
   final List<StreamSubscription> playSubs = [];
 
   final ClientWebSocket client;
 
-  final List<CanvasLayer> canvasLayers = [];
+  final CanvasHelper cvs;
 
   Timer timer;
 
-  Play(this.client) {
+  ToolType toolType = defaultToolType;
+
+  Play(this.client) : cvs = new CanvasHelper(client) {
     client
       ..on(Message.guess, (x) => _guess(x))
       ..on(Message.existingPlayer, (x) => _existingPlayer(x))
@@ -45,15 +47,10 @@ class Play extends Card {
       ..on(Message.setCanvasMiddleLabel, (x) => _setCanvasMiddleLabel(x))
       ..on(Message.setCanvasRightLabel, (x) => _setCanvasRightLabel(x))
       ..on(Message.clearCanvasLabels, (_) => _clearCanvasLabels())
-      ..on(Message.drawPoint, (x) => _drawPoint(new DrawPoint.fromJson(x)))
-      ..on(Message.drawLine, (x) => _drawLine(new Point.fromJson(x)))
-      ..on(Message.clearDrawing, (_) => _clearDrawing())
-      ..on(Message.undoLast, (_) => _undoLast())
       ..on(Message.setQueue, (x) => _setQueue(x))
       ..on(Message.setPlayerOrder, (x) => _setPlayerOrder(x))
       ..on(Message.enableDrawNext, (x) => _enableDrawNext())
-      ..on(Message.updatePlayerScore, (x) => _updatePlayerScore(x))
-      ..on(Message.existingCanvasLayers, (x) => _existingCanvasLayers(x));
+      ..on(Message.updatePlayerScore, (x) => _updatePlayerScore(x));
   }
 
   show() {
@@ -117,86 +114,6 @@ class Play extends Card {
     chatList.children.removeAt(0);
   }
 
-  _drawPoint(DrawPoint drawPoint) {
-    var layer = new CanvasLayer(
-        [drawPoint.pos.clone()], drawPoint.color, drawPoint.size);
-    canvasLayers.add(layer);
-
-    _strokeCanvasLayers();
-  }
-
-  _drawLine(Point pos) {
-    if (canvasLayers.length > 0) {
-      canvasLayers.last.points.add(pos.clone());
-    }
-    _strokeCanvasLayers();
-  }
-
-  // smooth draw path
-  _strokeCanvasLayers() {
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-
-    for (var layer in canvasLayers) {
-      var p1 = layer.points.first;
-
-      if (layer.points.length == 1) {
-        ctx
-          ..beginPath()
-          ..arc(p1.x, p1.y, layer.brushSize / 2, 0, 2 * PI)
-          ..closePath()
-          ..fillStyle = layer.brushColor
-          ..fill();
-      } else if (layer.points.length > 1) {
-        var p2 = layer.points[1];
-
-        ctx
-          ..beginPath()
-          ..moveTo(p1.x, p1.y);
-
-        for (int i = 1; i < layer.points.length - 1; i++) {
-          var midPoint = Point.midPoint(p1, p2);
-
-          ctx.quadraticCurveTo(p1.x, p1.y, midPoint.x, midPoint.y);
-
-          p1 = layer.points[i];
-          p2 = layer.points[i + 1];
-        }
-
-        ctx
-          ..lineTo(p1.x, p1.y)
-          ..lineWidth = layer.brushSize
-          ..strokeStyle = layer.brushColor
-          ..lineCap = 'round'
-          ..lineJoin = 'round'
-          ..stroke();
-      }
-    }
-  }
-
-  _clearDrawing() {
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-
-    canvasLayers.clear();
-
-    undoBtn.classes.add('disabled');
-    clearBtn.classes.add('disabled');
-  }
-
-  _undoLast() {
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-
-    if (canvasLayers.length > 0) {
-      canvasLayers.removeLast();
-
-      _strokeCanvasLayers();
-
-      if (canvasLayers.length == 0) {
-        undoBtn.classes.add('disabled');
-        clearBtn.classes.add('disabled');
-      }
-    }
-  }
-
   _guess(String json) {
     var guess = new Guess.fromJson(json);
 
@@ -225,7 +142,7 @@ class Play extends Card {
       ..remove('scale-out')
       ..add('scale-in');
 
-    _clearDrawing();
+    cvs.clearDrawing();
 
     var brush = new Brush();
 
@@ -235,30 +152,34 @@ class Play extends Card {
         num x = e.page.x - (rect.left + window.pageXOffset);
         num y = e.page.y - (rect.top + window.pageYOffset);
 
-        brush
-          ..pos.x = x
-          ..pos.y = y
-          ..pressed = true;
-
         var color = querySelector('#color').text;
 
-        var drawPoint = new DrawPoint(color, Brush.defaultSize, brush.pos);
+        if (toolType == ToolType.BRUSH) {
+          brush
+            ..pos.x = x
+            ..pos.y = y
+            ..pressed = true;
 
-        _drawPoint(drawPoint);
-        client.send(Message.drawPoint, drawPoint.toJson());
+          var drawPoint = new DrawPoint(color, Brush.defaultSize, brush.pos);
 
-        timer?.cancel();
-        timer = new Timer.periodic(brushInterval, (_) {
-          if (brush.moved) {
-            _drawLine(brush.pos);
-            client.send(Message.drawLine, brush.pos.toJson());
+          cvs.drawPoint(drawPoint);
+          client.send(Message.drawPoint, drawPoint.toJson());
 
-            brush.moved = false;
-          }
-        });
+          timer?.cancel();
+          timer = new Timer.periodic(brushInterval, (_) {
+            if (brush.moved) {
+              cvs.drawLine(brush.pos);
+              client.send(Message.drawLine, brush.pos.toJson());
 
-        undoBtn.classes.remove('disabled');
-        clearBtn.classes.remove('disabled');
+              brush.moved = false;
+            }
+          });
+
+          undoBtn.classes.remove('disabled');
+          clearBtn.classes.remove('disabled');
+        } else if (toolType == ToolType.FILL) {
+          cvs.fill(x, y, color);
+        }
       }),
       document.onMouseMove.listen((MouseEvent e) {
         if (brush.pressed) {
@@ -271,21 +192,50 @@ class Play extends Card {
         }
       }),
       document.onMouseUp.listen((MouseEvent e) {
-        brush
-          ..pressed = false
-          ..moved = false;
+        if (toolType == ToolType.FILL) {
+          var rect = canvas.getBoundingClientRect();
+          var color = querySelector('#color').text;
 
-        timer?.cancel();
+          var layer = new FillLayer(e.page.x - (rect.left + window.pageXOffset),
+              e.page.y - (rect.top + window.pageYOffset), color);
+
+          cvs.canvasLayers.add(layer);
+          return;
+        }
+
+        if (brush.pressed) {
+          brush
+            ..pressed = false
+            ..moved = false;
+
+          timer?.cancel();
+        }
       }),
       undoBtn.onClick.listen((_) {
         if (undoBtn.classes.contains('disabled')) return;
 
         client.send(Message.undoLast);
-        _undoLast();
+        cvs.undoLast();
       }),
       clearBtn.onClick.listen((_) {
         client.send(Message.clearDrawing);
-        _clearDrawing();
+        cvs.clearDrawing();
+      }),
+      brushBtn.onClick.listen((_) {
+        if (brushBtn.classes.contains('disabled')) return;
+
+        toolType = ToolType.BRUSH;
+
+        brushBtn.classes.add('disabled');
+        fillBtn.classes.remove('disabled');
+      }),
+      fillBtn.onClick.listen((_) {
+        if (fillBtn.classes.contains('disabled')) return;
+
+        toolType = ToolType.FILL;
+
+        fillBtn.classes.add('disabled');
+        brushBtn.classes.remove('disabled');
       })
     ]);
   }
@@ -295,7 +245,7 @@ class Play extends Card {
       ..remove('scale-in')
       ..add('scale-out');
 
-    _clearDrawing();
+    cvs.clearDrawing();
     for (var sub in drawSubs) {
       sub?.cancel();
     }
@@ -365,17 +315,5 @@ class Play extends Card {
     var score = playerScore[1];
 
     querySelector('#player-$name-score')?.text = '$score';
-  }
-
-  _existingCanvasLayers(String json) {
-    canvasLayers.clear();
-
-    var layers = JSON.decode(json) as List;
-
-    for (var layer in layers) {
-      canvasLayers.add(new CanvasLayer.fromJson(layer));
-    }
-
-    _strokeCanvasLayers();
   }
 }

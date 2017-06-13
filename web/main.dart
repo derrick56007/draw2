@@ -1,5 +1,8 @@
 library client;
 
+import 'common/brush_layer.dart';
+import 'common/fill_layer.dart';
+import 'common/tool_type.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:html' hide Point;
@@ -16,10 +19,14 @@ import 'common/login_info.dart';
 import 'common/message.dart';
 import 'common/point.dart';
 
-import 'brush.dart';
 import 'client_websocket.dart';
+import 'draw/color.dart';
+import 'draw/hex_color.dart';
 import 'toast.dart';
+import 'draw/brush.dart';
 
+
+part 'draw/canvas.dart';
 part 'card.dart';
 part 'create.dart';
 part 'lobbies.dart';
@@ -38,6 +45,7 @@ main() async {
   create = new Create(client);
   play = new Play(client);
   password = new Password(client);
+
 
   login.show();
 

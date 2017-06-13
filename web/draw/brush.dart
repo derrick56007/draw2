@@ -1,4 +1,4 @@
-import 'common/point.dart';
+import '../common/point.dart';
 
 class Brush {
   static const defaultColor = '#000000';

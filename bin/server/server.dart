@@ -3,7 +3,7 @@ library server;
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
+import 'dart:math' hide Point;
 
 
 import 'package:args/args.dart';

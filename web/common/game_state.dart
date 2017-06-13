@@ -1,8 +1,11 @@
+import 'brush_layer.dart';
 import 'dart:convert';
 
 import 'canvas_layer.dart';
 import 'existing_player.dart';
+import 'fill_layer.dart';
 import 'guess.dart';
+import 'tool_type.dart';
 
 class GameState {
   final String currentArtist;
@@ -37,7 +40,15 @@ class GameState {
     var layersDecoded = <CanvasLayer>[];
 
     for (var layer in list[canvasLayersIndex]) {
-      layersDecoded.add(new CanvasLayer.fromJson(layer));
+      switch (layer[CanvasLayer.layerTypeIndex]) {
+        case ToolType.BRUSH:
+          layersDecoded.add(new BrushLayer.fromList(layer));
+          break;
+        case ToolType.FILL:
+          layersDecoded.add(new FillLayer.fromList(layer));
+          break;
+        default:
+      }
     }
 
     var gameState = new GameState(list[currentArtistIndex], guessesDecoded,

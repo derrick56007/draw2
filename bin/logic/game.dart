@@ -215,7 +215,7 @@ class Game {
     var drawPoint = new DrawPoint.fromJson(json);
 
     var layer =
-        new CanvasLayer([drawPoint.pos], drawPoint.color, drawPoint.size);
+        new BrushLayer([drawPoint.pos], drawPoint.color, drawPoint.size);
 
     canvasLayers.add(layer);
   }
@@ -224,7 +224,7 @@ class Game {
     if (canvasLayers.isNotEmpty) {
       var point = new Point.fromJson(json);
 
-      canvasLayers.last.points.add(point);
+      (canvasLayers.last as BrushLayer).points.add(point);
     }
   }
 
