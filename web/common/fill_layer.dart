@@ -9,7 +9,7 @@ class FillLayer extends CanvasLayer {
 
   FillLayer(this.x, this.y, this.color) : super(ToolType.FILL);
 
-  factory FillLayer.fromList(var json) {
+  factory FillLayer.fromJson(var json) {
     var list;
 
     if (json is List) {

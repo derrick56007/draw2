@@ -20,6 +20,7 @@ class CanvasHelper {
       ..on(Message.drawLine, (x) => drawLine(new Point.fromJson(x)))
       ..on(Message.clearDrawing, (_) => clearDrawing())
       ..on(Message.undoLast, (_) => undoLast())
+      ..on(Message.fill, (x) => fill(new FillLayer.fromJson(x)))
       ..on(Message.existingCanvasLayers, (x) => existingCanvasLayers(x));
   }
 
@@ -152,19 +153,21 @@ class CanvasHelper {
     return false;
   }
 
-  fill(int x, int y, String fillColor) {
+  fill(FillLayer fillLayer) {
+    canvasLayers.add(fillLayer);
+
     var img = ctx.getImageData(0, 0, canvasWidth, canvasHeight);
     var data = img.data;
 
     var length = data.length;
     var queue = [];
-    var i = (x + y * canvasWidth) * 4;
+    var i = (fillLayer.x + fillLayer.y * canvasWidth) * 4;
     var e = i, w = i, me, mw, w2 = canvasWidth * 4;
     var tolerance = 1;
 
     var targetColor = [data[i], data[i + 1], data[i + 2]];
 
-    var hex = new HexColor(fillColor);
+    var hex = new HexColor(fillLayer.color);
 
     if (!pixelCompare(i, targetColor, hex, data, length, tolerance)) {
       queue.add(i);
@@ -211,10 +214,10 @@ class CanvasHelper {
     for (var layer in layers) {
       switch (layer[CanvasLayer.layerTypeIndex]) {
         case ToolType.BRUSH:
-          canvasLayers.add(new BrushLayer.fromList(layer));
+          canvasLayers.add(new BrushLayer.fromJson(layer));
           break;
         case ToolType.FILL:
-          canvasLayers.add(new FillLayer.fromList(layer));
+          canvasLayers.add(new FillLayer.fromJson(layer));
           break;
         default:
       }

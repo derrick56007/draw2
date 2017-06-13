@@ -221,7 +221,7 @@ class Game {
   }
 
   drawLine(String json) {
-    if (canvasLayers.isNotEmpty) {
+    if (canvasLayers.isNotEmpty && canvasLayers.last is BrushLayer) {
       var point = new Point.fromJson(json);
 
       (canvasLayers.last as BrushLayer).points.add(point);
@@ -236,5 +236,11 @@ class Game {
     if (canvasLayers.isNotEmpty) {
       canvasLayers.removeLast();
     }
+  }
+
+  fill(String json) {
+    var fillLayer = new FillLayer.fromJson(json);
+
+    canvasLayers.add(fillLayer);
   }
 }

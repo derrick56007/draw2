@@ -34,7 +34,8 @@ class SocketReceiver {
       ..on(Message.drawPoint, (x) => _drawPoint(x))
       ..on(Message.drawLine, (x) => _drawLine(x))
       ..on(Message.clearDrawing, (_) => _clearDrawing())
-      ..on(Message.undoLast, (_) => _undoLast());
+      ..on(Message.undoLast, (_) => _undoLast())
+      ..on(Message.fill, (x) => _fill(x));
   }
 
   _onClose() {
@@ -213,5 +214,14 @@ class SocketReceiver {
 
     lobby.sendToAll(Message.undoLast, except: socket);
     lobby.game.undoLast();
+  }
+
+  _fill(String json) {
+    var lobby = gPlayerLobby[socket];
+
+    if (lobby == null) return;
+
+    lobby.sendToAll(Message.fill, val: json, except: socket);
+    lobby.game.fill(json);
   }
 }

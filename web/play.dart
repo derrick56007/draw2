@@ -148,13 +148,13 @@ class Play extends Card {
 
     drawSubs.addAll([
       canvas.onMouseDown.listen((MouseEvent e) {
-        var rect = canvas.getBoundingClientRect();
-        num x = e.page.x - (rect.left + window.pageXOffset);
-        num y = e.page.y - (rect.top + window.pageYOffset);
-
-        var color = querySelector('#color').text;
-
         if (toolType == ToolType.BRUSH) {
+          var rect = canvas.getBoundingClientRect();
+          num x = e.page.x - (rect.left + window.pageXOffset);
+          num y = e.page.y - (rect.top + window.pageYOffset);
+
+          var color = querySelector('#color').text;
+
           brush
             ..pos.x = x
             ..pos.y = y
@@ -177,9 +177,7 @@ class Play extends Card {
 
           undoBtn.classes.remove('disabled');
           clearBtn.classes.remove('disabled');
-        } else if (toolType == ToolType.FILL) {
-          cvs.fill(x, y, color);
-        }
+        } else if (toolType == ToolType.FILL) {}
       }),
       document.onMouseMove.listen((MouseEvent e) {
         if (brush.pressed) {
@@ -192,23 +190,23 @@ class Play extends Card {
         }
       }),
       document.onMouseUp.listen((MouseEvent e) {
-        if (toolType == ToolType.FILL) {
-          var rect = canvas.getBoundingClientRect();
-          var color = querySelector('#color').text;
-
-          var layer = new FillLayer(e.page.x - (rect.left + window.pageXOffset),
-              e.page.y - (rect.top + window.pageYOffset), color);
-
-          cvs.canvasLayers.add(layer);
-          return;
-        }
-
-        if (brush.pressed) {
+        if (toolType == ToolType.BRUSH) {
           brush
             ..pressed = false
             ..moved = false;
 
           timer?.cancel();
+        } else if (toolType == ToolType.FILL) {
+          var rect = canvas.getBoundingClientRect();
+          var color = querySelector('#color').text;
+
+          var fillLayer = new FillLayer(
+              e.page.x - (rect.left + window.pageXOffset),
+              e.page.y - (rect.top + window.pageYOffset),
+              color);
+
+          cvs.fill(fillLayer);
+          client.send(Message.fill, fillLayer.toJson());
         }
       }),
       undoBtn.onClick.listen((_) {

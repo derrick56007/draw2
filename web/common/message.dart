@@ -25,11 +25,12 @@ class Message {
   static const drawLine               = 'o';
   static const clearDrawing           = 'p';
   static const undoLast               = 'q';
-  static const updatePlayerScore      = 'r';
-  static const enterLobbyWithPassword = 's';
-  static const drawNext               = 't';
-  static const setQueue               = 'u';
-  static const enableDrawNext         = 'v';
-  static const setPlayerOrder         = 'w';
-  static const existingCanvasLayers   = 'x';
+  static const fill                   = 'r';
+  static const updatePlayerScore      = 's';
+  static const enterLobbyWithPassword = 't';
+  static const drawNext               = 'u';
+  static const setQueue               = 'v';
+  static const enableDrawNext         = 'w';
+  static const setPlayerOrder         = 'x';
+  static const existingCanvasLayers   = 'y';
 }

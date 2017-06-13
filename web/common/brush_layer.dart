@@ -10,7 +10,7 @@ class BrushLayer extends CanvasLayer {
 
   BrushLayer(this.points, this.color, this.size) : super(ToolType.BRUSH);
 
-  factory BrushLayer.fromList(var json) {
+  factory BrushLayer.fromJson(var json) {
     var list;
 
     if (json is List) {

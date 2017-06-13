@@ -42,10 +42,10 @@ class GameState {
     for (var layer in list[canvasLayersIndex]) {
       switch (layer[CanvasLayer.layerTypeIndex]) {
         case ToolType.BRUSH:
-          layersDecoded.add(new BrushLayer.fromList(layer));
+          layersDecoded.add(new BrushLayer.fromJson(layer));
           break;
         case ToolType.FILL:
-          layersDecoded.add(new FillLayer.fromList(layer));
+          layersDecoded.add(new FillLayer.fromJson(layer));
           break;
         default:
       }
