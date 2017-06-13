@@ -21,7 +21,6 @@ class CanvasHelper {
       ..on(Message.clearDrawing, (_) => clearDrawing())
       ..on(Message.undoLast, (_) => undoLast())
       ..on(Message.existingCanvasLayers, (x) => existingCanvasLayers(x));
-
   }
 
   drawPoint(DrawPoint drawPoint) {
@@ -97,7 +96,6 @@ class CanvasHelper {
     }
   }
 
-
   clearDrawing() {
     ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
@@ -109,17 +107,17 @@ class CanvasHelper {
 
   matchStartColor(int pixelPos, ImageData imgData, HexColor color) {
     var r = imgData.data[pixelPos];
-    var g = imgData.data[pixelPos+1];
-    var b = imgData.data[pixelPos+2];
+    var g = imgData.data[pixelPos + 1];
+    var b = imgData.data[pixelPos + 2];
 
     return (r == color.r && g == color.g && b == color.b);
   }
 
   colorPixel(int pixelPos, ImageData imgData, HexColor color) {
     imgData.data[pixelPos] = color.r;
-    imgData.data[pixelPos+1] = color.g;
-    imgData.data[pixelPos+2] = color.b;
-    imgData.data[pixelPos+3] = 255;
+    imgData.data[pixelPos + 1] = color.g;
+    imgData.data[pixelPos + 2] = color.b;
+    imgData.data[pixelPos + 3] = 255;
   }
 
   fill(num x, num y, String color) {
@@ -129,55 +127,47 @@ class CanvasHelper {
 
     var drawingBoundTop = 0;
 
-    var pixelStack = [[x, y]];
+    var pixelStack = [
+      [x, y]
+    ];
 
-    while(pixelStack.isNotEmpty)
-    {
+    while (pixelStack.isNotEmpty) {
       var newPos, x, y, pixelPos, reachLeft, reachRight;
       newPos = pixelStack.removeLast();
       x = newPos[0];
       y = newPos[1];
 
-      pixelPos = (y*canvasWidth + x) * 4;
-      while(y-- >= drawingBoundTop && matchStartColor(pixelPos, imgData, hex))
-      {
+      pixelPos = (y * canvasWidth + x) * 4;
+      while (
+          y-- >= drawingBoundTop && matchStartColor(pixelPos, imgData, hex)) {
         pixelPos -= canvasWidth * 4;
       }
       pixelPos += canvasWidth * 4;
       ++y;
       reachLeft = false;
       reachRight = false;
-      while(y++ < canvasHeight-1 && matchStartColor(pixelPos, imgData, hex))
-      {
+      while (
+          y++ < canvasHeight - 1 && matchStartColor(pixelPos, imgData, hex)) {
         colorPixel(pixelPos, imgData, hex);
 
-        if(x > 0)
-        {
-          if(matchStartColor(pixelPos - 4, imgData, hex))
-          {
-            if(!reachLeft){
+        if (x > 0) {
+          if (matchStartColor(pixelPos - 4, imgData, hex)) {
+            if (!reachLeft) {
               pixelStack.add([x - 1, y]);
               reachLeft = true;
             }
-          }
-          else if(reachLeft)
-          {
+          } else if (reachLeft) {
             reachLeft = false;
           }
         }
 
-        if(x < canvasWidth-1)
-        {
-          if(matchStartColor(pixelPos + 4, imgData, hex))
-          {
-            if(!reachRight)
-            {
+        if (x < canvasWidth - 1) {
+          if (matchStartColor(pixelPos + 4, imgData, hex)) {
+            if (!reachRight) {
               pixelStack.add([x + 1, y]);
               reachRight = true;
             }
-          }
-          else if(reachRight)
-          {
+          } else if (reachRight) {
             reachRight = false;
           }
         }
