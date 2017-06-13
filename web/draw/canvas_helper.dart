@@ -113,69 +113,94 @@ class CanvasHelper {
     return (r == color.r && g == color.g && b == color.b);
   }
 
-  colorPixel(int pixelPos, ImageData imgData, HexColor color) {
-    imgData.data[pixelPos] = color.r;
-    imgData.data[pixelPos + 1] = color.g;
-    imgData.data[pixelPos + 2] = color.b;
-    imgData.data[pixelPos + 3] = 255;
+  colorPixel(int x, int y, Uint32List data, HexColor color) {
+    data[y * canvasWidth + x] = (255 << 24) | // alpha
+        (color.b << 16) | // blue
+        (color.g << 8) | // green
+        color.r; // red
   }
 
-  fill(num x, num y, String color) {
-    var imgData = ctx.getImageData(0, 0, canvasWidth, canvasHeight);
+  bool pixelCompare(int i, List<int> targetColor, HexColor fillColor,
+      Uint8ClampedList data, int length, int tolerance) {
+    if (i < 0 || i >= length) return false;
 
-    var hex = new HexColor(color);
+    if ((targetColor[0] == fillColor.r) &&
+        (targetColor[1] == fillColor.g) &&
+        (targetColor[2] == fillColor.b)) return false;
 
-    var drawingBoundTop = 0;
+    if ((targetColor[0] == data[i]) &&
+        (targetColor[1] == data[i + 1]) &&
+        (targetColor[2] == data[i + 2])) return true;
 
-    var pixelStack = [
-      [x, y]
-    ];
+    if ((targetColor[0] - data[i]).abs() <= tolerance &&
+        (targetColor[1] - data[i + 1]).abs() <= tolerance &&
+        (targetColor[2] - data[i + 2]).abs() <= tolerance) return true;
 
-    while (pixelStack.isNotEmpty) {
-      var newPos, x, y, pixelPos, reachLeft, reachRight;
-      newPos = pixelStack.removeLast();
-      x = newPos[0];
-      y = newPos[1];
+    return false; // no match
+  }
 
-      pixelPos = (y * canvasWidth + x) * 4;
-      while (
-          y-- >= drawingBoundTop && matchStartColor(pixelPos, imgData, hex)) {
-        pixelPos -= canvasWidth * 4;
-      }
-      pixelPos += canvasWidth * 4;
-      ++y;
-      reachLeft = false;
-      reachRight = false;
-      while (
-          y++ < canvasHeight - 1 && matchStartColor(pixelPos, imgData, hex)) {
-        colorPixel(pixelPos, imgData, hex);
+  bool pixelCompareAndSet(int i, List<int> targetColor, HexColor fillColor,
+      Uint8ClampedList data, int length, int tolerance) {
+    if (pixelCompare(i, targetColor, fillColor, data, length, tolerance)) {
+      // fill the color
+      data[i] = fillColor.r;
+      data[i + 1] = fillColor.g;
+      data[i + 2] = fillColor.b;
+      return true;
+    }
 
-        if (x > 0) {
-          if (matchStartColor(pixelPos - 4, imgData, hex)) {
-            if (!reachLeft) {
-              pixelStack.add([x - 1, y]);
-              reachLeft = true;
+    return false;
+  }
+
+  fill(int x, int y, String fillColor) {
+    var img = ctx.getImageData(0, 0, canvasWidth, canvasHeight);
+    var data = img.data;
+
+    var length = data.length;
+    var queue = [];
+    var i = (x + y * canvasWidth) * 4;
+    var e = i, w = i, me, mw, w2 = canvasWidth * 4;
+    var tolerance = 1;
+
+    var targetColor = [data[i], data[i + 1], data[i + 2]];
+
+    var hex = new HexColor(fillColor);
+
+    if (!pixelCompare(i, targetColor, hex, data, length, tolerance)) {
+      queue.add(i);
+
+      while (queue.isNotEmpty) {
+        i = queue.removeLast();
+
+        if (pixelCompare(i, targetColor, hex, data, length, tolerance)) {
+          e = i;
+          w = i;
+          mw = i ~/ w2 * w2; // left bound
+          me = mw + w2; // right bound
+
+          while (mw < w &&
+              mw < (w -= 4) &&
+              pixelCompareAndSet(i, targetColor, hex, data, length, tolerance));
+          while (me < e &&
+              me < (e += 4) &&
+              pixelCompareAndSet(i, targetColor, hex, data, length, tolerance));
+          for (int j = w; j < e; j += 4) {
+            if (j - w2 >= 0 &&
+                pixelCompare(
+                    j - w2, targetColor, hex, data, length, tolerance)) {
+              queue.add(j - w2);
             }
-          } else if (reachLeft) {
-            reachLeft = false;
+            if (j + w2 < length &&
+                pixelCompare(
+                    j + w2, targetColor, hex, data, length, tolerance)) {
+              queue.add(j + w2);
+            }
           }
         }
-
-        if (x < canvasWidth - 1) {
-          if (matchStartColor(pixelPos + 4, imgData, hex)) {
-            if (!reachRight) {
-              pixelStack.add([x + 1, y]);
-              reachRight = true;
-            }
-          } else if (reachRight) {
-            reachRight = false;
-          }
-        }
-
-        pixelPos += canvasWidth * 4;
       }
     }
-    ctx.putImageData(imgData, 0, 0);
+
+    ctx.putImageData(img, 0, 0);
   }
 
   existingCanvasLayers(String json) {
