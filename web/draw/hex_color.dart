@@ -1,9 +1,9 @@
 class HexColor {
-  int r;
-  int g;
-  int b;
+  final int r;
+  final int g;
+  final int b;
 
-  HexColor._internal(this.r, this.b, this.g);
+  const HexColor._internal(this.r, this.b, this.g);
 
   factory HexColor(String hexCode) {
     if (hexCode.startsWith('#')) {
