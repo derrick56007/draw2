@@ -1,5 +1,7 @@
 library server;
 
+import '../../web/common/brush_layer.dart';
+import '../../web/common/fill_layer.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
