@@ -33,5 +33,5 @@ class BrushLayer extends CanvasLayer {
   static const colorIndex = 2;
   static const sizeIndex = 3;
 
-  String toJson() => JSON.encode([layerType, points, color, size]);
+  String toJson() => JSON.encode([layerType.index, points, color, size]);
 }

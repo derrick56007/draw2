@@ -200,13 +200,13 @@ class Game {
       ..start();
 
     timer = new Timer.periodic(timerTickInterval, (_) {
-      repeating(stopwatch.elapsed);
-
       if (stopwatch.elapsedMilliseconds > duration.inMilliseconds) {
         timer?.cancel();
         stopwatch.stop();
 
         onFinish();
+      } else {
+        repeating(stopwatch.elapsed);
       }
     });
   }

@@ -148,13 +148,13 @@ class Play extends Card {
 
     drawSubs.addAll([
       canvas.onMouseDown.listen((MouseEvent e) {
+        var rect = canvas.getBoundingClientRect();
+        num x = e.page.x - (rect.left + window.pageXOffset);
+        num y = e.page.y - (rect.top + window.pageYOffset);
+
+        var color = querySelector('#color').text;
+
         if (toolType == ToolType.BRUSH) {
-          var rect = canvas.getBoundingClientRect();
-          num x = e.page.x - (rect.left + window.pageXOffset);
-          num y = e.page.y - (rect.top + window.pageYOffset);
-
-          var color = querySelector('#color').text;
-
           brush
             ..pos.x = x
             ..pos.y = y
@@ -177,7 +177,12 @@ class Play extends Card {
 
           undoBtn.classes.remove('disabled');
           clearBtn.classes.remove('disabled');
-        } else if (toolType == ToolType.FILL) {}
+        } else if (toolType == ToolType.FILL) {
+          var fillLayer = new FillLayer(x, y, color);
+
+          cvs.addFillLayer(fillLayer);
+          client.send(Message.fill, fillLayer.toJson());
+        }
       }),
       document.onMouseMove.listen((MouseEvent e) {
         if (brush.pressed) {
@@ -196,17 +201,6 @@ class Play extends Card {
             ..moved = false;
 
           timer?.cancel();
-        } else if (toolType == ToolType.FILL) {
-          var rect = canvas.getBoundingClientRect();
-          var color = querySelector('#color').text;
-
-          var fillLayer = new FillLayer(
-              e.page.x - (rect.left + window.pageXOffset),
-              e.page.y - (rect.top + window.pageYOffset),
-              color);
-
-          cvs.fill(fillLayer);
-          client.send(Message.fill, fillLayer.toJson());
         }
       }),
       undoBtn.onClick.listen((_) {

@@ -3,7 +3,7 @@ class HexColor {
   final int g;
   final int b;
 
-  const HexColor._internal(this.r, this.b, this.g);
+  const HexColor._internal(this.r, this.g, this.b);
 
   factory HexColor(String hexCode) {
     if (hexCode.startsWith('#')) {
@@ -18,4 +18,6 @@ class HexColor {
 
     return new HexColor._internal(r, g, b);
   }
+
+  String toString() => '($r,$g,$b)';
 }
