@@ -1,3 +1,5 @@
+part of play;
+
 class HexColor {
   final int r;
   final int g;

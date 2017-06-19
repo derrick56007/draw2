@@ -1,4 +1,4 @@
-part of client;
+part of play;
 
 class CanvasHelper {
   static const canvasWidth = 640;

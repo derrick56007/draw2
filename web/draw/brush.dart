@@ -1,4 +1,4 @@
-import '../common/point.dart';
+part of play;
 
 class Brush {
   static const defaultColor = '#000000';

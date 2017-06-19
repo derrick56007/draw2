@@ -1,16 +1,42 @@
-part of client;
+library play;
+
+import 'common/existing_player.dart';
+import 'common/guess.dart';
+import 'dart:async';
+import 'dart:convert';
+import 'dart:html' hide Point;
+import 'dart:math' hide Point;
+
+import 'common/draw_point.dart';
+import 'common/fill_layer.dart';
+import 'common/message.dart';
+import 'common/point.dart';
+import 'common/tool_type.dart';
+import 'common/brush_layer.dart';
+import 'common/canvas_layer.dart';
+
+import 'card.dart';
+import 'client_websocket.dart';
+import 'dart:typed_data';
+import 'main.dart';
+
+part 'draw/brush.dart';
+part 'draw/canvas_helper.dart';
+part 'draw/hex_color.dart';
+
+part 'panel_left.dart';
+part 'panel_right.dart';
 
 class Play extends Card {
-  static const maxChatLength = 20;
   static const brushInterval = const Duration(milliseconds: 25);
   static const defaultToolType = ToolType.BRUSH;
 
   final Element playCard = querySelector('#play-card');
-  final Element playerListCollection = querySelector('#player-list-collection');
+
   final Element canvasLeftLabel = querySelector('#canvas-left-label');
   final Element canvasMiddleLabel = querySelector('#canvas-middle-label');
   final Element canvasRightLabel = querySelector('#canvas-right-label');
-  final Element chatList = querySelector('#chat-list');
+
   final Element artistOptions = querySelector('#artist-options');
   final Element drawNextBtn = querySelector('#draw-next-btn');
   final Element undoBtn = querySelector('#undo-btn');
@@ -35,10 +61,6 @@ class Play extends Card {
 
   Play(this.client) : cvs = new CanvasHelper(client) {
     client
-      ..on(Message.guess, (x) => _guess(x))
-      ..on(Message.existingPlayer, (x) => _existingPlayer(x))
-      ..on(Message.newPlayer, (x) => _newPlayer(x))
-      ..on(Message.removePlayer, (x) => _removePlayer(x))
       ..on(Message.setAsArtist, (_) => _setAsArtist())
       ..on(Message.setArtist, (_) => _setArtist())
       ..on(Message.win, (_) => _win())
@@ -47,10 +69,7 @@ class Play extends Card {
       ..on(Message.setCanvasMiddleLabel, (x) => _setCanvasMiddleLabel(x))
       ..on(Message.setCanvasRightLabel, (x) => _setCanvasRightLabel(x))
       ..on(Message.clearCanvasLabels, (_) => _clearCanvasLabels())
-      ..on(Message.setQueue, (x) => _setQueue(x))
-      ..on(Message.setPlayerOrder, (x) => _setPlayerOrder(x))
-      ..on(Message.enableDrawNext, (x) => _enableDrawNext())
-      ..on(Message.updatePlayerScore, (x) => _updatePlayerScore(x));
+      ..on(Message.enableDrawNext, (x) => _enableDrawNext());
   }
 
   show() {
@@ -85,53 +104,6 @@ class Play extends Card {
       sub?.cancel();
     }
     playSubs.clear();
-  }
-
-  _addPlayer(String name, int score) {
-    var el = new Element.html('''
-      <a id="player-$name" class="collection-item player-item">
-        <span id="player-$name-queue-number" class="queue-number"></span>
-        <span id="player-$name-score" class="player-score">$score</span>
-        $name
-      </a>''');
-
-    playerListCollection.children.add(el);
-  }
-
-  _addToChat(String username, String text) {
-    var el = new Element.html('''
-      <a class="collection-item chat-item">
-        <div class="chat-username">$username</div>
-        <div class="chat-text">$text</div>
-      </a>''');
-
-    chatList
-      ..children.add(el)
-      ..scrollTop = chatList.scrollHeight;
-
-    if (chatList.children.length < maxChatLength) return;
-
-    chatList.children.removeAt(0);
-  }
-
-  _guess(String json) {
-    var guess = new Guess.fromJson(json);
-
-    _addToChat(guess.username, guess.guess);
-  }
-
-  _existingPlayer(String json) {
-    var existingPlayer = new ExistingPlayer.fromJson(json);
-
-    _addPlayer(existingPlayer.username, existingPlayer.score);
-  }
-
-  _newPlayer(String name) {
-    _addPlayer(name, 0);
-  }
-
-  _removePlayer(String name) {
-    querySelector('#player-$name')?.remove();
   }
 
   _setAsArtist() {
@@ -271,41 +243,7 @@ class Play extends Card {
     canvasRightLabel.text = '';
   }
 
-  _setQueue(String json) {
-    for (var el in playerListCollection.children) {
-      var queueNumber = el.querySelectorAll('.queue-number').first;
-      queueNumber.text = '';
-    }
-
-    var queue = JSON.decode(json) as List;
-
-    for (var player in queue) {
-      var name = player[0];
-      querySelector('#player-$name-queue-number')?.text = '${player[1]}';
-    }
-  }
-
-  _setPlayerOrder(String json) {
-    var order = JSON.decode(json) as List;
-    for (var name in order.reversed) {
-      var el = querySelector('#player-$name');
-
-      if (el == null) continue;
-
-      el.remove();
-      playerListCollection.children.insert(0, el);
-    }
-  }
-
   _enableDrawNext() {
     drawNextBtn.classes.remove('disabled');
-  }
-
-  _updatePlayerScore(String json) {
-    var playerScore = JSON.decode(json) as List;
-    var name = playerScore[0];
-    var score = playerScore[1];
-
-    querySelector('#player-$name-score')?.text = '$score';
   }
 }

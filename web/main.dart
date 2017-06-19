@@ -1,41 +1,25 @@
 library client;
 
+import 'card.dart';
 import 'dart:async';
-import 'dart:convert';
-import 'dart:html' hide Point;
-import 'dart:math' hide Point;
-import 'dart:typed_data';
+import 'dart:html';
 
-import 'common/brush_layer.dart';
-import 'common/canvas_layer.dart';
 import 'common/create_lobby_info.dart';
-import 'common/draw_point.dart';
 import 'common/draw_regex.dart';
-import 'common/existing_player.dart';
-import 'common/fill_layer.dart';
-import 'common/guess.dart';
 import 'common/lobby_info.dart';
 import 'common/login_info.dart';
 import 'common/message.dart';
-import 'common/point.dart';
-import 'common/tool_type.dart';
-
-import 'draw/hex_color.dart';
-import 'draw/brush.dart';
 
 import 'client_websocket.dart';
+import 'play.dart';
 import 'toast.dart';
 
-part 'draw/canvas_helper.dart';
-
-part 'card.dart';
 part 'create.dart';
 part 'lobbies.dart';
 part 'login.dart';
 part 'password.dart';
-part 'play.dart';
 
-var login, lobbies, create, play, password;
+var login, lobbies, create, play, panelLeft, panelRight, password;
 
 main() async {
   var client = new ClientWebSocket();
@@ -45,6 +29,8 @@ main() async {
   lobbies = new Lobbies(client);
   create = new Create(client);
   play = new Play(client);
+  panelLeft = new PanelLeft(client);
+  panelRight = new PanelRight(client);
   password = new Password(client);
 
 
