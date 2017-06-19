@@ -8,19 +8,18 @@ class PanelRight {
   final ClientWebSocket client;
 
   PanelRight(this.client) {
-    client
-      ..on(Message.guess, (x) => _guess(x));
+    client.on(Message.guess, (x) => _guess(x));
   }
 
-  _addToChat(String username, String text) {
-    var el = new Element.html('''
+  _newChatItem(String username, String text) => new Element.html('''
       <a class="collection-item chat-item">
         <div class="chat-username">$username</div>
         <div class="chat-text">$text</div>
       </a>''');
 
+  _addToChat(Element chatItem) {
     chatList
-      ..children.add(el)
+      ..children.add(chatItem)
       ..scrollTop = chatList.scrollHeight;
 
     if (chatList.children.length < maxChatLength) return;
@@ -31,6 +30,7 @@ class PanelRight {
   _guess(String json) {
     var guess = new Guess.fromJson(json);
 
-    _addToChat(guess.username, guess.guess);
+    var chatItem = _newChatItem(guess.username, guess.guess);
+    _addToChat(chatItem);
   }
 }

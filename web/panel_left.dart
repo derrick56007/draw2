@@ -15,15 +15,17 @@ class PanelLeft {
       ..on(Message.updatePlayerScore, (x) => _updatePlayerScore(x));
   }
 
-  _newPlayer(String name, int score) {
-    var el = new Element.html('''
+  _newPlayerItem(String name, int score) => new Element.html('''
       <a id="player-$name" class="collection-item player-item">
         <span id="player-$name-queue-number" class="queue-number"></span>
         <span id="player-$name-score" class="player-score">$score</span>
         $name
       </a>''');
 
-    playerListCollection.children.add(el);
+  _newPlayer(String name, int score) {
+    var playerItem = _newPlayerItem(name, score);
+
+    playerListCollection.children.add(playerItem);
   }
 
   _existingPlayer(String json) {

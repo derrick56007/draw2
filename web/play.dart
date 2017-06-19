@@ -100,26 +100,25 @@ class Play extends Card {
   hide() {
     playCard.style.display = 'none';
 
+    _clearPlaySubs();
+    _clearDrawSubs();
+  }
+
+  _clearPlaySubs() {
     for (var sub in playSubs) {
       sub?.cancel();
     }
     playSubs.clear();
   }
 
-  _setAsArtist() {
-    querySelector('#color').text = Brush.defaultColor;
-    // TODO set default size
+  _clearDrawSubs() {
+    for (var sub in drawSubs) {
+      sub?.cancel();
+    }
+    drawSubs.clear();
+  }
 
-    artistOptions.classes
-      ..remove('scale-out')
-      ..add('scale-in');
-
-    cvs.clearDrawing();
-
-    var brush = new Brush();
-
-    drawSubs.addAll([
-      canvas.onMouseDown.listen((MouseEvent e) {
+  _canvasOnMouseDown(Brush brush) => canvas.onMouseDown.listen((MouseEvent e) {
         var rect = canvas.getBoundingClientRect();
         num x = e.page.x - (rect.left + window.pageXOffset);
         num y = e.page.y - (rect.top + window.pageYOffset);
@@ -155,7 +154,9 @@ class Play extends Card {
           cvs.addFillLayer(fillLayer);
           client.send(Message.fill, fillLayer.toJson());
         }
-      }),
+      });
+
+  _documentOnMouseMove(Brush brush) =>
       document.onMouseMove.listen((MouseEvent e) {
         if (brush.pressed) {
           var rect = canvas.getBoundingClientRect();
@@ -165,8 +166,9 @@ class Play extends Card {
             ..pos.y = e.page.y - (rect.top + window.pageYOffset)
             ..moved = true;
         }
-      }),
-      document.onMouseUp.listen((MouseEvent e) {
+      });
+
+  _documentOnMouseUp(Brush brush) => document.onMouseUp.listen((MouseEvent e) {
         if (toolType == ToolType.BRUSH) {
           brush
             ..pressed = false
@@ -174,33 +176,58 @@ class Play extends Card {
 
           timer?.cancel();
         }
-      }),
-      undoBtn.onClick.listen((_) {
+      });
+
+  _undoBtnOnClick() => undoBtn.onClick.listen((_) {
         if (undoBtn.classes.contains('disabled')) return;
 
         client.send(Message.undoLast);
         cvs.undoLast();
-      }),
-      clearBtn.onClick.listen((_) {
+      });
+
+  _clearBtnOnClick() => clearBtn.onClick.listen((_) {
         client.send(Message.clearDrawing);
         cvs.clearDrawing();
-      }),
-      brushBtn.onClick.listen((_) {
+      });
+
+  _brushBtnOnClick() => brushBtn.onClick.listen((_) {
         if (brushBtn.classes.contains('disabled')) return;
 
         toolType = ToolType.BRUSH;
 
         brushBtn.classes.add('disabled');
         fillBtn.classes.remove('disabled');
-      }),
-      fillBtn.onClick.listen((_) {
+      });
+
+  _fillBtnOnClick() => fillBtn.onClick.listen((_) {
         if (fillBtn.classes.contains('disabled')) return;
 
         toolType = ToolType.FILL;
 
         fillBtn.classes.add('disabled');
         brushBtn.classes.remove('disabled');
-      })
+      });
+
+  _setAsArtist() {
+    querySelector('#color').text = Brush.defaultColor;
+    // TODO set default size
+
+    artistOptions.classes
+      ..remove('scale-out')
+      ..add('scale-in');
+
+    cvs.clearDrawing();
+
+    var brush = new Brush();
+
+    drawSubs.addAll([
+      _canvasOnMouseDown(brush),
+      _documentOnMouseMove(brush),
+      _documentOnMouseUp(brush),
+      _undoBtnOnClick(),
+      _clearBtnOnClick(),
+      _brushBtnOnClick(),
+      _fillBtnOnClick()
     ]);
   }
 
@@ -210,10 +237,7 @@ class Play extends Card {
       ..add('scale-out');
 
     cvs.clearDrawing();
-    for (var sub in drawSubs) {
-      sub?.cancel();
-    }
-    drawSubs.clear();
+    _clearDrawSubs();
 
     timer?.cancel();
 
