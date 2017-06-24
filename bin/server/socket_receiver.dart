@@ -6,7 +6,7 @@ class SocketReceiver {
   SocketReceiver._internal(this.socket);
 
   factory SocketReceiver.handle(ServerWebSocket socket) {
-    var sr = new SocketReceiver._internal(socket);
+    final sr = new SocketReceiver._internal(socket);
 
     sr._init();
 
@@ -44,7 +44,7 @@ class SocketReceiver {
 
     // check if player was in a lobby
     if (gPlayerLobby.containsKey(socket)) {
-      var lobby = gPlayerLobby.remove(socket);
+      final lobby = gPlayerLobby.remove(socket);
       lobby.removePlayer(socket);
 
       // close lobby if empty and is not default lobby
@@ -59,7 +59,7 @@ class SocketReceiver {
       }
     }
 
-    var username = gPlayers.remove(socket);
+    final username = gPlayers.remove(socket);
     print('$username logged out');
   }
 
@@ -91,7 +91,7 @@ class SocketReceiver {
   }
 
   _createLobby(String json) {
-    var createLobbyInfo = new CreateLobbyInfo.fromJson(json);
+    final createLobbyInfo = new CreateLobbyInfo.fromJson(json);
 
     ////////// check if lobby exists /////////////
     if (gLobbies.containsKey(createLobbyInfo.name)) {
@@ -109,7 +109,7 @@ class SocketReceiver {
 
     print('new lobby ${createLobbyInfo.toJson()}');
 
-    var lobby = new Lobby(createLobbyInfo);
+    final lobby = new Lobby(createLobbyInfo);
     gLobbies[createLobbyInfo.name] = lobby;
 
     for (var otherSocket in gPlayers.keys) {
@@ -129,7 +129,7 @@ class SocketReceiver {
       return;
     }
 
-    var lobby = gLobbies[lobbyName];
+    final lobby = gLobbies[lobbyName];
 
     if (lobby.hasPassword) {
       socket.send(Message.requestPassword, lobbyName);
@@ -142,7 +142,7 @@ class SocketReceiver {
   }
 
   _enterLobbyWithPassword(String json) {
-    var loginInfo = new LoginInfo.fromJson(json);
+    final loginInfo = new LoginInfo.fromJson(json);
 
     if (!gLobbies.containsKey(loginInfo.lobbyName)) {
       socket.send(Message.toast, 'Lobby doesn\'t exist');
@@ -150,7 +150,7 @@ class SocketReceiver {
       return;
     }
 
-    var lobby = gLobbies[loginInfo.lobbyName];
+    final lobby = gLobbies[loginInfo.lobbyName];
 
     if (lobby.hasPassword && lobby.password != loginInfo.password) {
       socket.send(Message.toast, 'Password is incorrect');
@@ -166,22 +166,22 @@ class SocketReceiver {
   _drawNext() {
     if (!gPlayerLobby.containsKey(socket)) return;
 
-    var lobby = gPlayerLobby[socket];
+    final lobby = gPlayerLobby[socket];
     lobby.game.addToQueue(socket);
   }
 
   _guess(String json) {
     if (!gPlayerLobby.containsKey(socket)) return;
 
-    var lobby = gPlayerLobby[socket];
+    final lobby = gPlayerLobby[socket];
 
-    var guess = new Guess(gPlayers[socket], json);
+    final guess = new Guess(gPlayers[socket], json);
 
     lobby.game.onGuess(socket, guess);
   }
 
   _drawPoint(String json) {
-    var lobby = gPlayerLobby[socket];
+    final lobby = gPlayerLobby[socket];
 
     if (lobby == null) return;
 
@@ -190,7 +190,7 @@ class SocketReceiver {
   }
 
   _drawLine(String json) {
-    var lobby = gPlayerLobby[socket];
+    final lobby = gPlayerLobby[socket];
 
     if (lobby == null) return;
 
@@ -199,7 +199,7 @@ class SocketReceiver {
   }
 
   _clearDrawing() {
-    var lobby = gPlayerLobby[socket];
+    final lobby = gPlayerLobby[socket];
 
     if (lobby == null) return;
 
@@ -208,7 +208,7 @@ class SocketReceiver {
   }
 
   _undoLast() {
-    var lobby = gPlayerLobby[socket];
+    final lobby = gPlayerLobby[socket];
 
     if (lobby == null) return;
 
@@ -217,7 +217,7 @@ class SocketReceiver {
   }
 
   _fill(String json) {
-    var lobby = gPlayerLobby[socket];
+    final lobby = gPlayerLobby[socket];
 
     if (lobby == null) return;
 

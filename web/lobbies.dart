@@ -49,7 +49,7 @@ class Lobbies extends Card {
   }
 
   static bool isValidLobbyName(String lobbyName) {
-    var lobbyMatches = lobbyNameRegex.firstMatch(lobbyName);
+    final lobbyMatches = lobbyNameRegex.firstMatch(lobbyName);
 
     return lobbyMatches != null && lobbyMatches[0] == lobbyName;
   }
@@ -57,9 +57,9 @@ class Lobbies extends Card {
   _lobbyInfo(String json) {
     querySelector('#lobby-list-progress')?.remove();
 
-    var lobbyInfo = new LobbyInfo.fromJson(json);
+    final lobbyInfo = new LobbyInfo.fromJson(json);
 
-    var el = new Element.html('''
+    final el = new Element.html('''
           <a id="lobby-${lobbyInfo.name}" class="collection-item lobby-list-item">
             <span class="badge">${lobbyInfo.numberOfPlayers}/${lobbyInfo.maxPlayers}</span>
             

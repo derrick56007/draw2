@@ -42,14 +42,14 @@ class Password {
       return;
     }
 
-    var password = passwordField.value.trim();
+    final password = passwordField.value.trim();
 
     if (password.isEmpty) {
       toast('Invalid input');
       return;
     }
 
-    var loginInfo = new LoginInfo(lobbyName, password);
+    final loginInfo = new LoginInfo(lobbyName, password);
 
     client.send(Message.enterLobbyWithPassword, loginInfo.toJson());
   }

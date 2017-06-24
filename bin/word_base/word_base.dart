@@ -12,12 +12,12 @@ class WordBase {
 
   static init() {
     for (var category in categories) {
-      var list = category.split('\n');
+      final list = category.split('\n');
 
-      var trimmed = [];
+      final trimmed = [];
 
       for (var word in list) {
-        var trimmedWord = word.trim();
+        final trimmedWord = word.trim();
 
         if (trimmedWord.isNotEmpty) {
           trimmed.add(trimmedWord);

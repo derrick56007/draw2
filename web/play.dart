@@ -80,7 +80,7 @@ class Play extends Card {
       ..add(document.onKeyPress.listen((KeyboardEvent e) {
         if (e.keyCode != KeyCode.ENTER) return;
 
-        String guess = chatInput.value.trim();
+        final guess = chatInput.value.trim();
 
         if (guess.isNotEmpty) {
           client.send(Message.guess, guess);
@@ -119,11 +119,11 @@ class Play extends Card {
   }
 
   _canvasOnMouseDown(Brush brush) => canvas.onMouseDown.listen((MouseEvent e) {
-        var rect = canvas.getBoundingClientRect();
-        num x = e.page.x - (rect.left + window.pageXOffset);
-        num y = e.page.y - (rect.top + window.pageYOffset);
+        final rect = canvas.getBoundingClientRect();
+        final x = e.page.x - (rect.left + window.pageXOffset);
+        final y = e.page.y - (rect.top + window.pageYOffset);
 
-        var color = querySelector('#color').text;
+        final color = querySelector('#color').text;
 
         if (toolType == ToolType.BRUSH) {
           brush
@@ -131,7 +131,7 @@ class Play extends Card {
             ..pos.y = y
             ..pressed = true;
 
-          var drawPoint = new DrawPoint(color, Brush.defaultSize, brush.pos);
+          final drawPoint = new DrawPoint(color, Brush.defaultSize, brush.pos);
 
           cvs.drawPoint(drawPoint);
           client.send(Message.drawPoint, drawPoint.toJson());
@@ -149,7 +149,7 @@ class Play extends Card {
           undoBtn.classes.remove('disabled');
           clearBtn.classes.remove('disabled');
         } else if (toolType == ToolType.FILL) {
-          var fillLayer = new FillLayer(x, y, color);
+          final fillLayer = new FillLayer(x, y, color);
 
           cvs.addFillLayer(fillLayer);
           client.send(Message.fill, fillLayer.toJson());
@@ -159,7 +159,7 @@ class Play extends Card {
   _documentOnMouseMove(Brush brush) =>
       document.onMouseMove.listen((MouseEvent e) {
         if (brush.pressed) {
-          var rect = canvas.getBoundingClientRect();
+          final rect = canvas.getBoundingClientRect();
 
           brush
             ..pos.x = e.page.x - (rect.left + window.pageXOffset)
@@ -218,7 +218,7 @@ class Play extends Card {
 
     cvs.clearDrawing();
 
-    var brush = new Brush();
+    final brush = new Brush();
 
     drawSubs.addAll([
       _canvasOnMouseDown(brush),

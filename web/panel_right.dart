@@ -28,9 +28,9 @@ class PanelRight {
   }
 
   _guess(String json) {
-    var guess = new Guess.fromJson(json);
+    final guess = new Guess.fromJson(json);
 
-    var chatItem = _newChatItem(guess.username, guess.guess);
+    final chatItem = _newChatItem(guess.username, guess.guess);
     _addToChat(chatItem);
   }
 }

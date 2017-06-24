@@ -22,7 +22,7 @@ part 'password.dart';
 var login, lobbies, create, play, panelLeft, panelRight, password;
 
 main() async {
-  var client = new ClientWebSocket();
+  final client = new ClientWebSocket();
   await client.start();
 
   login = new Login(client);

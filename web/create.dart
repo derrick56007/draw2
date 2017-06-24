@@ -41,25 +41,25 @@ class Create extends Card {
       return;
     }
 
-    String lobbyName = lobbyNameElement.value.trim();
+    final lobbyName = lobbyNameElement.value.trim();
 
     if (lobbyName.isEmpty) {
       toast('Not a valid lobby name');
       return;
     }
 
-    var passwordElement =
+    final passwordElement =
         querySelector('#create-lobby-password') as InputElement;
-    String password = passwordElement.value.trim();
+    final password = passwordElement.value.trim();
 
-    var selectNumPlayersEl =
+    final selectNumPlayersEl =
         querySelector('#number-of-players') as SelectElement;
-    int maxPlayers = int.parse(selectNumPlayersEl.value);
+    final maxPlayers = int.parse(selectNumPlayersEl.value);
 
-    var timerElement = querySelector('#timer-switch') as InputElement;
-    bool hasTimer = timerElement.checked;
+    final timerElement = querySelector('#timer-switch') as InputElement;
+    final hasTimer = timerElement.checked;
 
-    var lobbyInfo =
+    final lobbyInfo =
         new CreateLobbyInfo(lobbyName, password, hasTimer, maxPlayers);
 
     client.send(Message.createLobby, lobbyInfo.toJson());

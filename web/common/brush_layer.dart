@@ -19,7 +19,7 @@ class BrushLayer extends CanvasLayer {
       list = JSON.decode(json) as List;
     }
 
-    var decodedPoints = <Point>[];
+    final decodedPoints = <Point>[];
 
     for (var point in list[pointsIndex]) {
       decodedPoints.add(new Point.fromJson(point));

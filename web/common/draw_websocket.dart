@@ -17,7 +17,7 @@ abstract class DrawWebSocket {
   void send(String request, var val);
 
   void onMessageToDispatch(var data) {
-    var msg = JSON.decode(data);
+    final msg = JSON.decode(data);
 
     // checks if is [request, data]
     if (msg is List) {

@@ -40,7 +40,7 @@ class Login extends Card {
       return;
     }
 
-    String username = usernameElement.value.trim();
+    final username = usernameElement.value.trim();
 
     if (username.isEmpty) {
       toast('Not a valid username');
@@ -53,7 +53,7 @@ class Login extends Card {
   _loginSuccesful() {
     lobbies.show();
 
-    var path = window.location.pathname.substring(1);
+    final path = window.location.pathname.substring(1);
     if (Lobbies.isValidLobbyName(path)) {
       client.send(Message.enterLobby, path);
     }

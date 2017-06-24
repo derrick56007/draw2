@@ -12,11 +12,11 @@ class HexColor {
       hexCode = hexCode.substring(1);
     }
 
-    var hexDigits = hexCode.split('');
+    final hexDigits = hexCode.split('');
 
-    int r = int.parse(hexDigits.sublist(0, 2).join(), radix: 16);
-    int g = int.parse(hexDigits.sublist(2, 4).join(), radix: 16);
-    int b = int.parse(hexDigits.sublist(4).join(), radix: 16);
+    final r = int.parse(hexDigits.sublist(0, 2).join(), radix: 16);
+    final g = int.parse(hexDigits.sublist(2, 4).join(), radix: 16);
+    final b = int.parse(hexDigits.sublist(4).join(), radix: 16);
 
     return new HexColor._internal(r, g, b);
   }

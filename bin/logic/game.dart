@@ -86,7 +86,7 @@ class Game {
       // TODO check for end game
       currentWord = words.list.removeLast();
 
-      var currentArtistName = lobby.players[currentArtist];
+      final currentArtistName = lobby.players[currentArtist];
 
       currentArtist
         ..send(Message.clearCanvasLabels)
@@ -108,9 +108,9 @@ class Game {
           return '0$n';
         }
 
-        var twoDigitMinutes =
+        final twoDigitMinutes =
             twoDigits(maxGameTime.inMinutes - elapsed.inMinutes);
-        var twoDigitSeconds = twoDigits(
+        final twoDigitSeconds = twoDigits(
             (maxGameTime.inSeconds - elapsed.inSeconds)
                 .remainder(Duration.SECONDS_PER_MINUTE));
 
@@ -165,10 +165,10 @@ class Game {
       onWin(socket, guess.username, currentWord);
     } else {
       // check similarity
-      num similarity = WordSimilarity.similarity(guess.guess, currentWord);
+      final similarity = WordSimilarity.similarity(guess.guess, currentWord);
 
       if (similarity >= similarityThreshold) {
-        var serverMsg =
+        final serverMsg =
             new Guess('Server', '${guess.username}\'s guess was close!');
 
         lobby.sendToAll(Message.guess, val: serverMsg.toJson());
@@ -212,9 +212,9 @@ class Game {
   }
 
   drawPoint(String json) {
-    var drawPoint = new DrawPoint.fromJson(json);
+    final drawPoint = new DrawPoint.fromJson(json);
 
-    var layer =
+    final layer =
         new BrushLayer([drawPoint.pos], drawPoint.color, drawPoint.size);
 
     canvasLayers.add(layer);
@@ -222,7 +222,7 @@ class Game {
 
   drawLine(String json) {
     if (canvasLayers.isNotEmpty && canvasLayers.last is BrushLayer) {
-      var point = new Point.fromJson(json);
+      final point = new Point.fromJson(json);
 
       (canvasLayers.last as BrushLayer).points.add(point);
     }
@@ -239,7 +239,7 @@ class Game {
   }
 
   fill(String json) {
-    var fillLayer = new FillLayer.fromJson(json);
+    final fillLayer = new FillLayer.fromJson(json);
 
     canvasLayers.add(fillLayer);
   }

@@ -1,24 +1,23 @@
 library server;
 
-import '../../web/common/brush_layer.dart';
-import '../../web/common/fill_layer.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' hide Point;
-
 
 import 'package:args/args.dart';
 import 'package:http_server/http_server.dart';
 
 import '../word_base/word_base.dart';
 
+import '../../web/common/brush_layer.dart';
 import '../../web/common/canvas_layer.dart';
 import '../../web/common/create_lobby_info.dart';
 import '../../web/common/draw_point.dart';
 import '../../web/common/draw_regex.dart';
 import '../../web/common/draw_websocket.dart';
 import '../../web/common/existing_player.dart';
+import '../../web/common/fill_layer.dart';
 import '../../web/common/guess.dart';
 import '../../web/common/lobby_info.dart';
 import '../../web/common/login_info.dart';
@@ -51,20 +50,20 @@ main(List<String> args) async {
   WordBase.init();
   initDefaultLobbies();
 
-  var parser = new ArgParser();
   parser.addOption('clientFiles', defaultsTo: 'build/web/');
+  final parser = new ArgParser();
 
-  var results = parser.parse(args);
-  var clientFiles = results['clientFiles'];
+  final results = parser.parse(args);
+  final clientFiles = results['clientFiles'];
 
-  var defaultPage = new File('$clientFiles/index.html');
+  final defaultPage = new File('$clientFiles/index.html');
 
-  var staticFiles = new VirtualDirectory(clientFiles);
+  final staticFiles = new VirtualDirectory(clientFiles);
   staticFiles
     ..jailRoot = false
     ..allowDirectoryListing = true
     ..directoryHandler = (dir, request) async {
-      var indexUri = new Uri.file(dir.path).resolve('index.html');
+      final indexUri = new Uri.file(dir.path).resolve('index.html');
 
       var file = new File(indexUri.toFilePath());
 
@@ -74,19 +73,19 @@ main(List<String> args) async {
       staticFiles.serveFile(file, request);
     };
 
-  var server = await HttpServer.bind('0.0.0.0', port);
+  final server = await HttpServer.bind('0.0.0.0', port);
 
   print('server started at ${server.address.address}:${server.port}');
 
   await for (HttpRequest request in server) {
     request.response.headers.set('cache-control', 'no-cache');
 
-    var path = request.uri.path.trim();
+    final path = request.uri.path.trim();
 
-    var hasLobby = isValidLobbyName(path.substring(1));
+    final hasLobby = isValidLobbyName(path.substring(1));
 
     if (WebSocketTransformer.isUpgradeRequest(request)) {
-      var socket = new ServerWebSocket.ugradeRequest(request);
+      final socket = new ServerWebSocket.ugradeRequest(request);
 
       new SocketReceiver.handle(socket);
 
@@ -102,15 +101,15 @@ main(List<String> args) async {
 }
 
 bool isValidLobbyName(String lobbyName) {
-  var lobbyMatches = lobbyNameRegex.firstMatch(lobbyName);
+  final lobbyMatches = lobbyNameRegex.firstMatch(lobbyName);
 
   return lobbyMatches != null && lobbyMatches[0] == lobbyName;
 }
 
 initDefaultLobbies() {
-  var createLobbyInfo1 = const CreateLobbyInfo('lobby1', '', true, 15);
-  var createLobbyInfo2 = const CreateLobbyInfo('lobby2', '', true, 15);
-  var createLobbyInfo3 = const CreateLobbyInfo('lobby3', '', true, 15);
+  final createLobbyInfo1 = const CreateLobbyInfo('lobby1', '', true, 15);
+  final createLobbyInfo2 = const CreateLobbyInfo('lobby2', '', true, 15);
+  final createLobbyInfo3 = const CreateLobbyInfo('lobby3', '', true, 15);
 
   gLobbies[createLobbyInfo1.name] = new Lobby(createLobbyInfo1);
   gLobbies[createLobbyInfo2.name] = new Lobby(createLobbyInfo2);

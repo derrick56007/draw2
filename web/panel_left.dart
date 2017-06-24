@@ -23,13 +23,13 @@ class PanelLeft {
       </a>''');
 
   _newPlayer(String name, int score) {
-    var playerItem = _newPlayerItem(name, score);
+    final playerItem = _newPlayerItem(name, score);
 
     playerListCollection.children.add(playerItem);
   }
 
   _existingPlayer(String json) {
-    var existingPlayer = new ExistingPlayer.fromJson(json);
+    final existingPlayer = new ExistingPlayer.fromJson(json);
 
     _newPlayer(existingPlayer.username, existingPlayer.score);
   }
@@ -40,22 +40,22 @@ class PanelLeft {
 
   _setQueue(String json) {
     for (var el in playerListCollection.children) {
-      var queueNumber = el.querySelectorAll('.queue-number').first;
+      final queueNumber = el.querySelectorAll('.queue-number').first;
       queueNumber.text = '';
     }
 
-    var queue = JSON.decode(json) as List;
+    final queue = JSON.decode(json) as List;
 
     for (var player in queue) {
-      var name = player[0];
+      final name = player[0];
       querySelector('#player-$name-queue-number')?.text = '${player[1]}';
     }
   }
 
   _setPlayerOrder(String json) {
-    var order = JSON.decode(json) as List;
+    final order = JSON.decode(json) as List;
     for (var name in order.reversed) {
-      var el = querySelector('#player-$name');
+      final el = querySelector('#player-$name');
 
       if (el == null) continue;
 
@@ -65,9 +65,9 @@ class PanelLeft {
   }
 
   _updatePlayerScore(String json) {
-    var playerScore = JSON.decode(json) as List;
-    var name = playerScore[0];
-    var score = playerScore[1];
+    final playerScore = JSON.decode(json) as List;
+    final name = playerScore[0];
+    final score = playerScore[1];
 
     querySelector('#player-$name-score')?.text = '$score';
   }

@@ -30,7 +30,7 @@ class Lobby {
     // send info of existing players to the new player
     players.forEach((ServerWebSocket existingSocket, String existingUsername) {
       // player info
-      var existingPlayer =
+      final existingPlayer =
           new ExistingPlayer(existingUsername, game.scores[existingSocket]);
 
       socket.send(Message.existingPlayer, existingPlayer.toJson());
@@ -51,7 +51,7 @@ class Lobby {
     socket.send(Message.clearCanvasLabels);
 
     if (game.currentArtist != null) {
-      var currentArtistName = players[socket];
+      final currentArtistName = players[socket];
 
       socket.send(Message.setCanvasLeftLabel, '$currentArtistName is drawing');
     }
@@ -68,7 +68,7 @@ class Lobby {
   }
 
   removePlayer(ServerWebSocket socket) {
-    var username = players[socket];
+    final username = players[socket];
 
     sendToAll(Message.removePlayer, val: username);
 
@@ -92,10 +92,10 @@ class Lobby {
   }
 
   sendQueueInfo() {
-    var list = [];
+    final list = [];
 
-    for (int i = 0; i < game.artistQueue.length; i++) {
-      var socket = game.artistQueue[i];
+    for (var i = 0; i < game.artistQueue.length; i++) {
+      final socket = game.artistQueue[i];
 
       list.add([players[socket], i + 1]);
     }
@@ -104,7 +104,7 @@ class Lobby {
   }
 
   sendPlayerOrder() {
-    var list = [];
+    final list = [];
 
     if (game.currentArtist != null) {
       list.add(players[game.currentArtist]);

@@ -28,7 +28,7 @@ class CanvasHelper {
   }
 
   drawPoint(DrawPoint drawPoint) {
-    var layer = new BrushLayer(
+    final layer = new BrushLayer(
         [drawPoint.pos.clone()], drawPoint.color, drawPoint.size);
     canvasLayers.add(layer);
 
@@ -36,7 +36,7 @@ class CanvasHelper {
   }
 
   drawLine(Point pos) {
-    if (canvasLayers.length > 0 && canvasLayers.last is BrushLayer) {
+    if (canvasLayers.isNotEmpty && canvasLayers.last is BrushLayer) {
       (canvasLayers.last as BrushLayer).points.add(pos.clone());
 
       strokeAllLayers();
@@ -61,8 +61,8 @@ class CanvasHelper {
           ..beginPath()
           ..moveTo(p1.x, p1.y);
 
-        for (int i = 1; i < layer.points.length - 1; i++) {
-          var midPoint = Point.midPoint(p1, p2);
+        for (var i = 1; i < layer.points.length - 1; i++) {
+          final midPoint = Point.midPoint(p1, p2);
 
           ctx.quadraticCurveTo(p1.x, p1.y, midPoint.x, midPoint.y);
 
@@ -79,18 +79,19 @@ class CanvasHelper {
           ..stroke();
       }
     } else if (layer is FillLayer) {
-      var img = ctx.getImageData(0, 0, canvasWidth, canvasHeight);
-      var data = img.data;
+      final img = ctx.getImageData(0, 0, canvasWidth, canvasHeight);
+      final data = img.data;
 
-      var length = data.length;
-      var queue = [];
+      final length = data.length;
+      final queue = [];
       var i = ((layer.x.floor() + layer.y.floor() * canvasWidth) * 4).toInt();
-      var e = i, w = i, me, mw, w2 = canvasWidth * 4;
-      var tolerance = 100;
+      var e = i, w = i, me, mw;
+      final w2 = canvasWidth * 4;
+      final tolerance = 100;
 
-      var targetColor = [data[i], data[i + 1], data[i + 2]];
+      final targetColor = [data[i], data[i + 1], data[i + 2]];
 
-      var hex = new HexColor(layer.color);
+      final hex = new HexColor(layer.color);
 
       if (!pixelCompare(i, targetColor, hex, data, length, tolerance)) {
         return false;
@@ -198,7 +199,7 @@ class CanvasHelper {
   existingCanvasLayers(String json) {
     canvasLayers.clear();
 
-    var layers = JSON.decode(json) as List;
+    final layers = JSON.decode(json) as List;
 
     for (var layer in layers) {
       var canvasLayer;

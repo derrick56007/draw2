@@ -7,7 +7,10 @@
    strong-mode: true
 #   exclude:
 #     - path/to/excluded/files/**
-# linter:
-#   rules:
-#     # see catalog here: http://dart-lang.github.io/linter/lints/
-#     - hash_and_equals
+ linter:
+   rules:
+     - cancel_subscriptions
+     - omit_local_variable_types
+     - prefer_final_locals
+     - prefer_is_empty
+     - prefer_is_not_empty
