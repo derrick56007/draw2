@@ -118,65 +118,124 @@ class Play extends Card {
     drawSubs.clear();
   }
 
-  _canvasOnMouseDown(Brush brush) => canvas.onMouseDown.listen((MouseEvent e) {
-        final rect = canvas.getBoundingClientRect();
-        final x = e.page.x - (rect.left + window.pageXOffset);
-        final y = e.page.y - (rect.top + window.pageYOffset);
+  _drawStart(Brush brush, Point pos) {
+    final color = querySelector('#color').text;
 
-        final color = querySelector('#color').text;
+    if (toolType == ToolType.BRUSH) {
+      brush
+        ..pos.x = pos.x
+        ..pos.y = pos.y
+        ..pressed = true;
 
-        if (toolType == ToolType.BRUSH) {
-          brush
-            ..pos.x = x
-            ..pos.y = y
-            ..pressed = true;
+      final drawPoint = new DrawPoint(color, Brush.defaultSize, brush.pos);
 
-          final drawPoint = new DrawPoint(color, Brush.defaultSize, brush.pos);
+      cvs.drawPoint(drawPoint);
+      client.send(Message.drawPoint, drawPoint.toJson());
 
-          cvs.drawPoint(drawPoint);
-          client.send(Message.drawPoint, drawPoint.toJson());
+      timer?.cancel();
+      timer = new Timer.periodic(brushInterval, (_) {
+        if (brush.moved) {
+          cvs.drawLine(brush.pos);
+          client.send(Message.drawLine, brush.pos.toJson());
 
-          timer?.cancel();
-          timer = new Timer.periodic(brushInterval, (_) {
-            if (brush.moved) {
-              cvs.drawLine(brush.pos);
-              client.send(Message.drawLine, brush.pos.toJson());
-
-              brush.moved = false;
-            }
-          });
-
-          undoBtn.classes.remove('disabled');
-          clearBtn.classes.remove('disabled');
-        } else if (toolType == ToolType.FILL) {
-          final fillLayer = new FillLayer(x, y, color);
-
-          cvs.addFillLayer(fillLayer);
-          client.send(Message.fill, fillLayer.toJson());
+          brush.moved = false;
         }
+      });
+
+      undoBtn.classes.remove('disabled');
+      clearBtn.classes.remove('disabled');
+    } else if (toolType == ToolType.FILL) {
+      final fillLayer = new FillLayer(pos.x, pos.y, color);
+
+      cvs.addFillLayer(fillLayer);
+      client.send(Message.fill, fillLayer.toJson());
+    }
+  }
+
+  _drawMove(Brush brush, Point pos) {
+    if (brush.pressed) {
+      brush
+        ..pos.x = pos.x
+        ..pos.y = pos.y
+        ..moved = true;
+    }
+  }
+
+  _drawEnd(Brush brush) {
+    if (toolType == ToolType.BRUSH) {
+      brush
+        ..pressed = false
+        ..moved = false;
+
+      timer?.cancel();
+    }
+  }
+
+  _canvasOnMouseDown(Brush brush) => canvas.onMouseDown.listen((MouseEvent e) {
+        final mousePos = _getMousePos(e);
+
+        _drawStart(brush, mousePos);
       });
 
   _documentOnMouseMove(Brush brush) =>
       document.onMouseMove.listen((MouseEvent e) {
-        if (brush.pressed) {
-          final rect = canvas.getBoundingClientRect();
+        final mousePos = _getMousePos(e);
 
-          brush
-            ..pos.x = e.page.x - (rect.left + window.pageXOffset)
-            ..pos.y = e.page.y - (rect.top + window.pageYOffset)
-            ..moved = true;
-        }
+        _drawMove(brush, mousePos);
       });
 
-  _documentOnMouseUp(Brush brush) => document.onMouseUp.listen((MouseEvent e) {
-        if (toolType == ToolType.BRUSH) {
-          brush
-            ..pressed = false
-            ..moved = false;
-
-          timer?.cancel();
-        }
+  _documentOnMouseUp(Brush brush) => document.onMouseUp.listen((_) {
+        _drawEnd(brush);
       });
+
+  Point _getMousePos(MouseEvent e) {
+    final rect = canvas.getBoundingClientRect();
+
+    final x = e.page.x - (rect.left + window.pageXOffset);
+    final y = e.page.y - (rect.top + window.pageYOffset);
+
+    return new Point(x, y);
+  }
+
+  _canvasOnTouchStart(Brush brush) =>
+      canvas.onTouchStart.listen((TouchEvent e) {
+        if (e.target == canvas) {
+          e.preventDefault();
+        }
+
+        final touchPos = _getTouchPos(e);
+
+        _drawStart(brush, touchPos);
+      });
+
+  _documentOnTouchMove(Brush brush) =>
+      document.onTouchMove.listen((TouchEvent e) {
+        if (e.target == canvas) {
+          e.preventDefault();
+        }
+
+        final touchPos = _getTouchPos(e);
+
+        _drawMove(brush, touchPos);
+      });
+
+  _documentOnTouchEnd(Brush brush) =>
+      document.onTouchEnd.listen((TouchEvent e) {
+        if (e.target == canvas) {
+          e.preventDefault();
+        }
+
+        _drawEnd(brush);
+      });
+
+  Point _getTouchPos(TouchEvent e) {
+    final rect = canvas.getBoundingClientRect();
+
+    final x = e.touches.first.page.x - (rect.left + window.pageXOffset);
+    final y = e.touches.first.page.y - (rect.top + window.pageYOffset);
+
+    return new Point(x, y);
+  }
 
   _undoBtnOnClick() => undoBtn.onClick.listen((_) {
         if (undoBtn.classes.contains('disabled')) return;
@@ -221,9 +280,17 @@ class Play extends Card {
     final brush = new Brush();
 
     drawSubs.addAll([
+      // desktop
       _canvasOnMouseDown(brush),
       _documentOnMouseMove(brush),
       _documentOnMouseUp(brush),
+
+      // mobile
+      _canvasOnTouchStart(brush),
+      _documentOnTouchMove(brush),
+      _documentOnTouchEnd(brush),
+
+      // buttons
       _undoBtnOnClick(),
       _clearBtnOnClick(),
       _brushBtnOnClick(),
