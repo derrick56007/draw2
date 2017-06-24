@@ -50,8 +50,8 @@ main(List<String> args) async {
   WordBase.init();
   initDefaultLobbies();
 
-  parser.addOption('clientFiles', defaultsTo: 'build/web/');
   final parser = new ArgParser();
+  parser.addOption('clientFiles', defaultsTo: 'build/web/');
 
   final results = parser.parse(args);
   final clientFiles = results['clientFiles'];
