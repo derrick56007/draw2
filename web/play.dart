@@ -199,9 +199,7 @@ class Play extends Card {
 
   _canvasOnTouchStart(Brush brush) =>
       canvas.onTouchStart.listen((TouchEvent e) {
-        if (e.target == canvas) {
-          e.preventDefault();
-        }
+        e.preventDefault();
 
         final touchPos = _getTouchPos(e);
 
@@ -210,9 +208,7 @@ class Play extends Card {
 
   _documentOnTouchMove(Brush brush) =>
       document.onTouchMove.listen((TouchEvent e) {
-        if (e.target == canvas) {
-          e.preventDefault();
-        }
+        e.preventDefault();
 
         final touchPos = _getTouchPos(e);
 
@@ -221,9 +217,7 @@ class Play extends Card {
 
   _documentOnTouchEnd(Brush brush) =>
       document.onTouchEnd.listen((TouchEvent e) {
-        if (e.target == canvas) {
-          e.preventDefault();
-        }
+        e.preventDefault();
 
         _drawEnd(brush);
       });
