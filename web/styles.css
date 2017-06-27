@@ -11,6 +11,15 @@ html, body {
 
 body {
     padding-top: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+input[type="number"],
+input[type="text"],
+select:focus,
+textarea {
+    font-size: 16px;
 }
 
 #login-card, #lobby-list-card, #create-lobby-card, #password-card {
@@ -72,6 +81,7 @@ body {
     min-height: 350px;
     height: calc(100vh - 160px);
     overflow-y: auto;
+    min-width: 36px;
 }
 
 .chat-item {
@@ -83,6 +93,7 @@ body {
 .player-item {
     padding-left: 10px !important;
     padding-right: 10px !important;
+    min-width: 36px;
 }
 
 .chat-item:hover,

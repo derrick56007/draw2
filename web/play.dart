@@ -22,6 +22,7 @@ import 'main.dart';
 
 part 'draw/brush.dart';
 part 'draw/canvas_helper.dart';
+part 'draw/drop_text.dart';
 part 'draw/hex_color.dart';
 
 part 'panel_left.dart';
