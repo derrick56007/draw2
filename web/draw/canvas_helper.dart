@@ -17,12 +17,12 @@ class CanvasHelper {
 
   CanvasHelper(this.client) {
     client
-      ..on(Message.drawPoint, (x) => drawPoint(new DrawPoint.fromJson(x)))
-      ..on(Message.drawLine, (x) => drawLine(new Point.fromJson(x)))
-      ..on(Message.clearDrawing, (_) => clearDrawing())
-      ..on(Message.undoLast, (_) => undoLast())
-      ..on(Message.fill, (x) => addFillLayer(new FillLayer.fromJson(x)))
-      ..on(Message.existingCanvasLayers, (x) => existingCanvasLayers(x));
+      ..on(MessageType.drawPoint, (x) => drawPoint(new DrawPoint.fromJson(x)))
+      ..on(MessageType.drawLine, (x) => drawLine(new Point.fromJson(x)))
+      ..on(MessageType.clearDrawing, clearDrawing)
+      ..on(MessageType.undoLast, undoLast)
+      ..on(MessageType.fill, (x) => addFillLayer(new FillLayer.fromJson(x)))
+      ..on(MessageType.existingCanvasLayers, existingCanvasLayers);
 
     clearDrawing();
   }
@@ -197,26 +197,29 @@ class CanvasHelper {
   }
 
   existingCanvasLayers(String json) {
+
     canvasLayers.clear();
 
     final layers = JSON.decode(json) as List;
 
     for (var layer in layers) {
+      layer = JSON.decode(layer) as List;
+
+      final toolType = layer[CanvasLayer.toolTypeIndex];
+
       var canvasLayer;
 
-      switch (layer[CanvasLayer.layerTypeIndex]) {
-        case ToolType.BRUSH:
-          canvasLayer = new BrushLayer.fromJson(layer);
-          break;
-        case ToolType.FILL:
-          canvasLayer = new FillLayer.fromJson(layer);
-          break;
-        default:
+      // instantiate layer
+      if (toolType == ToolType.BRUSH.index) {
+        canvasLayer = new BrushLayer.fromJson(layer);
+      } else if (toolType == ToolType.FILL.index) {
+        canvasLayer = new FillLayer.fromJson(layer);
       }
 
-      canvasLayers.add(canvasLayer);
-
-      strokeAllLayers();
+      // stroke if successfully created
+      if (canvasLayer != null) {
+        strokeLayer(canvasLayer);
+      }
     }
   }
 }

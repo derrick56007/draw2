@@ -16,6 +16,7 @@ class Create extends Card {
     });
   }
 
+  @override
   show() {
     hideAllCards();
     createLobbyCard.style.display = '';
@@ -29,6 +30,7 @@ class Create extends Card {
     lobbyNameElement.focus();
   }
 
+  @override
   hide() {
     createLobbyCard.style.display = 'none';
 
@@ -62,6 +64,6 @@ class Create extends Card {
     final lobbyInfo =
         new CreateLobbyInfo(lobbyName, password, hasTimer, maxPlayers);
 
-    client.send(Message.createLobby, lobbyInfo.toJson());
+    client.send(MessageType.createLobby, lobbyInfo.toJson());
   }
 }

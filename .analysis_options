@@ -14,3 +14,9 @@
      - prefer_final_locals
      - prefer_is_empty
      - prefer_is_not_empty
+     - annotate_overrides
+     - valid_regexps
+     - avoid_returning_null
+     - overridden_fields
+     - prefer_conditional_assignment\
+     - prefer_contains

@@ -55,12 +55,12 @@ class Game {
   removeArtist() {
     timer?.cancel();
 
-    currentArtist.send(Message.enableDrawNext, '');
+    currentArtist.send(MessageType.enableDrawNext, '');
     currentArtist = null;
     currentWord = null;
 
     if (artistQueue.isEmpty) {
-      lobby.sendToAll(Message.setCanvasRightLabel, val: 'Click draw next!');
+      lobby.sendToAll(MessageType.setCanvasRightLabel, val: 'Click draw next!');
     } else {
       nextArtist();
     }
@@ -68,7 +68,7 @@ class Game {
 
   nextArtist() {
     startTimer(nextRoundDelay, (Duration elapsed) {
-      lobby.sendToAll(Message.setCanvasRightLabel,
+      lobby.sendToAll(MessageType.setCanvasRightLabel,
           val: 'Next game in ${nextRoundDelay.inSeconds - elapsed.inSeconds}s');
     }, () {
       currentArtist = artistQueue.removeAt(0);
@@ -89,16 +89,16 @@ class Game {
       final currentArtistName = lobby.players[currentArtist];
 
       currentArtist
-        ..send(Message.clearCanvasLabels)
-        ..send(Message.setCanvasLeftLabel, 'You are drawing')
-        ..send(Message.setCanvasMiddleLabel, currentWord)
-        ..send(Message.setAsArtist);
+        ..send(MessageType.clearCanvasLabels)
+        ..send(MessageType.setCanvasLeftLabel, 'You are drawing')
+        ..send(MessageType.setCanvasMiddleLabel, currentWord)
+        ..send(MessageType.setAsArtist);
 
       lobby
-        ..sendToAll(Message.clearCanvasLabels, except: currentArtist)
-        ..sendToAll(Message.setCanvasLeftLabel,
-            val: '$currentArtistName is drawing', except: currentArtist)
-        ..sendToAll(Message.setArtist, except: currentArtist);
+        ..sendToAll(MessageType.clearCanvasLabels, excludedSocket: currentArtist)
+        ..sendToAll(MessageType.setCanvasLeftLabel,
+            val: '$currentArtistName is drawing', excludedSocket: currentArtist)
+        ..sendToAll(MessageType.setArtist, excludedSocket: currentArtist);
 
       if (!hasTimer) return;
 
@@ -114,12 +114,12 @@ class Game {
             (maxGameTime.inSeconds - elapsed.inSeconds)
                 .remainder(Duration.SECONDS_PER_MINUTE));
 
-        lobby.sendToAll(Message.setCanvasRightLabel,
+        lobby.sendToAll(MessageType.setCanvasRightLabel,
             val: 'Time left $twoDigitMinutes:$twoDigitSeconds');
       }, () {
         lobby
-          ..sendToAll(Message.lose)
-          ..sendToAll(Message.setCanvasMiddleLabel,
+          ..sendToAll(MessageType.lose)
+          ..sendToAll(MessageType.setCanvasMiddleLabel,
               val: 'The word was \"$currentWord\"');
 
         removeArtist();
@@ -152,7 +152,7 @@ class Game {
       guesses.removeAt(0);
     }
 
-    lobby.sendToAll(Message.guess, val: guess.toJson());
+    lobby.sendToAll(MessageType.guess, val: guess.toJson());
 
     ////////////// check for win //////////////////
 
@@ -171,7 +171,7 @@ class Game {
         final serverMsg =
             new Guess('Server', '${guess.username}\'s guess was close!');
 
-        lobby.sendToAll(Message.guess, val: serverMsg.toJson());
+        lobby.sendToAll(MessageType.guess, val: serverMsg.toJson());
       }
     }
   }
@@ -181,11 +181,11 @@ class Game {
     scores[socket] += 1;
 
     lobby
-      ..sendToAll(Message.clearCanvasLabels)
-      ..sendToAll(Message.setCanvasMiddleLabel,
+      ..sendToAll(MessageType.clearCanvasLabels)
+      ..sendToAll(MessageType.setCanvasMiddleLabel,
           val: '$username guessed \"$word\" correctly!')
-      ..sendToAll(Message.win)
-      ..sendToAll(Message.updatePlayerScore,
+      ..sendToAll(MessageType.win)
+      ..sendToAll(MessageType.updatePlayerScore,
           val: JSON.encode([username, scores[socket]]));
 
     removeArtist();

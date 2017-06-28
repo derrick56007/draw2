@@ -15,13 +15,8 @@ class Lobby {
     game = new Game(this, hasTimer);
   }
 
-  factory Lobby(CreateLobbyInfo info) {
-    var lobby;
-    lobby = new Lobby._internal(info.name, info.password,
+  factory Lobby(CreateLobbyInfo info) => new Lobby._internal(info.name, info.password,
         info.password.isNotEmpty, info.hasTimer, info.maxPlayers);
-
-    return lobby;
-  }
 
   getInfo() =>
       new LobbyInfo(name, hasPassword, hasTimer, maxPlayers, players.length);
@@ -33,7 +28,7 @@ class Lobby {
       final existingPlayer =
           new ExistingPlayer(existingUsername, game.scores[existingSocket]);
 
-      socket.send(Message.existingPlayer, existingPlayer.toJson());
+      socket.send(MessageType.existingPlayer, existingPlayer.toJson());
     });
 
     // add player to game
@@ -41,36 +36,38 @@ class Lobby {
     game.addPlayer(socket);
 
     // alert other players of new player
-    sendToAll(Message.newPlayer, val: username);
+    sendToAll(MessageType.newPlayer, val: username);
 
     print('$username joined lobby $name');
 
     sendQueueInfo();
     sendPlayerOrder();
 
-    socket.send(Message.clearCanvasLabels);
+    socket.send(MessageType.clearCanvasLabels);
 
     if (game.currentArtist != null) {
       final currentArtistName = players[socket];
 
-      socket.send(Message.setCanvasLeftLabel, '$currentArtistName is drawing');
+      socket.send(
+          MessageType.setCanvasLeftLabel, '$currentArtistName is drawing');
     }
 
     if (game.guesses.isNotEmpty) {
       for (var guess in game.guesses) {
-        socket.send(Message.guess, guess.toJson());
+        socket.send(MessageType.guess, guess.toJson());
       }
     }
 
     if (game.canvasLayers.isNotEmpty) {
-      socket.send(Message.existingCanvasLayers, JSON.encode(game.canvasLayers));
+      socket.send(
+          MessageType.existingCanvasLayers, JSON.encode(game.canvasLayers));
     }
   }
 
   removePlayer(ServerWebSocket socket) {
     final username = players[socket];
 
-    sendToAll(Message.removePlayer, val: username);
+    sendToAll(MessageType.removePlayer, val: username);
 
     print('$username left lobby $name');
 
@@ -79,15 +76,10 @@ class Lobby {
     players.remove(socket);
   }
 
-  sendToAll(String request, {var val, ServerWebSocket except}) {
-    for (var socket in players.keys) {
-      if (socket != except) {
-        if (val != null) {
-          socket.send(request, val);
-        } else {
-          socket.send(request);
-        }
-      }
+  sendToAll(MessageType type, {var val, ServerWebSocket excludedSocket}) {
+    // send to all players in lobby except for the excluded socket
+    for (var socket in players.keys.where((s) => s != excludedSocket)) {
+      socket.send(type, val);
     }
   }
 
@@ -100,7 +92,7 @@ class Lobby {
       list.add([players[socket], i + 1]);
     }
 
-    sendToAll(Message.setQueue, val: JSON.encode(list));
+    sendToAll(MessageType.setQueue, val: JSON.encode(list));
   }
 
   sendPlayerOrder() {
@@ -114,6 +106,6 @@ class Lobby {
       list.add(players[socket]);
     }
 
-    sendToAll(Message.setPlayerOrder, val: JSON.encode(list));
+    sendToAll(MessageType.setPlayerOrder, val: JSON.encode(list));
   }
 }

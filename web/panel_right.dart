@@ -8,7 +8,7 @@ class PanelRight {
   final ClientWebSocket client;
 
   PanelRight(this.client) {
-    client.on(Message.guess, (x) => _guess(x));
+    client.on(MessageType.guess, _guess);
   }
 
   _newChatItem(String username, String text) => new Element.html('''

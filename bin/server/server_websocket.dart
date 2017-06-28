@@ -13,6 +13,7 @@ class ServerWebSocket extends DrawWebSocket {
   factory ServerWebSocket.ugradeRequest(HttpRequest req) =>
       new ServerWebSocket._internal(req);
 
+  @override
   start() async {
     _webSocket = await WebSocketTransformer.upgrade(_req)
       ..listen(onMessageToDispatch);
@@ -20,7 +21,12 @@ class ServerWebSocket extends DrawWebSocket {
     done = _webSocket.done;
   }
 
-  send(String request, [var val = '']) {
-    _webSocket.add(JSON.encode([request, val]));
+  @override
+  send(MessageType type, [var val]) {
+    if (val == null) {
+      _webSocket.add(type.index.toString());
+    } else {
+      _webSocket.add(JSON.encode([type.index, val]));
+    }
   }
 }

@@ -9,7 +9,7 @@ import 'dart:math' hide Point;
 
 import 'common/draw_point.dart';
 import 'common/fill_layer.dart';
-import 'common/message.dart';
+import 'common/message_type.dart';
 import 'common/point.dart';
 import 'common/tool_type.dart';
 import 'common/brush_layer.dart';
@@ -62,17 +62,18 @@ class Play extends Card {
 
   Play(this.client) : cvs = new CanvasHelper(client) {
     client
-      ..on(Message.setAsArtist, (_) => _setAsArtist())
-      ..on(Message.setArtist, (_) => _setArtist())
-      ..on(Message.win, (_) => _win())
-      ..on(Message.lose, (_) => _lose())
-      ..on(Message.setCanvasLeftLabel, (x) => _setCanvasLeftLabel(x))
-      ..on(Message.setCanvasMiddleLabel, (x) => _setCanvasMiddleLabel(x))
-      ..on(Message.setCanvasRightLabel, (x) => _setCanvasRightLabel(x))
-      ..on(Message.clearCanvasLabels, (_) => _clearCanvasLabels())
-      ..on(Message.enableDrawNext, (x) => _enableDrawNext());
+      ..on(MessageType.setAsArtist, _setAsArtist)
+      ..on(MessageType.setArtist, _setArtist)
+      ..on(MessageType.win, _win)
+      ..on(MessageType.lose, _lose)
+      ..on(MessageType.setCanvasLeftLabel, _setCanvasLeftLabel)
+      ..on(MessageType.setCanvasMiddleLabel, _setCanvasMiddleLabel)
+      ..on(MessageType.setCanvasRightLabel, _setCanvasRightLabel)
+      ..on(MessageType.clearCanvasLabels, _clearCanvasLabels)
+      ..on(MessageType.enableDrawNext, _enableDrawNext);
   }
 
+  @override
   show() {
     hideAllCards();
     playCard.style.display = '';
@@ -84,7 +85,7 @@ class Play extends Card {
         final guess = chatInput.value.trim();
 
         if (guess.isNotEmpty) {
-          client.send(Message.guess, guess);
+          client.send(MessageType.guess, guess);
         }
 
         chatInput.value = '';
@@ -94,10 +95,11 @@ class Play extends Card {
 
         drawNextBtn.classes.add('disabled');
 
-        client.send(Message.drawNext);
+        client.send(MessageType.drawNext);
       }));
   }
 
+  @override
   hide() {
     playCard.style.display = 'none';
 
@@ -131,13 +133,13 @@ class Play extends Card {
       final drawPoint = new DrawPoint(color, Brush.defaultSize, brush.pos);
 
       cvs.drawPoint(drawPoint);
-      client.send(Message.drawPoint, drawPoint.toJson());
+      client.send(MessageType.drawPoint, drawPoint.toJson());
 
       timer?.cancel();
       timer = new Timer.periodic(brushInterval, (_) {
         if (brush.moved) {
           cvs.drawLine(brush.pos);
-          client.send(Message.drawLine, brush.pos.toJson());
+          client.send(MessageType.drawLine, brush.pos.toJson());
 
           brush.moved = false;
         }
@@ -149,7 +151,7 @@ class Play extends Card {
       final fillLayer = new FillLayer(pos.x, pos.y, color);
 
       cvs.addFillLayer(fillLayer);
-      client.send(Message.fill, fillLayer.toJson());
+      client.send(MessageType.fill, fillLayer.toJson());
     }
   }
 
@@ -235,12 +237,12 @@ class Play extends Card {
   _undoBtnOnClick() => undoBtn.onClick.listen((_) {
         if (undoBtn.classes.contains('disabled')) return;
 
-        client.send(Message.undoLast);
+        client.send(MessageType.undoLast);
         cvs.undoLast();
       });
 
   _clearBtnOnClick() => clearBtn.onClick.listen((_) {
-        client.send(Message.clearDrawing);
+        client.send(MessageType.clearDrawing);
         cvs.clearDrawing();
       });
 

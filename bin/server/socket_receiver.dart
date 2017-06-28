@@ -25,17 +25,17 @@ class SocketReceiver {
 
   _onStart() {
     socket
-      ..on(Message.login, (x) => _login(x))
-      ..on(Message.createLobby, (x) => _createLobby(x))
-      ..on(Message.enterLobby, (x) => _enterLobby(x))
-      ..on(Message.enterLobbyWithPassword, (x) => _enterLobbyWithPassword(x))
-      ..on(Message.drawNext, (_) => _drawNext())
-      ..on(Message.guess, (x) => _guess(x))
-      ..on(Message.drawPoint, (x) => _drawPoint(x))
-      ..on(Message.drawLine, (x) => _drawLine(x))
-      ..on(Message.clearDrawing, (_) => _clearDrawing())
-      ..on(Message.undoLast, (_) => _undoLast())
-      ..on(Message.fill, (x) => _fill(x));
+      ..on(MessageType.login, _login)
+      ..on(MessageType.createLobby, _createLobby)
+      ..on(MessageType.enterLobby, _enterLobby)
+      ..on(MessageType.enterLobbyWithPassword, _enterLobbyWithPassword)
+      ..on(MessageType.drawNext, _drawNext)
+      ..on(MessageType.guess, _guess)
+      ..on(MessageType.drawPoint, _drawPoint)
+      ..on(MessageType.drawLine, _drawLine)
+      ..on(MessageType.clearDrawing, _clearDrawing)
+      ..on(MessageType.undoLast, _undoLast)
+      ..on(MessageType.fill, _fill);
   }
 
   _onClose() {
@@ -54,7 +54,7 @@ class SocketReceiver {
 
         // tell all players
         for (var sk in gPlayers.keys) {
-          sk.send(Message.lobbyClosed, lobby.name);
+          sk.send(MessageType.lobbyClosed, lobby.name);
         }
       }
     }
@@ -64,29 +64,35 @@ class SocketReceiver {
   }
 
   _login(String username) {
+    // check for null
+    if (username == null || username.isEmpty || username == 'null') {
+      socket.send(MessageType.toast, 'Invalid username');
+      return;
+    }
+
     /////////// check if username exists ///////////
     if (gPlayers.containsValue(username)) {
-      socket.send(Message.toast, 'Username taken');
+      socket.send(MessageType.toast, 'Username taken');
       return;
     }
     ////////////////////////////////////////////////
 
     ///////// check if valid name ////////////////
     if (!isValidLobbyName(username)) {
-      socket.send(Message.toast, 'Invalid username');
+      socket.send(MessageType.toast, 'Invalid username');
       return;
     }
     //////////////////////////////////////////////
 
     gPlayers[socket] = username;
 
-    socket.send(Message.loginSuccesful);
+    socket.send(MessageType.loginSuccesful);
 
     print('$username logged in');
 
     // send lobby info
     for (var lobby in gLobbies.values) {
-      socket.send(Message.lobbyInfo, lobby.getInfo().toJson());
+      socket.send(MessageType.lobbyInfo, lobby.getInfo().toJson());
     }
   }
 
@@ -95,14 +101,14 @@ class SocketReceiver {
 
     ////////// check if lobby exists /////////////
     if (gLobbies.containsKey(createLobbyInfo.name)) {
-      socket.send(Message.toast, 'Lobby already exists');
+      socket.send(MessageType.toast, 'Lobby already exists');
       return;
     }
     //////////////////////////////////////////////
 
     ///////// check if valid name ////////////////
     if (!isValidLobbyName(createLobbyInfo.name)) {
-      socket.send(Message.toast, 'Invalid lobby name');
+      socket.send(MessageType.toast, 'Invalid lobby name');
       return;
     }
     //////////////////////////////////////////////
@@ -113,54 +119,54 @@ class SocketReceiver {
     gLobbies[createLobbyInfo.name] = lobby;
 
     for (var otherSocket in gPlayers.keys) {
-      otherSocket.send(Message.lobbyInfo, lobby.getInfo().toJson());
+      otherSocket.send(MessageType.lobbyInfo, lobby.getInfo().toJson());
     }
 
     gPlayerLobby[socket] = lobby;
     lobby.addPlayer(socket, gPlayers[socket]);
-    socket.send(Message.enterLobbySuccessful, lobby.name);
+    socket.send(MessageType.enterLobbySuccessful, lobby.name);
   }
 
   _enterLobby(String lobbyName) {
     ////////// check if lobby exists ////////////////
     if (!gLobbies.containsKey(lobbyName)) {
-      socket.send(Message.toast, 'Lobby doesn\'t exist');
-      socket.send(Message.enterLobbyFailure);
+      socket.send(MessageType.toast, 'Lobby doesn\'t exist');
+      socket.send(MessageType.enterLobbyFailure);
       return;
     }
 
     final lobby = gLobbies[lobbyName];
 
     if (lobby.hasPassword) {
-      socket.send(Message.requestPassword, lobbyName);
+      socket.send(MessageType.requestPassword, lobbyName);
       return;
     }
 
     gPlayerLobby[socket] = lobby;
     lobby.addPlayer(socket, gPlayers[socket]);
-    socket.send(Message.enterLobbySuccessful, lobbyName);
+    socket.send(MessageType.enterLobbySuccessful, lobbyName);
   }
 
   _enterLobbyWithPassword(String json) {
     final loginInfo = new LoginInfo.fromJson(json);
 
     if (!gLobbies.containsKey(loginInfo.lobbyName)) {
-      socket.send(Message.toast, 'Lobby doesn\'t exist');
-      socket.send(Message.enterLobbyFailure);
+      socket.send(MessageType.toast, 'Lobby doesn\'t exist');
+      socket.send(MessageType.enterLobbyFailure);
       return;
     }
 
     final lobby = gLobbies[loginInfo.lobbyName];
 
     if (lobby.hasPassword && lobby.password != loginInfo.password) {
-      socket.send(Message.toast, 'Password is incorrect');
-      socket.send(Message.enterLobbyFailure);
+      socket.send(MessageType.toast, 'Password is incorrect');
+      socket.send(MessageType.enterLobbyFailure);
       return;
     }
 
     gPlayerLobby[socket] = lobby;
     lobby.addPlayer(socket, gPlayers[socket]);
-    socket.send(Message.enterLobbySuccessful, loginInfo.lobbyName);
+    socket.send(MessageType.enterLobbySuccessful, loginInfo.lobbyName);
   }
 
   _drawNext() {
@@ -185,7 +191,7 @@ class SocketReceiver {
 
     if (lobby == null) return;
 
-    lobby.sendToAll(Message.drawPoint, val: json, except: socket);
+    lobby.sendToAll(MessageType.drawPoint, val: json, excludedSocket: socket);
     lobby.game.drawPoint(json);
   }
 
@@ -194,7 +200,7 @@ class SocketReceiver {
 
     if (lobby == null) return;
 
-    lobby.sendToAll(Message.drawLine, val: json, except: socket);
+    lobby.sendToAll(MessageType.drawLine, val: json, excludedSocket: socket);
     lobby.game.drawLine(json);
   }
 
@@ -203,7 +209,7 @@ class SocketReceiver {
 
     if (lobby == null) return;
 
-    lobby.sendToAll(Message.clearDrawing, except: socket);
+    lobby.sendToAll(MessageType.clearDrawing, excludedSocket: socket);
     lobby.game.clearDrawing();
   }
 
@@ -212,7 +218,7 @@ class SocketReceiver {
 
     if (lobby == null) return;
 
-    lobby.sendToAll(Message.undoLast, except: socket);
+    lobby.sendToAll(MessageType.undoLast, excludedSocket: socket);
     lobby.game.undoLast();
   }
 
@@ -221,7 +227,7 @@ class SocketReceiver {
 
     if (lobby == null) return;
 
-    lobby.sendToAll(Message.fill, val: json, except: socket);
+    lobby.sendToAll(MessageType.fill, val: json, excludedSocket: socket);
     lobby.game.fill(json);
   }
 }

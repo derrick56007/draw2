@@ -28,10 +28,9 @@ class BrushLayer extends CanvasLayer {
     return new BrushLayer(decodedPoints, list[colorIndex], list[sizeIndex]);
   }
 
-  static const layerTypeIndex = 0;
   static const pointsIndex = 1;
   static const colorIndex = 2;
   static const sizeIndex = 3;
 
-  String toJson() => JSON.encode([layerType.index, points, color, size]);
+  String toJson() => JSON.encode([toolType.index, points, color, size]);
 }

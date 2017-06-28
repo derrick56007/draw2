@@ -21,10 +21,9 @@ class FillLayer extends CanvasLayer {
     return new FillLayer(list[xIndex], list[yIndex], list[colorIndex]);
   }
 
-  static const layerTypeIndex = 0;
   static const xIndex = 1;
   static const yIndex = 2;
   static const colorIndex = 3;
 
-  String toJson() => JSON.encode([layerType.index, x, y, color]);
+  String toJson() => JSON.encode([toolType.index, x, y, color]);
 }

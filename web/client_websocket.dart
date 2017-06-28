@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:html';
 
 import 'common/draw_websocket.dart';
+import 'common/message_type.dart';
 
 class ClientWebSocket extends DrawWebSocket {
   WebSocket _webSocket;
@@ -15,6 +16,7 @@ class ClientWebSocket extends DrawWebSocket {
 
   ClientWebSocket() {}
 
+  @override
   start([int retrySeconds = 2]) async {
     var reconnectScheduled = false;
 
@@ -53,7 +55,12 @@ class ClientWebSocket extends DrawWebSocket {
     onError = _webSocket.onError;
   }
 
-  send(String request, [var val = '']) {
-    _webSocket.send(JSON.encode([request, val]));
+  @override
+  send(MessageType type, [var val]) {
+    if (val == null) {
+      _webSocket.send(type.index.toString());
+    } else {
+      _webSocket.send(JSON.encode([type.index, val]));
+    }
   }
 }

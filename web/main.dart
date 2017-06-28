@@ -8,7 +8,7 @@ import 'common/create_lobby_info.dart';
 import 'common/draw_regex.dart';
 import 'common/lobby_info.dart';
 import 'common/login_info.dart';
-import 'common/message.dart';
+import 'common/message_type.dart';
 
 import 'client_websocket.dart';
 import 'play.dart';
@@ -36,7 +36,7 @@ main() async {
 
   login.show();
 
-  client.on(Message.toast, (x) => toast(x));
+  client.on(MessageType.toast, toast);
 }
 
 hideAllCards() {

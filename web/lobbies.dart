@@ -12,17 +12,18 @@ class Lobbies extends Card {
 
   Lobbies(this.client) {
     client
-      ..on(Message.lobbyInfo, (x) => _lobbyInfo(x))
-      ..on(Message.lobbyClosed, (x) => _lobbyClosed(x))
-      ..on(Message.requestPassword, (x) => _requestPassword(x))
-      ..on(Message.enterLobbySuccessful, (x) => _enterLobbySuccessful(x))
-      ..on(Message.enterLobbyFailure, (_) => _enterLobbyFailure());
+      ..on(MessageType.lobbyInfo, _lobbyInfo)
+      ..on(MessageType.lobbyClosed, _lobbyClosed)
+      ..on(MessageType.requestPassword, _requestPassword)
+      ..on(MessageType.enterLobbySuccessful, _enterLobbySuccessful)
+      ..on(MessageType.enterLobbyFailure, _enterLobbyFailure);
 
     querySelector('#create-lobby-card-btn').onClick.listen((_) {
       create.show();
     });
   }
 
+  @override
   show() {
     hideAllCards();
     lobbiesCard.style.display = '';
@@ -34,6 +35,7 @@ class Lobbies extends Card {
     });
   }
 
+  @override
   hide() {
     lobbiesCard.style.display = 'none';
     submitSub?.cancel();
@@ -73,7 +75,7 @@ class Lobbies extends Card {
             
             ${lobbyInfo.name}
           </a>''')
-      ..onClick.listen((_) => client.send(Message.enterLobby, lobbyInfo.name));
+      ..onClick.listen((_) => client.send(MessageType.enterLobby, lobbyInfo.name));
 
     lobbyListCollection.children.add(el);
   }

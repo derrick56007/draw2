@@ -21,5 +21,6 @@ class HexColor {
     return new HexColor._internal(r, g, b);
   }
 
+  @override
   String toString() => '($r,$g,$b)';
 }

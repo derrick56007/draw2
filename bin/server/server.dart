@@ -21,7 +21,7 @@ import '../../web/common/fill_layer.dart';
 import '../../web/common/guess.dart';
 import '../../web/common/lobby_info.dart';
 import '../../web/common/login_info.dart';
-import '../../web/common/message.dart';
+import '../../web/common/message_type.dart';
 import '../../web/common/point.dart';
 
 part '../logic/game.dart';

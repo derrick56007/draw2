@@ -1,9 +1,9 @@
 import 'tool_type.dart';
 
 abstract class CanvasLayer {
-  final ToolType layerType;
+  final ToolType toolType;
 
-  CanvasLayer(this.layerType);
+  CanvasLayer(this.toolType);
 
-  static const layerTypeIndex = 0;
+  static const toolTypeIndex = 0;
 }

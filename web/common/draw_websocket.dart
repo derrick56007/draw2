@@ -1,33 +1,34 @@
 import 'dart:async';
 import 'dart:convert';
+import 'message_type.dart';
 
 abstract class DrawWebSocket {
   static const defaultMessageLength = 2;
-  static const requestIndex = 0;
+  static const messageTypeIndex = 0;
   static const valueIndex = 1;
 
-  Map<String, Function> messageDisatchers = {};
+  final messageDisatchers = new List<Function>(MessageType.values.length);
 
   Future start();
 
-  void on(String request, dynamic action(var data)) {
-    messageDisatchers[request] = action;
+  void on(MessageType type, Function function) {
+    if (messageDisatchers[type.index] != null) {
+      print("warning: overriding message dispatcher ${type.index}");
+    }
+
+    messageDisatchers[type.index] = function;
   }
 
-  void send(String request, var val);
+  void send(MessageType type, [var val]);
 
   void onMessageToDispatch(var data) {
     final msg = JSON.decode(data);
 
     // checks if is [request, data]
-    if (msg is List) {
-      // check if dispatch is valid
-      if (msg.length == defaultMessageLength &&
-          messageDisatchers.containsKey(msg[requestIndex])) {
-        messageDisatchers[msg[requestIndex]](msg[valueIndex]);
-      } else {
-        print('No such dispatch exists!: $msg');
-      }
+    if (msg is List && msg.length == defaultMessageLength) {
+      messageDisatchers[msg[messageTypeIndex]](msg[valueIndex]);
+    } else if (msg is int){
+      messageDisatchers[msg]();
     } else {
       print('No such dispatch exists!: $msg');
     }

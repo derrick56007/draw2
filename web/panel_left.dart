@@ -7,12 +7,12 @@ class PanelLeft {
 
   PanelLeft(this.client) {
     client
-      ..on(Message.newPlayer, (x) => _newPlayer(x, 0))
-      ..on(Message.existingPlayer, (x) => _existingPlayer(x))
-      ..on(Message.removePlayer, (x) => _removePlayer(x))
-      ..on(Message.setQueue, (x) => _setQueue(x))
-      ..on(Message.setPlayerOrder, (x) => _setPlayerOrder(x))
-      ..on(Message.updatePlayerScore, (x) => _updatePlayerScore(x));
+      ..on(MessageType.newPlayer, _newPlayer)
+      ..on(MessageType.existingPlayer, _existingPlayer)
+      ..on(MessageType.removePlayer, _removePlayer)
+      ..on(MessageType.setQueue, _setQueue)
+      ..on(MessageType.setPlayerOrder, _setPlayerOrder)
+      ..on(MessageType.updatePlayerScore, _updatePlayerScore);
   }
 
   _newPlayerItem(String name, int score) => new Element.html('''
@@ -22,8 +22,8 @@ class PanelLeft {
         $name
       </a>''');
 
-  _newPlayer(String name, int score) {
-    final playerItem = _newPlayerItem(name, score);
+  _newPlayer(String name) {
+    final playerItem = _newPlayerItem(name, 0);
 
     playerListCollection.children.add(playerItem);
   }
@@ -31,7 +31,10 @@ class PanelLeft {
   _existingPlayer(String json) {
     final existingPlayer = new ExistingPlayer.fromJson(json);
 
-    _newPlayer(existingPlayer.username, existingPlayer.score);
+    final playerItem =
+        _newPlayerItem(existingPlayer.username, existingPlayer.score);
+
+    playerListCollection.children.add(playerItem);
   }
 
   _removePlayer(String name) {

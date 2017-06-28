@@ -9,13 +9,14 @@ class Login extends Card {
   StreamSubscription submitSub;
 
   Login(this.client) {
-    client.on(Message.loginSuccesful, (_) => _loginSuccesful());
+    client.on(MessageType.loginSuccesful, _loginSuccesful);
 
     querySelector('#login-btn').onClick.listen((_) {
       submit();
     });
   }
 
+  @override
   show() {
     hideAllCards();
     loginCard.style.display = '';
@@ -29,6 +30,7 @@ class Login extends Card {
     });
   }
 
+  @override
   hide() {
     loginCard.style.display = 'none';
     submitSub?.cancel();
@@ -47,7 +49,7 @@ class Login extends Card {
       return;
     }
 
-    client.send(Message.login, username);
+    client.send(MessageType.login, username);
   }
 
   _loginSuccesful() {
@@ -55,7 +57,7 @@ class Login extends Card {
 
     final path = window.location.pathname.substring(1);
     if (Lobbies.isValidLobbyName(path)) {
-      client.send(Message.enterLobby, path);
+      client.send(MessageType.enterLobby, path);
     }
   }
 }

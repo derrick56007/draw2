@@ -51,6 +51,6 @@ class Password {
 
     final loginInfo = new LoginInfo(lobbyName, password);
 
-    client.send(Message.enterLobbyWithPassword, loginInfo.toJson());
+    client.send(MessageType.enterLobbyWithPassword, loginInfo.toJson());
   }
 }
