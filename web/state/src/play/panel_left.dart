@@ -74,4 +74,6 @@ class PanelLeft {
 
     querySelector('#player-$name-score')?.text = '$score';
   }
+
+  clearPlayers() => playerListCollection.children.clear();
 }

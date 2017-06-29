@@ -29,6 +29,7 @@ class SocketReceiver {
       ..on(MessageType.createLobby, _createLobby)
       ..on(MessageType.enterLobby, _enterLobby)
       ..on(MessageType.enterLobbyWithPassword, _enterLobbyWithPassword)
+      ..on(MessageType.exitLobby, _exitLobby)
       ..on(MessageType.drawNext, _drawNext)
       ..on(MessageType.guess, _guess)
       ..on(MessageType.drawPoint, _drawPoint)
@@ -42,22 +43,7 @@ class SocketReceiver {
     // check if player was logged in
     if (!gPlayers.containsKey(socket)) return;
 
-    // check if player was in a lobby
-    if (gPlayerLobby.containsKey(socket)) {
-      final lobby = gPlayerLobby.remove(socket);
-      lobby.removePlayer(socket);
-
-      // close lobby if empty and is not default lobby
-      if (lobby.players.isEmpty && !defaultLobbies.contains(lobby)) {
-        print('closed lobby ${lobby.name}');
-        gLobbies.remove(lobby.name);
-
-        // tell all players
-        for (var sk in gPlayers.keys) {
-          sk.send(MessageType.lobbyClosed, lobby.name);
-        }
-      }
-    }
+    _exitLobby();
 
     final username = gPlayers.remove(socket);
     print('$username logged out');
@@ -167,6 +153,25 @@ class SocketReceiver {
     gPlayerLobby[socket] = lobby;
     lobby.addPlayer(socket, gPlayers[socket]);
     socket.send(MessageType.enterLobbySuccessful, loginInfo.lobbyName);
+  }
+
+  _exitLobby() {
+    // check if player was in a lobby
+    if (gPlayerLobby.containsKey(socket)) {
+      final lobby = gPlayerLobby.remove(socket);
+      lobby.removePlayer(socket);
+
+      // close lobby if empty and is not default lobby
+      if (lobby.players.isEmpty && !defaultLobbies.contains(lobby)) {
+        print('closed lobby ${lobby.name}');
+        gLobbies.remove(lobby.name);
+
+        // tell all players
+        for (var sk in gPlayers.keys) {
+          sk.send(MessageType.lobbyClosed, lobby.name);
+        }
+      }
+    }
   }
 
   _drawNext() {

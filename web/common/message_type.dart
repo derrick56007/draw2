@@ -32,5 +32,6 @@ enum MessageType {
   setQueue,
   enableDrawNext,
   setPlayerOrder,
-  existingCanvasLayers
+  existingCanvasLayers,
+  exitLobby
 }

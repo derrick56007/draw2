@@ -38,14 +38,12 @@ class StateManager {
       return;
     }
 
-    _hideAllStates();
+    _states.forEach((name, state) {
+      if (stateName != name) {
+        state.hide();
+      }
+    });
 
     _states[stateName].show();
-  }
-
-  _hideAllStates() {
-    for (var state in _states.values) {
-      state.hide();
-    }
   }
 }

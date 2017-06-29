@@ -57,7 +57,14 @@ class Play extends State {
 
   ToolType toolType = defaultToolType;
 
-  Play(ClientWebSocket client) : cvs = new CanvasHelper(client), super(client) {
+  final PanelLeft panelLeft;
+  final PanelRight panelRight;
+
+  Play(ClientWebSocket client)
+      : cvs = new CanvasHelper(client),
+        panelLeft = new PanelLeft(client),
+        panelRight = new PanelRight(client),
+        super(client) {
     client
       ..on(MessageType.setAsArtist, _setAsArtist)
       ..on(MessageType.setArtist, _setArtist)
@@ -68,9 +75,6 @@ class Play extends State {
       ..on(MessageType.setCanvasRightLabel, _setCanvasRightLabel)
       ..on(MessageType.clearCanvasLabels, _clearCanvasLabels)
       ..on(MessageType.enableDrawNext, _enableDrawNext);
-
-    new PanelLeft(client);
-    new PanelLeft(client);
   }
 
   @override
@@ -104,6 +108,11 @@ class Play extends State {
 
     _clearPlaySubs();
     _clearDrawSubs();
+
+    panelLeft.clearPlayers();
+    panelRight.clearGuesses();
+
+    client.send(MessageType.exitLobby);
   }
 
   _clearPlaySubs() {

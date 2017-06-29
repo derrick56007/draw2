@@ -17,7 +17,9 @@ class ClientWebSocket extends DrawWebSocket {
   ClientWebSocket() {}
 
   @override
-  start([int retrySeconds = 2]) async {
+  Future start([int retrySeconds = 2]) {
+    final completer = new Completer();
+
     var reconnectScheduled = false;
 
     final host = window.location.host;
@@ -35,6 +37,8 @@ class ClientWebSocket extends DrawWebSocket {
       ..onOpen.listen((Event e) {
         print('connected');
         _connected = true;
+
+        completer.complete();
       })
       ..onMessage.listen((MessageEvent e) {
         onMessageToDispatch(e.data);
@@ -53,6 +57,8 @@ class ClientWebSocket extends DrawWebSocket {
     onOpen = _webSocket.onOpen;
     onClose = _webSocket.onClose;
     onError = _webSocket.onError;
+
+    return completer.future;
   }
 
   @override

@@ -33,4 +33,6 @@ class PanelRight {
     final chatItem = _newChatItem(guess.username, guess.guess);
     _addToChat(chatItem);
   }
+
+  clearGuesses() => chatList.children.clear();
 }

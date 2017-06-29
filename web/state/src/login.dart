@@ -56,8 +56,10 @@ class Login extends State {
     if (!StateManager.shared.keys.contains(lobbyName) &&
         Lobbies.isValidLobbyName(lobbyName)) {
       client.send(MessageType.enterLobby, lobbyName);
-    } else {
-      StateManager.shared.pushState('lobbies');
+
+      return;
     }
+
+    StateManager.shared.pushState('lobbies');
   }
 }

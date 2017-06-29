@@ -22,7 +22,7 @@ main() async {
     'play': new Play(client)
   });
 
-  StateManager.shared.pushState('login');
+  StateManager.shared.pushState('login', '');
 //  panelLeft = new PanelLeft(client);
 //  panelRight = new PanelRight(client);
 //  password = new Password(client);
