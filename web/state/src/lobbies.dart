@@ -1,16 +1,14 @@
-part of client;
+part of state;
 
-class Lobbies extends Card {
+class Lobbies extends State {
   static RegExp lobbyNameRegex = new RegExp(DrawRegExp.lobbyName);
 
   final Element lobbiesCard = querySelector('#lobby-list-card');
   final Element lobbyListCollection = querySelector('#lobby-list-collection');
 
-  final ClientWebSocket client;
-
   StreamSubscription submitSub;
 
-  Lobbies(this.client) {
+  Lobbies(ClientWebSocket client) : super(client) {
     client
       ..on(MessageType.lobbyInfo, _lobbyInfo)
       ..on(MessageType.lobbyClosed, _lobbyClosed)
@@ -19,13 +17,12 @@ class Lobbies extends Card {
       ..on(MessageType.enterLobbyFailure, _enterLobbyFailure);
 
     querySelector('#create-lobby-card-btn').onClick.listen((_) {
-      create.show();
+      StateManager.shared.pushState('create');
     });
   }
 
   @override
   show() {
-    hideAllCards();
     lobbiesCard.style.display = '';
 
     submitSub = window.onKeyPress.listen((KeyboardEvent e) {
@@ -47,7 +44,7 @@ class Lobbies extends Card {
       return;
     }
 
-    create.show();
+    StateManager.shared.pushState('create');
   }
 
   static bool isValidLobbyName(String lobbyName) {
@@ -85,16 +82,17 @@ class Lobbies extends Card {
   }
 
   _requestPassword(String lobbyName) {
-    password.show(lobbyName);
+    // TODO fix
+//    password
+//      ..lobbyName = lobbyName
+//      ..show(lobbyName);
   }
 
   _enterLobbySuccessful(String lobbyName) {
-    window.history.pushState(null, null, '/$lobbyName');
-    play.show();
+    StateManager.shared.pushState('play', lobbyName);
   }
 
   _enterLobbyFailure() {
-    window.history.pushState(null, null, '/');
-    lobbies.show();
+    StateManager.shared.pushState('lobbies');
   }
 }

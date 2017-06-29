@@ -1,24 +1,23 @@
 library play;
 
-import 'common/existing_player.dart';
-import 'common/guess.dart';
+import '../../../common/brush_layer.dart';
+import '../../../common/canvas_layer.dart';
+import '../../../common/draw_point.dart';
+import '../../../common/existing_player.dart';
+import '../../../common/fill_layer.dart';
+import '../../../common/guess.dart';
+import '../../../common/message_type.dart';
+import '../../../common/point.dart';
+import '../../../common/tool_type.dart';
+
+import '../../state.dart';
+import '../../../client_websocket.dart';
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:html' hide Point;
 import 'dart:math' hide Point;
-
-import 'common/draw_point.dart';
-import 'common/fill_layer.dart';
-import 'common/message_type.dart';
-import 'common/point.dart';
-import 'common/tool_type.dart';
-import 'common/brush_layer.dart';
-import 'common/canvas_layer.dart';
-
-import 'card.dart';
-import 'client_websocket.dart';
 import 'dart:typed_data';
-import 'main.dart';
 
 part 'draw/brush.dart';
 part 'draw/canvas_helper.dart';
@@ -28,7 +27,7 @@ part 'draw/hex_color.dart';
 part 'panel_left.dart';
 part 'panel_right.dart';
 
-class Play extends Card {
+class Play extends State {
   static const brushInterval = const Duration(milliseconds: 25);
   static const defaultToolType = ToolType.BRUSH;
 
@@ -52,15 +51,13 @@ class Play extends Card {
   final List<StreamSubscription<MouseEvent>> drawSubs = [];
   final List<StreamSubscription> playSubs = [];
 
-  final ClientWebSocket client;
-
   final CanvasHelper cvs;
 
   Timer timer;
 
   ToolType toolType = defaultToolType;
 
-  Play(this.client) : cvs = new CanvasHelper(client) {
+  Play(ClientWebSocket client) : cvs = new CanvasHelper(client), super(client) {
     client
       ..on(MessageType.setAsArtist, _setAsArtist)
       ..on(MessageType.setArtist, _setArtist)
@@ -71,11 +68,13 @@ class Play extends Card {
       ..on(MessageType.setCanvasRightLabel, _setCanvasRightLabel)
       ..on(MessageType.clearCanvasLabels, _clearCanvasLabels)
       ..on(MessageType.enableDrawNext, _enableDrawNext);
+
+    new PanelLeft(client);
+    new PanelLeft(client);
   }
 
   @override
   show() {
-    hideAllCards();
     playCard.style.display = '';
 
     playSubs

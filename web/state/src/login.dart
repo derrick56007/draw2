@@ -1,14 +1,12 @@
-part of client;
+part of state;
 
-class Login extends Card {
+class Login extends State {
   final Element loginCard = querySelector('#login-card');
   final InputElement usernameElement = querySelector('#username');
 
-  final ClientWebSocket client;
-
   StreamSubscription submitSub;
 
-  Login(this.client) {
+  Login(ClientWebSocket client) : super(client) {
     client.on(MessageType.loginSuccesful, _loginSuccesful);
 
     querySelector('#login-btn').onClick.listen((_) {
@@ -18,7 +16,6 @@ class Login extends Card {
 
   @override
   show() {
-    hideAllCards();
     loginCard.style.display = '';
 
     usernameElement.autofocus = true;
@@ -53,11 +50,14 @@ class Login extends Card {
   }
 
   _loginSuccesful() {
-    lobbies.show();
+    final lobbyName = window.location.pathname.substring(1);
 
-    final path = window.location.pathname.substring(1);
-    if (Lobbies.isValidLobbyName(path)) {
-      client.send(MessageType.enterLobby, path);
+    // make sure lobby is not a state name
+    if (!StateManager.shared.keys.contains(lobbyName) &&
+        Lobbies.isValidLobbyName(lobbyName)) {
+      client.send(MessageType.enterLobby, lobbyName);
+    } else {
+      StateManager.shared.pushState('lobbies');
     }
   }
 }

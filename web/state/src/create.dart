@@ -1,24 +1,22 @@
-part of client;
+part of state;
 
-class Create extends Card {
+class Create extends State {
   final Element createLobbyCard = querySelector('#create-lobby-card');
   final InputElement lobbyNameElement = querySelector('#lobby-name');
   StreamSubscription submitSub;
-  ClientWebSocket client;
 
-  Create(this.client) {
+  Create(ClientWebSocket client) : super(client) {
     querySelector('#create-lobby-btn').onClick.listen((_) {
       submit();
     });
 
     querySelector('#back-to-lobbies-list-btn').onClick.listen((_) {
-      lobbies.show();
+      StateManager.shared.pushState('lobbies');
     });
   }
 
   @override
   show() {
-    hideAllCards();
     createLobbyCard.style.display = '';
 
     submitSub = window.onKeyPress.listen((KeyboardEvent e) {

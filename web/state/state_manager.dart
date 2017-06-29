@@ -1,0 +1,51 @@
+part of state;
+
+class StateManager {
+  static final shared = new StateManager._internal();
+
+  final _states = <String, State>{};
+
+  StateManager._internal() {
+    window.onPopState.listen((PopStateEvent e) {
+      final stateName = e.state.toString();
+
+      _showState(stateName);
+    });
+  }
+
+  Iterable<String> get keys => _states.keys;
+
+  addAll(Map<String, State> states) => _states.addAll(states);
+
+  pushState(String stateName, [String path]) {
+    if (!_states.containsKey(stateName)) {
+      print('No such state!');
+      return;
+    }
+
+    if (path == null) {
+      window.history.pushState(stateName, null, stateName);
+    } else {
+      window.history.pushState(stateName, null, path);
+    }
+
+    _showState(stateName);
+  }
+
+  _showState(String stateName) {
+    if (!_states.containsKey(stateName)) {
+      print('No such state!');
+      return;
+    }
+
+    _hideAllStates();
+
+    _states[stateName].show();
+  }
+
+  _hideAllStates() {
+    for (var state in _states.values) {
+      state.hide();
+    }
+  }
+}

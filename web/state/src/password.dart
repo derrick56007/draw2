@@ -1,5 +1,6 @@
-part of client;
+part of state;
 
+// todo remove from states
 class Password {
   final Element passwordCard = querySelector('#password-card');
   final InputElement passwordField = querySelector('#enter-lobby-password');
@@ -16,10 +17,7 @@ class Password {
     });
   }
 
-  show(String _lobbyName) {
-    lobbyName = _lobbyName;
-
-    hideAllCards();
+  show() {
     passwordCard.style.display = '';
 
     passwordField.autofocus = true;
