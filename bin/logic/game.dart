@@ -55,7 +55,7 @@ class Game {
   removeArtist() {
     timer?.cancel();
 
-    currentArtist.send(MessageType.enableDrawNext, '');
+    currentArtist.send(MessageType.enableDrawNext);
     currentArtist = null;
     currentWord = null;
 
@@ -95,7 +95,8 @@ class Game {
         ..send(MessageType.setAsArtist);
 
       lobby
-        ..sendToAll(MessageType.clearCanvasLabels, excludedSocket: currentArtist)
+        ..sendToAll(MessageType.clearCanvasLabels,
+            excludedSocket: currentArtist)
         ..sendToAll(MessageType.setCanvasLeftLabel,
             val: '$currentArtistName is drawing', excludedSocket: currentArtist)
         ..sendToAll(MessageType.setArtist, excludedSocket: currentArtist);
@@ -116,14 +117,7 @@ class Game {
 
         lobby.sendToAll(MessageType.setCanvasRightLabel,
             val: 'Time left $twoDigitMinutes:$twoDigitSeconds');
-      }, () {
-        lobby
-          ..sendToAll(MessageType.lose)
-          ..sendToAll(MessageType.setCanvasMiddleLabel,
-              val: 'The word was \"$currentWord\"');
-
-        removeArtist();
-      });
+      }, () => onLose(currentWord));
     });
   }
 
@@ -187,6 +181,15 @@ class Game {
       ..sendToAll(MessageType.win)
       ..sendToAll(MessageType.updatePlayerScore,
           val: JSON.encode([username, scores[socket]]));
+
+    removeArtist();
+  }
+
+  onLose(String word) {
+    lobby
+      ..sendToAll(MessageType.lose)
+      ..sendToAll(MessageType.setCanvasMiddleLabel,
+          val: 'The word was \"$currentWord\"');
 
     removeArtist();
   }
