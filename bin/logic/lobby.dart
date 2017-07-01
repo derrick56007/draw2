@@ -8,15 +8,20 @@ class Lobby {
   final int maxPlayers;
   final Map<ServerWebSocket, String> players = {};
 
+  final bool isDefault;
+
   Game game;
 
-  Lobby._internal(this.name, this.password, this.hasPassword, this.hasTimer,
-      this.maxPlayers) {
+  Lobby(this.name,
+      {this.password = '', this.hasTimer = true, this.maxPlayers = 15, this.isDefault = false})
+      : hasPassword = password.isNotEmpty {
     game = new Game(this, hasTimer);
   }
 
-  factory Lobby(CreateLobbyInfo info) => new Lobby._internal(info.name, info.password,
-        info.password.isNotEmpty, info.hasTimer, info.maxPlayers);
+  factory Lobby.fromInfo(CreateLobbyInfo info) => new Lobby(info.name,
+      password: info.password,
+      hasTimer: info.hasTimer,
+      maxPlayers: info.maxPlayers);
 
   getInfo() =>
       new LobbyInfo(name, hasPassword, hasTimer, maxPlayers, players.length);

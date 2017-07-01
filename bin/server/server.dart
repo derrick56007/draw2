@@ -27,14 +27,10 @@ import '../../web/common/point.dart';
 part '../logic/game.dart';
 part '../logic/lobby.dart';
 part '../logic/word_similarity.dart';
+
+part '../server/login_manager.dart';
 part '../server/server_websocket.dart';
 part '../server/socket_receiver.dart';
-
-var gLobbies = <String, Lobby>{};
-var gPlayers = <ServerWebSocket, String>{};
-var gPlayerLobby = <ServerWebSocket, Lobby>{};
-
-var defaultLobbies = <Lobby>[];
 
 var lobbyNameRegex = new RegExp(DrawRegExp.lobbyName);
 
@@ -48,7 +44,9 @@ main(List<String> args) async {
   }
 
   WordBase.init();
-  initDefaultLobbies();
+
+  final loginManager = new LoginManager();
+  createDefaultLobbies(loginManager);
 
   final parser = new ArgParser();
   parser.addOption('clientFiles', defaultsTo: 'build/web/');
@@ -87,7 +85,7 @@ main(List<String> args) async {
     if (WebSocketTransformer.isUpgradeRequest(request)) {
       final socket = new ServerWebSocket.ugradeRequest(request);
 
-      new SocketReceiver.handle(socket);
+      new SocketReceiver.handle(socket, loginManager);
 
       continue;
     }
@@ -100,20 +98,17 @@ main(List<String> args) async {
   }
 }
 
+// TODO move this somewhere more relevant
 bool isValidLobbyName(String lobbyName) {
   final lobbyMatches = lobbyNameRegex.firstMatch(lobbyName);
 
   return lobbyMatches != null && lobbyMatches[0] == lobbyName;
 }
 
-initDefaultLobbies() {
-  final createLobbyInfo1 = const CreateLobbyInfo('lobby1', '', true, 15);
-  final createLobbyInfo2 = const CreateLobbyInfo('lobby2', '', true, 15);
-  final createLobbyInfo3 = const CreateLobbyInfo('lobby3', '', true, 15);
-
-  gLobbies[createLobbyInfo1.name] = new Lobby(createLobbyInfo1);
-  gLobbies[createLobbyInfo2.name] = new Lobby(createLobbyInfo2);
-  gLobbies[createLobbyInfo3.name] = new Lobby(createLobbyInfo3);
-
-  defaultLobbies.addAll(gLobbies.values);
+createDefaultLobbies(LoginManager loginManager) {
+  loginManager
+    ..addLobby(new Lobby('lobby1'))
+    ..addLobby(new Lobby('lobby2'))
+    ..addLobby(new Lobby('lobby3'))
+    ..addLobby(new Lobby('lobby4'));
 }
