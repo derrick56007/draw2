@@ -1,9 +1,18 @@
 part of server;
 
 class LoginManager {
+  // shared instance
+  static final _shared = new LoginManager._internal();
+
   var _lobbies = <String, Lobby>{};
   var _socketForUsername = <ServerWebSocket, String>{};
   var _socketForLobby = <ServerWebSocket, Lobby>{};
+
+  // create singleton
+  LoginManager._internal();
+
+  // return singleton
+  static getSharedInstance() => _shared;
 
   // returns true if socket is logged in
   bool containsSocket(ServerWebSocket socket) =>
@@ -27,12 +36,21 @@ class LoginManager {
   String usernameFromSocket(ServerWebSocket socket) =>
       _socketForUsername[socket];
 
+  // get all sockets
+  getSockets() => _socketForUsername.keys;
+
+  // get all lobbies
+  getLobbies() => _lobbies.values;
+
+  // get all usernames
+  getUsernames() => _socketForUsername.values;
+
   // add lobby and alert others of new lobby
   addLobby(Lobby lobby) {
     _lobbies[lobby.name] = lobby;
 
     // send lobby info to others
-    for (var socket in _socketForUsername.keys) {
+    for (var socket in getSockets()) {
       socket.send(MessageType.lobbyInfo, lobby.getInfo().toJson());
     }
   }
@@ -72,7 +90,7 @@ class LoginManager {
 
     // TODO have the client request the info
     // send lobby info
-    for (var lobby in _lobbies.values) {
+    for (var lobby in getLobbies()) {
       socket.send(MessageType.lobbyInfo, lobby.getInfo().toJson());
     }
   }
@@ -106,7 +124,8 @@ class LoginManager {
 
     _socketForLobby[socket] = lobby;
     lobby.addPlayer(socket, _socketForUsername[socket]);
-    socket.send(MessageType.enterLobbySuccessful, lobby.name);  }
+    socket.send(MessageType.enterLobbySuccessful, lobby.name);
+  }
 
   // enter lobby
   enterLobby(ServerWebSocket socket, String lobbyName) {
@@ -160,14 +179,14 @@ class LoginManager {
     lobby.removePlayer(socket);
 
     // check for empty lobby, ignore if default lobby
-    if (lobby.players.isNotEmpty || lobby.isDefault) return;
+    if (lobby._players.isNotEmpty || lobby.isDefault) return;
 
     // remove empty lobby
     _lobbies.remove(lobby.name);
     print('closed lobby ${lobby.name}');
 
     // alert players of closed lobby
-    for (var socket in _socketForUsername.keys) {
+    for (var socket in getSockets()) {
       socket.send(MessageType.lobbyClosed, lobby.name);
     }
   }

@@ -1,14 +1,13 @@
 part of server;
 
 class SocketReceiver {
-  final LoginManager loginManager;
-  final ServerWebSocket socket;
+  final LoginManager _loginManager = LoginManager.getSharedInstance();
+  final ServerWebSocket _socket;
 
-  SocketReceiver._internal(this.socket, this.loginManager);
+  SocketReceiver._internal(this._socket);
 
-  factory SocketReceiver.handle(
-      ServerWebSocket socket, LoginManager loginManager) {
-    final sr = new SocketReceiver._internal(socket, loginManager);
+  factory SocketReceiver.handle(ServerWebSocket socket) {
+    final sr = new SocketReceiver._internal(socket);
 
     sr._init();
 
@@ -16,17 +15,17 @@ class SocketReceiver {
   }
 
   _init() async {
-    await socket.start();
+    await _socket.start();
 
     _onStart();
 
-    await socket.done;
+    await _socket.done;
 
     _onClose();
   }
 
   _onStart() {
-    socket
+    _socket
       ..on(MessageType.login, _login)
       ..on(MessageType.createLobby, _createLobby)
       ..on(MessageType.enterLobby, _enterLobby)
@@ -42,92 +41,92 @@ class SocketReceiver {
   }
 
   _onClose() {
-    loginManager.logoutSocket(socket);
+    _loginManager.logoutSocket(_socket);
   }
 
   _login(String username) {
-    loginManager.loginSocket(socket, username);
+    _loginManager.loginSocket(_socket, username);
   }
 
   _createLobby(String json) {
     final info = new CreateLobbyInfo.fromJson(json);
 
-    loginManager.createLobby(socket, info);
+    _loginManager.createLobby(_socket, info);
   }
 
   _enterLobby(String lobbyName) {
-    loginManager.enterLobby(socket, lobbyName);
+    _loginManager.enterLobby(_socket, lobbyName);
   }
 
   _enterLobbyWithPassword(String json) {
     final info = new LoginInfo.fromJson(json);
 
-    loginManager.enterSecureLobby(socket, info);
+    _loginManager.enterSecureLobby(_socket, info);
   }
 
   _exitLobby() {
-    loginManager.exitLobby(socket);
+    _loginManager.exitLobby(_socket);
   }
 
   _drawNext() {
-    if (!loginManager.containsSocket(socket)) return;
+    if (!_loginManager.containsSocket(_socket)) return;
 
-    final lobby = loginManager.lobbyFromSocket(socket);
-    lobby.game.addToQueue(socket);
+    final lobby = _loginManager.lobbyFromSocket(_socket);
+    lobby.game.addToQueue(_socket);
   }
 
   _guess(String json) {
-    if (!loginManager.containsSocket(socket)) return;
+    if (!_loginManager.containsSocket(_socket)) return;
 
-    final lobby = loginManager.lobbyFromSocket(socket);
+    final lobby = _loginManager.lobbyFromSocket(_socket);
 
-    final guess = new Guess(loginManager.usernameFromSocket(socket), json);
+    final guess = new Guess(_loginManager.usernameFromSocket(_socket), json);
 
-    lobby.game.onGuess(socket, guess);
+    lobby.game.onGuess(_socket, guess);
   }
 
   _drawPoint(String json) {
-    final lobby = loginManager.lobbyFromSocket(socket);
+    final lobby = _loginManager.lobbyFromSocket(_socket);
 
     if (lobby == null) return;
 
-    lobby.sendToAll(MessageType.drawPoint, val: json, excludedSocket: socket);
+    lobby.sendToAll(MessageType.drawPoint, val: json, excludedSocket: _socket);
     lobby.game.drawPoint(json);
   }
 
   _drawLine(String json) {
-    final lobby = loginManager.lobbyFromSocket(socket);
+    final lobby = _loginManager.lobbyFromSocket(_socket);
 
     if (lobby == null) return;
 
-    lobby.sendToAll(MessageType.drawLine, val: json, excludedSocket: socket);
+    lobby.sendToAll(MessageType.drawLine, val: json, excludedSocket: _socket);
     lobby.game.drawLine(json);
   }
 
   _clearDrawing() {
-    final lobby = loginManager.lobbyFromSocket(socket);
+    final lobby = _loginManager.lobbyFromSocket(_socket);
 
     if (lobby == null) return;
 
-    lobby.sendToAll(MessageType.clearDrawing, excludedSocket: socket);
+    lobby.sendToAll(MessageType.clearDrawing, excludedSocket: _socket);
     lobby.game.clearDrawing();
   }
 
   _undoLast() {
-    final lobby = loginManager.lobbyFromSocket(socket);
+    final lobby = _loginManager.lobbyFromSocket(_socket);
 
     if (lobby == null) return;
 
-    lobby.sendToAll(MessageType.undoLast, excludedSocket: socket);
+    lobby.sendToAll(MessageType.undoLast, excludedSocket: _socket);
     lobby.game.undoLast();
   }
 
   _fill(String json) {
-    final lobby = loginManager.lobbyFromSocket(socket);
+    final lobby = _loginManager.lobbyFromSocket(_socket);
 
     if (lobby == null) return;
 
-    lobby.sendToAll(MessageType.fill, val: json, excludedSocket: socket);
+    lobby.sendToAll(MessageType.fill, val: json, excludedSocket: _socket);
     lobby.game.fill(json);
   }
 }

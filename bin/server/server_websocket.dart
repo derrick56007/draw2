@@ -1,17 +1,13 @@
 part of server;
 
 class ServerWebSocket extends DrawWebSocket {
+  final HttpRequest _req;
+
   WebSocket _webSocket;
-  HttpRequest _req;
 
-  Future<dynamic> done;
+  Future done;
 
-  ServerWebSocket._internal(HttpRequest req) {
-    _req = req;
-  }
-
-  factory ServerWebSocket.ugradeRequest(HttpRequest req) =>
-      new ServerWebSocket._internal(req);
+  ServerWebSocket.ugradeRequest(this._req);
 
   @override
   start() async {

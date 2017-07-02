@@ -32,7 +32,7 @@ part '../server/login_manager.dart';
 part '../server/server_websocket.dart';
 part '../server/socket_receiver.dart';
 
-var lobbyNameRegex = new RegExp(DrawRegExp.lobbyName);
+final lobbyNameRegex = new RegExp(DrawRegExp.lobbyName);
 
 main(List<String> args) async {
   int port;
@@ -45,8 +45,7 @@ main(List<String> args) async {
 
   WordBase.init();
 
-  final loginManager = new LoginManager();
-  createDefaultLobbies(loginManager);
+  createDefaultLobbies();
 
   final parser = new ArgParser();
   parser.addOption('clientFiles', defaultsTo: 'build/web/');
@@ -85,7 +84,7 @@ main(List<String> args) async {
     if (WebSocketTransformer.isUpgradeRequest(request)) {
       final socket = new ServerWebSocket.ugradeRequest(request);
 
-      new SocketReceiver.handle(socket, loginManager);
+      new SocketReceiver.handle(socket);
 
       continue;
     }
@@ -105,8 +104,8 @@ bool isValidLobbyName(String lobbyName) {
   return lobbyMatches != null && lobbyMatches[0] == lobbyName;
 }
 
-createDefaultLobbies(LoginManager loginManager) {
-  loginManager
+createDefaultLobbies() {
+  LoginManager.getSharedInstance()
     ..addLobby(new Lobby('lobby1'))
     ..addLobby(new Lobby('lobby2'))
     ..addLobby(new Lobby('lobby3'))

@@ -6,14 +6,17 @@ class Lobby {
   final bool hasPassword;
   final bool hasTimer;
   final int maxPlayers;
-  final Map<ServerWebSocket, String> players = {};
+  final Map<ServerWebSocket, String> _players = {};
 
   final bool isDefault;
 
   Game game;
 
   Lobby(this.name,
-      {this.password = '', this.hasTimer = true, this.maxPlayers = 15, this.isDefault = false})
+       {this.password = '',
+        this.hasTimer = true,
+        this.maxPlayers = 15,
+        this.isDefault = false})
       : hasPassword = password.isNotEmpty {
     game = new Game(this, hasTimer);
   }
@@ -24,11 +27,11 @@ class Lobby {
       maxPlayers: info.maxPlayers);
 
   getInfo() =>
-      new LobbyInfo(name, hasPassword, hasTimer, maxPlayers, players.length);
+      new LobbyInfo(name, hasPassword, hasTimer, maxPlayers, _players.length);
 
   addPlayer(ServerWebSocket socket, String username) {
     // send info of existing players to the new player
-    players.forEach((ServerWebSocket existingSocket, String existingUsername) {
+    _players.forEach((ServerWebSocket existingSocket, String existingUsername) {
       // player info
       final existingPlayer =
           new ExistingPlayer(existingUsername, game.scores[existingSocket]);
@@ -37,7 +40,7 @@ class Lobby {
     });
 
     // add player to game
-    players[socket] = username;
+    _players[socket] = username;
     game.addPlayer(socket);
 
     // alert other players of new player
@@ -51,7 +54,7 @@ class Lobby {
     socket.send(MessageType.clearCanvasLabels);
 
     if (game.currentArtist != null) {
-      final currentArtistName = players[socket];
+      final currentArtistName = _players[socket];
 
       socket.send(
           MessageType.setCanvasLeftLabel, '$currentArtistName is drawing');
@@ -70,7 +73,7 @@ class Lobby {
   }
 
   removePlayer(ServerWebSocket socket) {
-    final username = players[socket];
+    final username = _players[socket];
 
     sendToAll(MessageType.removePlayer, val: username);
 
@@ -78,12 +81,12 @@ class Lobby {
 
     game.removePlayer(socket);
 
-    players.remove(socket);
+    _players.remove(socket);
   }
 
   sendToAll(MessageType type, {var val, ServerWebSocket excludedSocket}) {
     // send to all players in lobby except for the excluded socket
-    for (var socket in players.keys.where((s) => s != excludedSocket)) {
+    for (var socket in _players.keys.where((s) => s != excludedSocket)) {
       socket.send(type, val);
     }
   }
@@ -94,23 +97,38 @@ class Lobby {
     for (var i = 0; i < game.artistQueue.length; i++) {
       final socket = game.artistQueue[i];
 
-      list.add([players[socket], i + 1]);
+      final username = usernameFromSocket(socket);
+
+      list.add([username, i + 1]);
     }
 
     sendToAll(MessageType.setQueue, val: JSON.encode(list));
   }
 
   sendPlayerOrder() {
-    final list = [];
+    final list = <String>[];
 
+    // current artist will be first in the list
     if (game.currentArtist != null) {
-      list.add(players[game.currentArtist]);
+      final username = usernameFromSocket(game.currentArtist);
+
+      list.add(username);
     }
 
+    // add the rest of the artist queue
     for (var socket in game.artistQueue) {
-      list.add(players[socket]);
+      final username = usernameFromSocket(socket);
+
+      list.add(username);
+    }
+
+    // prevent sending empty list
+    if (list.isEmpty) {
+      return;
     }
 
     sendToAll(MessageType.setPlayerOrder, val: JSON.encode(list));
   }
+
+  usernameFromSocket(ServerWebSocket socket) => _players[socket];
 }
