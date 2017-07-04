@@ -79,8 +79,9 @@ main(List<String> args) async {
 
     final path = request.uri.path.trim();
 
-    final hasLobby = isValidLobbyName(path.substring(1));
+    final pathHasValidLobbyName = ValidateString.isValidLobbyName(path.substring(1));
 
+    // handle websocket connection
     if (WebSocketTransformer.isUpgradeRequest(request)) {
       final socket = new ServerWebSocket.ugradeRequest(request);
 
@@ -89,19 +90,13 @@ main(List<String> args) async {
       continue;
     }
 
-    if (hasLobby) {
+    // handle path with lobby name
+    if (pathHasValidLobbyName) {
       staticFiles.serveFile(defaultPage, request);
     } else {
       staticFiles.serveRequest(request);
     }
   }
-}
-
-// TODO move this somewhere more relevant
-bool isValidLobbyName(String lobbyName) {
-  final lobbyMatches = lobbyNameRegex.firstMatch(lobbyName);
-
-  return lobbyMatches != null && lobbyMatches[0] == lobbyName;
 }
 
 createDefaultLobbies() {
