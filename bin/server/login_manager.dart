@@ -106,7 +106,7 @@ class LoginManager {
   // create lobby from info
   createLobby(ServerWebSocket socket, CreateLobbyInfo info) {
     // check if lobby name already exists
-    if (_lobbies.containsKey(info.name)) {
+    if (_lobbies.containsKey(info.lobbyName)) {
       socket.send(MessageType.toast, 'Lobby already exists');
       return;
     }
