@@ -21,7 +21,7 @@ class Lobby {
     game = new Game(this, hasTimer);
   }
 
-  factory Lobby.fromInfo(CreateLobbyInfo info) => new Lobby(info.name,
+  factory Lobby.fromInfo(CreateLobbyInfo info) => new Lobby(info.lobbyName,
       password: info.password,
       hasTimer: info.hasTimer,
       maxPlayers: info.maxPlayers);
