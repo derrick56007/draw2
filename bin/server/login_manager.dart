@@ -2,7 +2,7 @@ part of server;
 
 class LoginManager {
   // shared instance
-  static final _shared = new LoginManager._internal();
+  static final shared = new LoginManager._internal();
 
   var _lobbies = <String, Lobby>{};
   var _socketForUsername = <ServerWebSocket, String>{};
@@ -10,9 +10,6 @@ class LoginManager {
 
   // create singleton
   LoginManager._internal();
-
-  // return singleton
-  static getSharedInstance() => _shared;
 
   // returns true if socket is logged in
   bool containsSocket(ServerWebSocket socket) =>

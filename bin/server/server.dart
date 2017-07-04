@@ -105,7 +105,7 @@ bool isValidLobbyName(String lobbyName) {
 }
 
 createDefaultLobbies() {
-  LoginManager.getSharedInstance()
+  LoginManager.shared
     ..addLobby(new Lobby('lobby1'))
     ..addLobby(new Lobby('lobby2'))
     ..addLobby(new Lobby('lobby3'))
