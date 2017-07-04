@@ -1,7 +1,7 @@
 part of server;
 
 class SocketReceiver {
-  final LoginManager _loginManager = LoginManager.getSharedInstance();
+  static final LoginManager _loginManager = LoginManager.shared;
   final ServerWebSocket _socket;
 
   SocketReceiver._internal(this._socket);
