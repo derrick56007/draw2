@@ -66,7 +66,7 @@ class LoginManager {
     }
 
     // check if valid name
-    if (!isValidLobbyName(username)) {
+    if (!ValidateString.isValidUsername(username)) {
       socket.send(MessageType.toast, 'Invalid username');
       return;
     }
@@ -111,7 +111,7 @@ class LoginManager {
       return;
     }
 
-    if (!isValidLobbyName(info.name)) {
+    if (!ValidateString.isValidLobbyName(info.lobbyName)) {
       socket.send(MessageType.toast, 'Invalid lobby name');
       return;
     }

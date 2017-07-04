@@ -31,8 +31,8 @@ part '../logic/word_similarity.dart';
 part '../server/login_manager.dart';
 part '../server/server_websocket.dart';
 part '../server/socket_receiver.dart';
+part '../server/validate_string.dart';
 
-final lobbyNameRegex = new RegExp(DrawRegExp.lobbyName);
 
 main(List<String> args) async {
   int port;
