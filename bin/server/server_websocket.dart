@@ -6,9 +6,7 @@ class ServerWebSocket extends DrawWebSocket {
 
   Future<dynamic> done;
 
-  ServerWebSocket._internal(HttpRequest req) {
-    _req = req;
-  }
+  ServerWebSocket._internal(this._req);
 
   factory ServerWebSocket.ugradeRequest(HttpRequest req) =>
       new ServerWebSocket._internal(req);
