@@ -86,7 +86,8 @@ class Game {
       // TODO check for end game
       currentWord = words.list.removeLast();
 
-      final currentArtistName = lobby._players[currentArtist];
+      final currentArtistName =
+          LoginManager.shared.usernameFromSocket(currentArtist);
 
       currentArtist
         ..send(MessageType.clearCanvasLabels)
