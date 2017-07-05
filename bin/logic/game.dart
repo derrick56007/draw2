@@ -86,7 +86,7 @@ class Game {
       // TODO check for end game
       currentWord = words.list.removeLast();
 
-      final currentArtistName = lobby.players[currentArtist];
+      final currentArtistName = lobby._players[currentArtist];
 
       currentArtist
         ..send(MessageType.clearCanvasLabels)

@@ -14,7 +14,7 @@ class ClientWebSocket extends DrawWebSocket {
 
   Stream<Event> onOpen, onClose, onError;
 
-  ClientWebSocket() {}
+  ClientWebSocket();
 
   @override
   Future start([int retrySeconds = 2]) {

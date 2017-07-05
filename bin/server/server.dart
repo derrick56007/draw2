@@ -27,16 +27,12 @@ import '../../web/common/point.dart';
 part '../logic/game.dart';
 part '../logic/lobby.dart';
 part '../logic/word_similarity.dart';
+
+part '../server/login_manager.dart';
 part '../server/server_websocket.dart';
 part '../server/socket_receiver.dart';
+part '../server/validate_string.dart';
 
-var gLobbies = <String, Lobby>{};
-var gPlayers = <ServerWebSocket, String>{};
-var gPlayerLobby = <ServerWebSocket, Lobby>{};
-
-var defaultLobbies = <Lobby>[];
-
-var lobbyNameRegex = new RegExp(DrawRegExp.lobbyName);
 
 main(List<String> args) async {
   int port;
@@ -48,7 +44,8 @@ main(List<String> args) async {
   }
 
   WordBase.init();
-  initDefaultLobbies();
+
+  createDefaultLobbies();
 
   final parser = new ArgParser();
   parser.addOption('clientFiles', defaultsTo: 'build/web/');
@@ -82,8 +79,9 @@ main(List<String> args) async {
 
     final path = request.uri.path.trim();
 
-    final hasLobby = isValidLobbyName(path.substring(1));
+    final pathHasValidLobbyName = ValidateString.isValidLobbyName(path.substring(1));
 
+    // handle websocket connection
     if (WebSocketTransformer.isUpgradeRequest(request)) {
       final socket = new ServerWebSocket.ugradeRequest(request);
 
@@ -92,7 +90,8 @@ main(List<String> args) async {
       continue;
     }
 
-    if (hasLobby) {
+    // handle path with lobby name
+    if (pathHasValidLobbyName) {
       staticFiles.serveFile(defaultPage, request);
     } else {
       staticFiles.serveRequest(request);
@@ -100,20 +99,10 @@ main(List<String> args) async {
   }
 }
 
-bool isValidLobbyName(String lobbyName) {
-  final lobbyMatches = lobbyNameRegex.firstMatch(lobbyName);
-
-  return lobbyMatches != null && lobbyMatches[0] == lobbyName;
-}
-
-initDefaultLobbies() {
-  final createLobbyInfo1 = const CreateLobbyInfo('lobby1', '', true, 15);
-  final createLobbyInfo2 = const CreateLobbyInfo('lobby2', '', true, 15);
-  final createLobbyInfo3 = const CreateLobbyInfo('lobby3', '', true, 15);
-
-  gLobbies[createLobbyInfo1.name] = new Lobby(createLobbyInfo1);
-  gLobbies[createLobbyInfo2.name] = new Lobby(createLobbyInfo2);
-  gLobbies[createLobbyInfo3.name] = new Lobby(createLobbyInfo3);
-
-  defaultLobbies.addAll(gLobbies.values);
+createDefaultLobbies() {
+  LoginManager.shared
+    ..addLobby(new Lobby('lobby1'))
+    ..addLobby(new Lobby('lobby2'))
+    ..addLobby(new Lobby('lobby3'))
+    ..addLobby(new Lobby('lobby4'));
 }
