@@ -5,11 +5,8 @@ class ServerWebSocket extends DrawWebSocket {
 
   WebSocket _webSocket;
 
-<<<<<<< HEAD
   ServerWebSocket._internal(this._req);
-=======
   Future done;
->>>>>>> 498dcfb951e9f6562814253bb1fcebda64401eca
 
   ServerWebSocket.ugradeRequest(this._req);
 

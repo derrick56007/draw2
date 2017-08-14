@@ -73,7 +73,7 @@ class Lobby {
   }
 
   removePlayer(ServerWebSocket socket) {
-    final username = _players[socket];
+    final username = LoginManager.shared.usernameFromSocket(socket);
 
     sendToAll(MessageType.removePlayer, val: username);
 

@@ -81,11 +81,12 @@ class Lobbies extends State {
     querySelector('#lobby-$lobbyName')?.remove();
   }
 
-  _requestPassword(String lobbyName) {
-    // TODO fix
-//    password
-//      ..lobbyName = lobbyName
-//      ..show(lobbyName);
+  _requestPassword(String lobbyName) async {
+    final password = await Password.show();
+
+    final loginInfo = new LoginInfo(lobbyName, password);
+
+    client.send(MessageType.enterLobbyWithPassword, loginInfo.toJson());
   }
 
   _enterLobbySuccessful(String lobbyName) {

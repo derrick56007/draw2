@@ -1,54 +1,42 @@
 part of state;
 
-// todo remove from states
 class Password {
-  final Element passwordCard = querySelector('#password-card');
-  final InputElement passwordField = querySelector('#enter-lobby-password');
+  static final Element passwordCard = querySelector('#password-card');
+  static final InputElement passwordField = querySelector('#enter-lobby-password');
 
-  final ClientWebSocket client;
+  static StreamSubscription submitButtonSub;
+  static StreamSubscription enterToSubmitSub;
 
-  StreamSubscription submitSub;
+  static Future<String> show() {
+    final completer = new Completer<String>();
 
-  String lobbyName;
+    submitButtonSub = querySelector('#enter-lobby-password-btn').onClick.listen((_) {
+      hide();
 
-  Password(this.client) {
-    querySelector('#enter-lobby-password-btn').onClick.listen((_) {
-      submit();
+      completer.complete(getPassword());
     });
-  }
 
-  show() {
     passwordCard.style.display = '';
 
     passwordField.autofocus = true;
 
-    submitSub = window.onKeyPress.listen((KeyboardEvent e) {
+    enterToSubmitSub = window.onKeyPress.listen((KeyboardEvent e) {
       if (e.keyCode == KeyCode.ENTER) {
-        submit();
+        hide();
+
+        completer.complete(getPassword());
       }
     });
+
+    return completer.future;
   }
 
-  hide() {
+  static hide() {
     passwordCard.style.display = 'none';
-    submitSub?.cancel();
+
+    submitButtonSub?.cancel();
+    enterToSubmitSub?.cancel();
   }
 
-  submit() {
-    if (!client.isConnected()) {
-      toast('Not connected');
-      return;
-    }
-
-    final password = passwordField.value.trim();
-
-    if (password.isEmpty) {
-      toast('Invalid input');
-      return;
-    }
-
-    final loginInfo = new LoginInfo(lobbyName, password);
-
-    client.send(MessageType.enterLobbyWithPassword, loginInfo.toJson());
-  }
+  static String getPassword() => passwordField.value.trim();
 }
