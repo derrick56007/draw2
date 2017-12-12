@@ -18,5 +18,4 @@
      - valid_regexps
      - avoid_returning_null
      - overridden_fields
-     - prefer_conditional_assignment\
      - prefer_contains
