@@ -48,7 +48,7 @@ main(List<String> args) async {
   createDefaultLobbies();
 
   final parser = new ArgParser();
-  parser.addOption('clientFiles', defaultsTo: 'build/web/');
+  parser.addOption('clientFiles', defaultsTo: 'build/');
 
   final results = parser.parse(args);
   final clientFiles = results['clientFiles'];
