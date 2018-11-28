@@ -83,7 +83,7 @@ main(List<String> args) async {
 
     // handle websocket connection
     if (WebSocketTransformer.isUpgradeRequest(request)) {
-      final socket = new ServerWebSocket.ugradeRequest(request);
+      final socket = new ServerWebSocket.upgradeRequest(request);
 
       new SocketReceiver.handle(socket);
 
@@ -101,8 +101,8 @@ main(List<String> args) async {
 
 createDefaultLobbies() {
   LoginManager.shared
-    ..addLobby(new Lobby('lobby1', isDefault: true))
-    ..addLobby(new Lobby('lobby2', isDefault: true))
-    ..addLobby(new Lobby('lobby3', isDefault: true))
-    ..addLobby(new Lobby('lobby4', isDefault: true));
+    ..addLobby(new Lobby('lobby1', isDefaultLobby: true))
+    ..addLobby(new Lobby('lobby2', isDefaultLobby: true))
+    ..addLobby(new Lobby('lobby3', isDefaultLobby: true))
+    ..addLobby(new Lobby('lobby4', isDefaultLobby: true));
 }

@@ -114,7 +114,7 @@ class Game {
             twoDigits(maxGameTime.inMinutes - elapsed.inMinutes);
         final twoDigitSeconds = twoDigits(
             (maxGameTime.inSeconds - elapsed.inSeconds)
-                .remainder(Duration.SECONDS_PER_MINUTE));
+                .remainder(Duration.secondsPerMinute));
 
         lobby.sendToAll(MessageType.setCanvasRightLabel,
             val: 'Time left $twoDigitMinutes:$twoDigitSeconds');
@@ -181,7 +181,7 @@ class Game {
           val: '$username guessed \"$word\" correctly!')
       ..sendToAll(MessageType.win)
       ..sendToAll(MessageType.updatePlayerScore,
-          val: JSON.encode([username, scores[socket]]));
+          val: jsonEncode([username, scores[socket]]));
 
     removeArtist();
   }

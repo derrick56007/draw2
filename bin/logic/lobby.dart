@@ -8,7 +8,7 @@ class Lobby {
   final int maxPlayers;
   final Map<ServerWebSocket, String> _players = {};
 
-  final bool isDefault;
+  final bool isDefaultLobby;
 
   Game game;
 
@@ -16,7 +16,7 @@ class Lobby {
        {this.password = '',
         this.hasTimer = true,
         this.maxPlayers = 15,
-        this.isDefault = false})
+        this.isDefaultLobby = false})
       : hasPassword = password.isNotEmpty {
     game = new Game(this, hasTimer);
   }
@@ -68,7 +68,7 @@ class Lobby {
 
     if (game.canvasLayers.isNotEmpty) {
       socket.send(
-          MessageType.existingCanvasLayers, JSON.encode(game.canvasLayers));
+          MessageType.existingCanvasLayers, jsonEncode(game.canvasLayers));
     }
   }
 
@@ -102,7 +102,7 @@ class Lobby {
       list.add([username, i + 1]);
     }
 
-    sendToAll(MessageType.setQueue, val: JSON.encode(list));
+    sendToAll(MessageType.setQueue, val: jsonEncode(list));
   }
 
   sendPlayerOrder() {
@@ -127,7 +127,7 @@ class Lobby {
       return;
     }
 
-    sendToAll(MessageType.setPlayerOrder, val: JSON.encode(list));
+    sendToAll(MessageType.setPlayerOrder, val: jsonEncode(list));
   }
 
   usernameFromSocket(ServerWebSocket socket) => _players[socket];

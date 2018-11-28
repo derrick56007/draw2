@@ -12,7 +12,7 @@ class ExistingPlayer {
     if (json is List) {
       list = json;
     } else {
-      list = JSON.decode(json) as List;
+      list = jsonDecode(json) as List;
     }
 
     return new ExistingPlayer(list[usernameIndex], list[scoreIndex]);
@@ -21,5 +21,5 @@ class ExistingPlayer {
   static const usernameIndex = 0;
   static const scoreIndex = 1;
 
-  String toJson() => JSON.encode([username, score]);
+  String toJson() => jsonEncode([username, score]);
 }

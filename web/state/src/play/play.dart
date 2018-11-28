@@ -16,7 +16,7 @@ import '../../../client_websocket.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:html' hide Point;
-import 'dart:math' hide Point;
+import 'dart:math' as Math hide Point;
 import 'dart:typed_data';
 
 part 'draw/brush.dart';

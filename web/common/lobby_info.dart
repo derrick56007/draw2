@@ -16,7 +16,7 @@ class LobbyInfo {
     if (json is List) {
       list = json;
     } else {
-      list = JSON.decode(json) as List;
+      list = jsonDecode(json) as List;
     }
 
     return new LobbyInfo(list[nameIndex], list[hasPasswordIndex],
@@ -30,5 +30,5 @@ class LobbyInfo {
   static const numberOfPlayersIndex = 4;
 
   String toJson() =>
-      JSON.encode([name, hasPassword, hasTimer, maxPlayers, numberOfPlayers]);
+      jsonEncode([name, hasPassword, hasTimer, maxPlayers, numberOfPlayers]);
 }

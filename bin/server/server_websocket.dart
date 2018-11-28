@@ -8,7 +8,7 @@ class ServerWebSocket extends DrawWebSocket {
   ServerWebSocket._internal(this._req);
   Future done;
 
-  ServerWebSocket.ugradeRequest(this._req);
+  ServerWebSocket.upgradeRequest(this._req);
 
   @override
   start() async {
@@ -23,7 +23,7 @@ class ServerWebSocket extends DrawWebSocket {
     if (val == null) {
       _webSocket.add(type.index.toString());
     } else {
-      _webSocket.add(JSON.encode([type.index, val]));
+      _webSocket.add(jsonEncode([type.index, val]));
     }
   }
 }

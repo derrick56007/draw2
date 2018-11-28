@@ -1,7 +1,7 @@
 part of play;
 
 class DropText {
-  static final rand = new Random();
+  static final rand = new Math.Random();
 
   final Element element;
   final Point velocity;

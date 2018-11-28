@@ -66,7 +66,7 @@ class ClientWebSocket extends DrawWebSocket {
     if (val == null) {
       _webSocket.send(type.index.toString());
     } else {
-      _webSocket.send(JSON.encode([type.index, val]));
+      _webSocket.send(jsonEncode([type.index, val]));
     }
   }
 }

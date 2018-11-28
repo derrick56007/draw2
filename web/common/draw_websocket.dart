@@ -7,28 +7,28 @@ abstract class DrawWebSocket {
   static const messageTypeIndex = 0;
   static const valueIndex = 1;
 
-  final messageDisatchers = new List<Function>(MessageType.values.length);
+  final messageDispatchers = new List<Function>(MessageType.values.length);
 
   Future start();
 
   void on(MessageType type, Function function) {
-    if (messageDisatchers[type.index] != null) {
+    if (messageDispatchers[type.index] != null) {
       print("warning: overriding message dispatcher ${type.index}");
     }
 
-    messageDisatchers[type.index] = function;
+    messageDispatchers[type.index] = function;
   }
 
   void send(MessageType type, [var val]);
 
   void onMessageToDispatch(var data) {
-    final msg = JSON.decode(data);
+    final msg = jsonDecode(data);
 
     // checks if is [request, data]
     if (msg is List && msg.length == defaultMessageLength) {
-      messageDisatchers[msg[messageTypeIndex]](msg[valueIndex]);
+      messageDispatchers[msg[messageTypeIndex]](msg[valueIndex]);
     } else if (msg is int){
-      messageDisatchers[msg]();
+      messageDispatchers[msg]();
     } else {
       print('No such dispatch exists!: $msg');
     }

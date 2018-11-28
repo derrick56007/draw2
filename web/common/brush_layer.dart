@@ -16,7 +16,7 @@ class BrushLayer extends CanvasLayer {
     if (json is List) {
       list = json;
     } else {
-      list = JSON.decode(json) as List;
+      list = jsonDecode(json) as List;
     }
 
     final decodedPoints = <Point>[];
@@ -32,5 +32,5 @@ class BrushLayer extends CanvasLayer {
   static const colorIndex = 2;
   static const sizeIndex = 3;
 
-  String toJson() => JSON.encode([toolType.index, points, color, size]);
+  String toJson() => jsonEncode([toolType.index, points, color, size]);
 }

@@ -47,7 +47,7 @@ class PanelLeft {
       queueNumber.text = '';
     }
 
-    final queue = JSON.decode(json) as List;
+    final queue = jsonDecode(json) as List;
 
     for (var player in queue) {
       final name = player[0];
@@ -56,7 +56,7 @@ class PanelLeft {
   }
 
   _setPlayerOrder(String json) {
-    final order = JSON.decode(json) as List;
+    final order = jsonDecode(json) as List;
     for (var name in order.reversed) {
       final el = querySelector('#player-$name');
 
@@ -68,7 +68,7 @@ class PanelLeft {
   }
 
   _updatePlayerScore(String json) {
-    final playerScore = JSON.decode(json) as List;
+    final playerScore = jsonDecode(json) as List;
     final name = playerScore[0];
     final score = playerScore[1];
 

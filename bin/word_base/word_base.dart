@@ -14,7 +14,7 @@ class WordBase {
     for (var category in categories) {
       final list = category.split('\n');
 
-      final trimmed = [];
+      final trimmed = <String>[];
 
       for (var word in list) {
         final trimmedWord = word.trim();

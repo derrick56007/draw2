@@ -7,7 +7,7 @@ class Point<T> {
 
   Point clone() => new Point(x, y);
 
-  String toJson() => JSON.encode([x, y]);
+  String toJson() => jsonEncode([x, y]);
 
   static const xIndex = 0;
   static const yIndex = 1;
@@ -17,7 +17,7 @@ class Point<T> {
   factory Point.fromJson(var json) {
     if (json is List) return new Point.fromList(json);
 
-    return new Point.fromList(JSON.decode(json));
+    return new Point.fromList(jsonDecode(json));
   }
 
   static Point midPoint(Point p1, Point p2) =>

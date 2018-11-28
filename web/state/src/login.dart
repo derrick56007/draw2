@@ -7,7 +7,7 @@ class Login extends State {
   StreamSubscription submitSub;
 
   Login(ClientWebSocket client) : super(client) {
-    client.on(MessageType.loginSuccesful, _loginSuccesful);
+    client.on(MessageType.loginSuccessful, _loginSuccesful);
 
     querySelector('#login-btn').onClick.listen((_) {
       submit();

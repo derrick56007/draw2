@@ -9,7 +9,7 @@ class Stroke {
     if (layer.points.length == 1) {
       ctx
         ..beginPath()
-        ..arc(p1.x, p1.y, layer.size / 2, 0, 2 * PI)
+        ..arc(p1.x, p1.y, layer.size / 2, 0, 2 * Math.pi)
         ..closePath()
         ..fillStyle = layer.color
         ..fill();

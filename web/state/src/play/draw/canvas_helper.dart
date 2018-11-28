@@ -95,10 +95,10 @@ class CanvasHelper {
 
     canvasLayers.clear();
 
-    final layers = JSON.decode(json) as List;
+    final layers = jsonDecode(json) as List;
 
     for (var layer in layers) {
-      layer = JSON.decode(layer) as List;
+      layer = jsonDecode(layer) as List;
 
       final toolType = layer[CanvasLayer.toolTypeIndex];
 

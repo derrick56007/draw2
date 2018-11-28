@@ -1,7 +1,7 @@
 enum MessageType {
   toast,
   login,
-  loginSuccesful,
+  loginSuccessful,
   createLobby,
   enterLobby,
   enterLobbySuccessful,

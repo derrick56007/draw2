@@ -81,7 +81,7 @@ class LoginManager {
     _socketForUsername[socket] = username;
 
     // alert successful login
-    socket.send(MessageType.loginSuccesful);
+    socket.send(MessageType.loginSuccessful);
 
     print('$username logged in');
 
@@ -176,7 +176,7 @@ class LoginManager {
     lobby.removePlayer(socket);
 
     // check for empty lobby, ignore if default lobby
-    if (lobby._players.isNotEmpty || lobby.isDefault) return;
+    if (lobby._players.isNotEmpty || lobby.isDefaultLobby) return;
 
     // remove empty lobby
     _lobbies.remove(lobby.name);

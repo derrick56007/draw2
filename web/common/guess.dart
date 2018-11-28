@@ -12,7 +12,7 @@ class Guess {
     if (json is List) {
       list = json;
     } else {
-      list = JSON.decode(json) as List;
+      list = jsonDecode(json) as List;
     }
 
     return new Guess(list[usernameIndex], list[guessIndex]);
@@ -21,5 +21,5 @@ class Guess {
   static const usernameIndex = 0;
   static const guessIndex = 1;
 
-  String toJson() => JSON.encode([username, guess]);
+  String toJson() => jsonEncode([username, guess]);
 }

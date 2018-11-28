@@ -15,7 +15,7 @@ class DrawPoint {
     if (json is List) {
       list = json;
     } else {
-      list = JSON.decode(json) as List;
+      list = jsonDecode(json) as List;
     }
 
     return new DrawPoint(
@@ -26,5 +26,5 @@ class DrawPoint {
   static const sizeIndex = 1;
   static const posIndex = 2;
 
-  String toJson() => JSON.encode([color, size, pos]);
+  String toJson() => jsonEncode([color, size, pos]);
 }

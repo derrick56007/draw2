@@ -12,7 +12,7 @@ class LoginInfo {
     if (json is List) {
       list = json;
     } else {
-      list = JSON.decode(json) as List;
+      list = jsonDecode(json) as List;
     }
 
     return new LoginInfo(list[lobbyNameIndex], list[passwordIndex]);
@@ -21,5 +21,5 @@ class LoginInfo {
   static const lobbyNameIndex = 0;
   static const passwordIndex = 1;
 
-  String toJson() => JSON.encode([lobbyName, password]);
+  String toJson() => jsonEncode([lobbyName, password]);
 }

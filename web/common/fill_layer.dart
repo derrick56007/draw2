@@ -15,7 +15,7 @@ class FillLayer extends CanvasLayer {
     if (json is List) {
       list = json;
     } else {
-      list = JSON.decode(json) as List;
+      list = jsonDecode(json) as List;
     }
 
     return new FillLayer(list[xIndex], list[yIndex], list[colorIndex]);
@@ -25,5 +25,5 @@ class FillLayer extends CanvasLayer {
   static const yIndex = 2;
   static const colorIndex = 3;
 
-  String toJson() => JSON.encode([toolType.index, x, y, color]);
+  String toJson() => jsonEncode([toolType.index, x, y, color]);
 }
