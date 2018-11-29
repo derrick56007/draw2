@@ -101,8 +101,8 @@ main(List<String> args) async {
 
 createDefaultLobbies() {
   LoginManager.shared
+    ..addLobby(new Lobby('lobby0', isDefaultLobby: true))
     ..addLobby(new Lobby('lobby1', isDefaultLobby: true))
     ..addLobby(new Lobby('lobby2', isDefaultLobby: true))
-    ..addLobby(new Lobby('lobby3', isDefaultLobby: true))
-    ..addLobby(new Lobby('lobby4', isDefaultLobby: true));
+    ..addLobby(new Lobby('lobby3', isDefaultLobby: true));
 }
