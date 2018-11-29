@@ -10,6 +10,7 @@ import '../../../common/message_type.dart';
 import '../../../common/point.dart';
 import '../../../common/tool_type.dart';
 
+import '../../../toast.dart';
 import '../../state.dart';
 import '../../../client_websocket.dart';
 
@@ -44,6 +45,9 @@ class Play extends State {
   final Element clearBtn = querySelector('#clear-btn');
   final Element brushBtn = querySelector('#brush-btn');
   final Element fillBtn = querySelector('#fill-btn');
+
+  final Element invitePlayersText = querySelector('#invite-players-text');
+  final Element invitePlayersBtn = querySelector('#invite-players-btn');
 
   static final CanvasElement canvas = querySelector('#canvas');
 
@@ -100,7 +104,8 @@ class Play extends State {
         drawNextBtn.classes.add('disabled');
 
         client.send(MessageType.drawNext);
-      }));
+      }))
+      ..add(_invitePlayers());
   }
 
   @override
@@ -209,6 +214,34 @@ class Play extends State {
     return new Point(x, y);
   }
 
+  _invitePlayers() => invitePlayersBtn.onClick.listen((_) {
+    final text = invitePlayersText.text.trim();
+
+    if (_copyToClipboard(text)) {
+      toast('Copied link to clipboard!');
+    } else {
+      toast('error');
+    }
+  });
+
+  // made by bergwerf
+  // https://gist.github.com/bergwerf/1b427ad2b1f9770b260dd4dac295b6f0
+  bool _copyToClipboard(String text) {
+    final textArea = new TextAreaElement();
+    document.body.append(textArea);
+    textArea.style.border = '0';
+    textArea.style.margin = '0';
+    textArea.style.padding = '0';
+    textArea.style.opacity = '0';
+    textArea.style.position = 'absolute';
+    textArea.readOnly = true;
+    textArea.value = text;
+    textArea.select();
+    final result = document.execCommand('copy');
+    textArea.remove();
+    return result;
+  }
+
   _canvasOnTouchStart(Brush brush) =>
       canvas.onTouchStart.listen((TouchEvent e) {
         e.preventDefault();
@@ -292,15 +325,15 @@ class Play extends State {
       _documentOnMouseUp(brush),
 
       // mobile
-      _canvasOnTouchStart(brush),
-      _documentOnTouchMove(brush),
-      _documentOnTouchEnd(brush),
+//      _canvasOnTouchStart(brush),
+//      _documentOnTouchMove(brush),
+//      _documentOnTouchEnd(brush),
 
       // buttons
       _undoBtnOnClick(),
       _clearBtnOnClick(),
       _brushBtnOnClick(),
-      _fillBtnOnClick()
+//      _fillBtnOnClick(),
     ]);
   }
 

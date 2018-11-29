@@ -106,9 +106,14 @@ textarea {
     color: black;
 }
 
-#player-list-holder {
+#left-holder {
     margin-right: 10px;
     width: 220px;
+}
+
+#player-list-holder {
+    width: 220px;
+    margin: 0 0 10px;
 }
 
 #player-list-holder > .card-content {
@@ -118,7 +123,6 @@ textarea {
 #player-list-collection {
     text-align: left;
     overflow-y: auto;
-    margin-bottom: 10px;
     max-height: 372px;
 }
 
@@ -224,4 +228,37 @@ textarea {
 
 span.badge {
     margin-left: 0;
+}
+
+#invite-players {
+    text-align: center;
+    padding: 10px;
+}
+
+#invite-players-text {
+    width: 100%;
+    border: #e0e0e0 solid 1px;
+    border-top-left-radius: 2px;
+    border-bottom-left-radius: 2px;
+    text-align: left;
+    height: 26px;
+    line-height: 32px;
+    padding-left: 2px;
+    overflow: hidden;
+    -webkit-touch-callout: default;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+}
+
+#invite-players-btn {
+    border: #e0e0e0 solid 1px;
+    border-left: none;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+
+#invite-players-btn:hover {
+    cursor: pointer;
+    color: #8e8e8e;
 }

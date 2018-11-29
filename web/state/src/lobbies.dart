@@ -62,17 +62,14 @@ class Lobbies extends State {
           <a id="lobby-${lobbyInfo.name}" class="collection-item lobby-list-item">
             <span class="badge">${lobbyInfo.numberOfPlayers}/${lobbyInfo.maxPlayers}</span>
             
-            ${lobbyInfo.hasPassword ?
-                '<i class="material-icons lock">lock</i>' :
-                '<i class="material-icons lock">lock_open</i>'}
+            ${lobbyInfo.hasPassword ? '<i class="material-icons lock">lock</i>' : '<i class="material-icons lock">lock_open</i>'}
                 
-            ${lobbyInfo.hasTimer ?
-                '<i class="material-icons hourglass">hourglass_empty</i>' :
-                ''}
+            ${lobbyInfo.hasTimer ? '<i class="material-icons hourglass">hourglass_empty</i>' : ''}
             
             ${lobbyInfo.name}
           </a>''')
-      ..onClick.listen((_) => client.send(MessageType.enterLobby, lobbyInfo.name));
+      ..onClick
+          .listen((_) => client.send(MessageType.enterLobby, lobbyInfo.name));
 
     lobbyListCollection.children.add(el);
   }
@@ -91,6 +88,11 @@ class Lobbies extends State {
 
   _enterLobbySuccessful(String lobbyName) {
     StateManager.shared.pushState('play', lobbyName);
+
+    //
+    document.getElementById('invite-players-text').text =
+        'https://${window.location.host}/$lobbyName';
+
   }
 
   _enterLobbyFailure() {
