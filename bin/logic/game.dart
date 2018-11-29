@@ -91,9 +91,12 @@ class Game {
 
       currentArtist
         ..send(MessageType.clearCanvasLabels)
-        ..send(MessageType.setCanvasLeftLabel, 'You are drawing')
+        ..send(MessageType.setCanvasLeftLabel, 'You are drawing!')
         ..send(MessageType.setCanvasMiddleLabel, currentWord)
         ..send(MessageType.setAsArtist);
+
+      final serverMsg = Guess('Server', 'You are drawing!');
+      currentArtist.send(MessageType.guess, serverMsg.toJson());
 
       lobby
         ..sendToAll(MessageType.clearCanvasLabels,
