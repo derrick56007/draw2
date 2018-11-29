@@ -7,7 +7,7 @@ class Login extends State {
   StreamSubscription submitSub;
 
   Login(ClientWebSocket client) : super(client) {
-    client.on(MessageType.loginSuccessful, _loginSuccesful);
+    client.on(MessageType.loginSuccessful, _loginSuccessful);
 
     querySelector('#login-btn').onClick.listen((_) {
       submit();
@@ -49,7 +49,7 @@ class Login extends State {
     client.send(MessageType.login, username);
   }
 
-  _loginSuccesful() {
+  _loginSuccessful() {
     final lobbyName = window.location.pathname.substring(1);
 
     // make sure lobby is not a state name
