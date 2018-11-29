@@ -90,6 +90,9 @@ class SocketReceiver {
 
     if (lobby == null) return;
 
+    // check if current artist
+    if (lobby.game.currentArtist != _socket) return;
+
     lobby.sendToAll(MessageType.drawPoint, val: json, excludedSocket: _socket);
     lobby.game.drawPoint(json);
   }
@@ -98,6 +101,9 @@ class SocketReceiver {
     final lobby = _loginManager.lobbyFromSocket(_socket);
 
     if (lobby == null) return;
+
+    // check if current artist
+    if (lobby.game.currentArtist != _socket) return;
 
     lobby.sendToAll(MessageType.drawLine, val: json, excludedSocket: _socket);
     lobby.game.drawLine(json);
@@ -108,6 +114,9 @@ class SocketReceiver {
 
     if (lobby == null) return;
 
+    // check if current artist
+    if (lobby.game.currentArtist != _socket) return;
+
     lobby.sendToAll(MessageType.clearDrawing, excludedSocket: _socket);
     lobby.game.clearDrawing();
   }
@@ -117,14 +126,21 @@ class SocketReceiver {
 
     if (lobby == null) return;
 
+    // check if current artist
+    if (lobby.game.currentArtist != _socket) return;
+
     lobby.sendToAll(MessageType.undoLast, excludedSocket: _socket);
     lobby.game.undoLast();
   }
 
   _fill(String json) {
+    return;
     final lobby = _loginManager.lobbyFromSocket(_socket);
 
     if (lobby == null) return;
+
+    // check if current artist
+    if (lobby.game.currentArtist != _socket) return;
 
     lobby.sendToAll(MessageType.fill, val: json, excludedSocket: _socket);
     lobby.game.fill(json);
