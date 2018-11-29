@@ -91,7 +91,7 @@ class Lobbies extends State {
 
     //
     document.getElementById('invite-players-text').text =
-        'https://${window.location.host}/$lobbyName';
+        '${window.location.host}/$lobbyName';
 
   }
 
