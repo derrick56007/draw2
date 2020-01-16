@@ -7,6 +7,7 @@ import 'dart:math' hide Point;
 
 import 'package:args/args.dart';
 import 'package:http_server/http_server.dart';
+import 'package:pedantic/pedantic.dart';
 
 import '../word_base/word_base.dart';
 
@@ -25,16 +26,20 @@ import '../../web/common/message_type.dart';
 import '../../web/common/point.dart';
 
 part '../logic/game.dart';
+
 part '../logic/lobby.dart';
+
 part '../logic/word_similarity.dart';
 
 part '../server/login_manager.dart';
+
 part '../server/server_websocket.dart';
+
 part '../server/socket_receiver.dart';
+
 part '../server/validate_string.dart';
 
-
-main(List<String> args) async {
+void main(List<String> args) async {
   int port;
 
   if (Platform.environment['PORT'] == null) {
@@ -47,22 +52,22 @@ main(List<String> args) async {
 
   createDefaultLobbies();
 
-  final parser = new ArgParser();
+  final parser = ArgParser();
   parser.addOption('clientFiles', defaultsTo: 'build/');
 
   final results = parser.parse(args);
   final clientFiles = results['clientFiles'];
 
-  final defaultPage = new File('$clientFiles/index.html');
+  final defaultPage = File('$clientFiles/index.html');
 
-  final staticFiles = new VirtualDirectory(clientFiles);
+  final staticFiles = VirtualDirectory(clientFiles);
   staticFiles
     ..jailRoot = false
     ..allowDirectoryListing = true
     ..directoryHandler = (dir, request) async {
-      final indexUri = new Uri.file(dir.path).resolve('index.html');
+      final indexUri = Uri.file(dir.path).resolve('index.html');
 
-      var file = new File(indexUri.toFilePath());
+      var file = File(indexUri.toFilePath());
 
       if (!(await file.exists())) {
         file = defaultPage;
@@ -74,35 +79,34 @@ main(List<String> args) async {
 
   print('server started at ${server.address.address}:${server.port}');
 
-  await for (HttpRequest request in server) {
+  unawaited(server.forEach((HttpRequest request) async {
     request.response.headers.set('cache-control', 'no-cache');
 
     final path = request.uri.path.trim();
 
-    final pathHasValidLobbyName = ValidateString.isValidLobbyName(path.substring(1));
+    final pathHasValidLobbyName =
+        ValidateString.isValidLobbyName(path.substring(1));
 
     // handle websocket connection
     if (WebSocketTransformer.isUpgradeRequest(request)) {
-      final socket = new ServerWebSocket.upgradeRequest(request);
+      final socket = ServerWebSocket.upgradeRequest(request);
 
-      new SocketReceiver.handle(socket);
-
-      continue;
-    }
-
-    // handle path with lobby name
-    if (pathHasValidLobbyName) {
-      staticFiles.serveFile(defaultPage, request);
+      SocketReceiver.handle(socket);
     } else {
-      staticFiles.serveRequest(request);
+      // handle path with lobby name
+      if (pathHasValidLobbyName) {
+        staticFiles.serveFile(defaultPage, request);
+      } else {
+        await staticFiles.serveRequest(request);
+      }
     }
-  }
+  }));
 }
 
-createDefaultLobbies() {
+void createDefaultLobbies() {
   LoginManager.shared
-    ..addLobby(new Lobby('lobby0', isDefaultLobby: true))
-    ..addLobby(new Lobby('lobby1', isDefaultLobby: true))
-    ..addLobby(new Lobby('lobby2', isDefaultLobby: true))
-    ..addLobby(new Lobby('lobby3', isDefaultLobby: true));
+    ..addLobby(Lobby('lobby0', isDefaultLobby: true))
+    ..addLobby(Lobby('lobby1', isDefaultLobby: true))
+    ..addLobby(Lobby('lobby2', isDefaultLobby: true))
+    ..addLobby(Lobby('lobby3', isDefaultLobby: true));
 }

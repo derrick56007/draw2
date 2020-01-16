@@ -15,7 +15,7 @@ class ExistingPlayer {
       list = jsonDecode(json) as List;
     }
 
-    return new ExistingPlayer(list[usernameIndex], list[scoreIndex]);
+    return  ExistingPlayer(list[usernameIndex], list[scoreIndex]);
   }
 
   static const usernameIndex = 0;

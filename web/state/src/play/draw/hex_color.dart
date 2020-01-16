@@ -18,7 +18,7 @@ class HexColor {
     final g = int.parse(hexDigits.sublist(2, 4).join(), radix: 16);
     final b = int.parse(hexDigits.sublist(4).join(), radix: 16);
 
-    return new HexColor._internal(r, g, b);
+    return HexColor._internal(r, g, b);
   }
 
   @override

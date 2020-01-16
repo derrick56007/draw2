@@ -7,14 +7,14 @@ class SocketReceiver {
   SocketReceiver._internal(this._socket);
 
   factory SocketReceiver.handle(ServerWebSocket socket) {
-    final sr = new SocketReceiver._internal(socket);
+    final sr = SocketReceiver._internal(socket);
 
     sr._init();
 
     return sr;
   }
 
-  _init() async {
+  Future _init() async {
     await _socket.start();
 
     _onStart();
@@ -24,7 +24,7 @@ class SocketReceiver {
     _onClose();
   }
 
-  _onStart() {
+  void _onStart() {
     _socket
       ..on(MessageType.login, _login)
       ..on(MessageType.createLobby, _createLobby)
@@ -40,52 +40,52 @@ class SocketReceiver {
       ..on(MessageType.fill, _fill);
   }
 
-  _onClose() {
+  void _onClose() {
     _loginManager.logoutSocket(_socket);
   }
 
-  _login(String username) {
+  void _login(String username) {
     _loginManager.loginSocket(_socket, username);
   }
 
-  _createLobby(String json) {
-    final info = new CreateLobbyInfo.fromJson(json);
+  void _createLobby(String json) {
+    final info = CreateLobbyInfo.fromJson(json);
 
     _loginManager.createLobby(_socket, info);
   }
 
-  _enterLobby(String lobbyName) {
+  void _enterLobby(String lobbyName) {
     _loginManager.enterLobby(_socket, lobbyName);
   }
 
-  _enterLobbyWithPassword(String json) {
-    final info = new LoginInfo.fromJson(json);
+  void _enterLobbyWithPassword(String json) {
+    final info = LoginInfo.fromJson(json);
 
     _loginManager.enterSecureLobby(_socket, info);
   }
 
-  _exitLobby() {
+  void _exitLobby() {
     _loginManager.exitLobby(_socket);
   }
 
-  _drawNext() {
+  void _drawNext() {
     if (!_loginManager.containsSocket(_socket)) return;
 
     final lobby = _loginManager.lobbyFromSocket(_socket);
     lobby.game.addToQueue(_socket);
   }
 
-  _guess(String json) {
+  void _guess(String json) {
     if (!_loginManager.containsSocket(_socket)) return;
 
     final lobby = _loginManager.lobbyFromSocket(_socket);
 
-    final guess = new Guess(_loginManager.usernameFromSocket(_socket), json);
+    final guess = Guess(_loginManager.usernameFromSocket(_socket), json);
 
     lobby.game.onGuess(_socket, guess);
   }
 
-  _drawPoint(String json) {
+  void _drawPoint(String json) {
     final lobby = _loginManager.lobbyFromSocket(_socket);
 
     if (lobby == null) return;
@@ -97,7 +97,7 @@ class SocketReceiver {
     lobby.game.drawPoint(json);
   }
 
-  _drawLine(String json) {
+  void _drawLine(String json) {
     final lobby = _loginManager.lobbyFromSocket(_socket);
 
     if (lobby == null) return;
@@ -109,7 +109,7 @@ class SocketReceiver {
     lobby.game.drawLine(json);
   }
 
-  _clearDrawing() {
+  void _clearDrawing() {
     final lobby = _loginManager.lobbyFromSocket(_socket);
 
     if (lobby == null) return;
@@ -121,7 +121,7 @@ class SocketReceiver {
     lobby.game.clearDrawing();
   }
 
-  _undoLast() {
+  void _undoLast() {
     final lobby = _loginManager.lobbyFromSocket(_socket);
 
     if (lobby == null) return;
@@ -133,16 +133,16 @@ class SocketReceiver {
     lobby.game.undoLast();
   }
 
-  _fill(String json) {
-    return;
-    final lobby = _loginManager.lobbyFromSocket(_socket);
-
-    if (lobby == null) return;
-
-    // check if current artist
-    if (lobby.game.currentArtist != _socket) return;
-
-    lobby.sendToAll(MessageType.fill, val: json, excludedSocket: _socket);
-    lobby.game.fill(json);
+  void _fill(String json) {
+//    return;
+//    final lobby = _loginManager.lobbyFromSocket(_socket);
+//
+//    if (lobby == null) return;
+//
+//    // check if current artist
+//    if (lobby.game.currentArtist != _socket) return;
+//
+//    lobby.sendToAll(MessageType.fill, val: json, excludedSocket: _socket);
+//    lobby.game.fill(json);
   }
 }

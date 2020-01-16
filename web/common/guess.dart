@@ -15,7 +15,7 @@ class Guess {
       list = jsonDecode(json) as List;
     }
 
-    return new Guess(list[usernameIndex], list[guessIndex]);
+    return  Guess(list[usernameIndex], list[guessIndex]);
   }
 
   static const usernameIndex = 0;

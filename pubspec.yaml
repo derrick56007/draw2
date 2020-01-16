@@ -5,11 +5,14 @@ description: An absolute bare-bones web app.
 #homepage: https://www.example.com
 
 environment:
-  sdk: 'any'
+  sdk: '^2.2.0'
 
 dependencies:
   args: 'any'
   http_server: 'any'
-  build_runner: '>=0.8.10 <0.11.0'
-  build_web_compilers: ^0.4.4
+
+dev_dependencies:
+  pedantic: ^1.8.0
+  build_runner: ^1.6.0
+  build_web_compilers: ^2.3.0
 

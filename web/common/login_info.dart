@@ -15,7 +15,7 @@ class LoginInfo {
       list = jsonDecode(json) as List;
     }
 
-    return new LoginInfo(list[lobbyNameIndex], list[passwordIndex]);
+    return LoginInfo(list[lobbyNameIndex], list[passwordIndex]);
   }
 
   static const lobbyNameIndex = 0;

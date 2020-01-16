@@ -15,7 +15,7 @@ class Login extends State {
   }
 
   @override
-  show() {
+  void show() {
     loginCard.style.display = '';
 
     usernameElement.autofocus = true;
@@ -28,12 +28,12 @@ class Login extends State {
   }
 
   @override
-  hide() {
+  void hide() {
     loginCard.style.display = 'none';
     submitSub?.cancel();
   }
 
-  submit() {
+  void submit() {
     if (!client.isConnected()) {
       toast('Not connected');
       return;
@@ -49,7 +49,7 @@ class Login extends State {
     client.send(MessageType.login, username);
   }
 
-  _loginSuccessful() {
+  void _loginSuccessful() {
     final lobbyName = window.location.pathname.substring(1);
 
     // make sure lobby is not a state name

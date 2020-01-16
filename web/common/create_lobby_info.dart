@@ -18,7 +18,7 @@ class CreateLobbyInfo {
       list = jsonDecode(json) as List;
     }
 
-    return new CreateLobbyInfo(list[lobbyNameIndex], list[passwordIndex],
+    return  CreateLobbyInfo(list[lobbyNameIndex], list[passwordIndex],
         list[hasTimerIndex], list[maxPlayersIndex]);
   }
 

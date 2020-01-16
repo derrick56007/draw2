@@ -22,18 +22,19 @@ class WordSimilarity {
     s1 = s1.toLowerCase();
     s2 = s2.toLowerCase();
 
-    final costs = new List<int>(s2.length + 1);
+    final costs = List<int>(s2.length + 1);
     for (var i = 0; i <= s1.length; i++) {
       var lastValue = i;
 
       for (var j = 0; j <= s2.length; j++) {
-        if (i == 0)
+        if (i == 0) {
           costs[j] = j;
-        else {
+        } else {
           if (j > 0) {
             var newValue = costs[j - 1];
-            if (s1[i - 1] != s2[j - 1])
+            if (s1[i - 1] != s2[j - 1]) {
               newValue = min(min(newValue, lastValue), costs[j]) + 1;
+            }
             costs[j - 1] = lastValue;
             lastValue = newValue;
           }

@@ -17,25 +17,25 @@ class CanvasHelper {
 
   CanvasHelper(this.client) {
     client
-      ..on(MessageType.drawPoint, (x) => drawPoint(new DrawPoint.fromJson(x)))
-      ..on(MessageType.drawLine, (x) => drawLine(new Point.fromJson(x)))
+      ..on(MessageType.drawPoint, (x) => drawPoint( DrawPoint.fromJson(x)))
+      ..on(MessageType.drawLine, (x) => drawLine( Point.fromJson(x)))
       ..on(MessageType.clearDrawing, clearDrawing)
       ..on(MessageType.undoLast, undoLast)
-      ..on(MessageType.fill, (x) => addFillLayer(new FillLayer.fromJson(x)))
+      ..on(MessageType.fill, (x) => addFillLayer( FillLayer.fromJson(x)))
       ..on(MessageType.existingCanvasLayers, existingCanvasLayers);
 
     clearDrawing();
   }
 
-  drawPoint(DrawPoint drawPoint) {
-    final layer = new BrushLayer(
+  void drawPoint(DrawPoint drawPoint) {
+    final layer =  BrushLayer(
         [drawPoint.pos.clone()], drawPoint.color, drawPoint.size);
     canvasLayers.add(layer);
 
     strokeLayer(layer);
   }
 
-  drawLine(Point pos) {
+  void drawLine(Point pos) {
     if (canvasLayers.isNotEmpty && canvasLayers.last is BrushLayer) {
       (canvasLayers.last as BrushLayer).points.add(pos.clone());
 
@@ -43,7 +43,7 @@ class CanvasHelper {
     }
   }
 
-  strokeLayer(CanvasLayer layer) {
+  void strokeLayer(CanvasLayer layer) {
     if (layer is BrushLayer) {
       Stroke.brushLayer(layer, ctx);
     } else if (layer is FillLayer) {
@@ -52,7 +52,7 @@ class CanvasHelper {
   }
 
   // smooth draw path
-  strokeAllLayers() {
+  void strokeAllLayers() {
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
@@ -61,7 +61,7 @@ class CanvasHelper {
     }
   }
 
-  undoLast() {
+  void undoLast() {
     if (canvasLayers.isNotEmpty) {
       canvasLayers.removeLast();
 
@@ -74,7 +74,7 @@ class CanvasHelper {
     }
   }
 
-  clearDrawing() {
+  void clearDrawing() {
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
@@ -85,13 +85,13 @@ class CanvasHelper {
   }
 
 
-  addFillLayer(FillLayer fillLayer) {
+  void addFillLayer(FillLayer fillLayer) {
     canvasLayers.add(fillLayer);
 
     strokeLayer(fillLayer);
   }
 
-  existingCanvasLayers(String json) {
+  void existingCanvasLayers(String json) {
 
     canvasLayers.clear();
 
@@ -106,9 +106,9 @@ class CanvasHelper {
 
       // instantiate layer
       if (toolType == ToolType.BRUSH.index) {
-        canvasLayer = new BrushLayer.fromJson(layer);
+        canvasLayer =  BrushLayer.fromJson(layer);
       } else if (toolType == ToolType.FILL.index) {
-        canvasLayer = new FillLayer.fromJson(layer);
+        canvasLayer =  FillLayer.fromJson(layer);
       }
 
       // stroke if successfully created

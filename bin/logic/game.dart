@@ -1,9 +1,9 @@
 part of server;
 
 class Game {
-  static const nextRoundDelay = const Duration(seconds: 10);
-  static const maxGameTime = const Duration(minutes: 5);
-  static const timerTickInterval = const Duration(seconds: 1);
+  static const nextRoundDelay = Duration(seconds: 10);
+  static const maxGameTime = Duration(minutes: 5);
+  static const timerTickInterval = Duration(seconds: 1);
   static const maxChatLength = 20;
   static const defaultBrushColor = '#000000';
   static const defaultBrushSize = 5;
@@ -32,15 +32,15 @@ class Game {
   final Words words;
 
   Game(this.lobby, this.hasTimer)
-      : stopwatch = new Stopwatch(),
+      : stopwatch = Stopwatch(),
         // TODO word genres
-        words = new Words('cat1');
+        words = Words('cat1');
 
-  addPlayer(ServerWebSocket socket) {
+  void addPlayer(ServerWebSocket socket) {
     scores[socket] = 0;
   }
 
-  removePlayer(ServerWebSocket socket) {
+  void removePlayer(ServerWebSocket socket) {
     scores.remove(socket);
 
     // remove from queue
@@ -52,7 +52,7 @@ class Game {
     }
   }
 
-  removeArtist() {
+  void removeArtist() {
     timer?.cancel();
 
     currentArtist.send(MessageType.enableDrawNext);
@@ -66,7 +66,7 @@ class Game {
     }
   }
 
-  nextArtist() {
+  void nextArtist() {
     startTimer(nextRoundDelay, (Duration elapsed) {
       lobby.sendToAll(MessageType.setCanvasRightLabel,
           val: 'Next game in ${nextRoundDelay.inSeconds - elapsed.inSeconds}s');
@@ -125,7 +125,7 @@ class Game {
     });
   }
 
-  addToQueue(ServerWebSocket socket) {
+  void addToQueue(ServerWebSocket socket) {
     // stop if already in queue
     if (artistQueue.contains(socket)) return;
 
@@ -143,7 +143,7 @@ class Game {
     nextArtist();
   }
 
-  onGuess(ServerWebSocket socket, Guess guess) {
+  void onGuess(ServerWebSocket socket, Guess guess) {
     guesses.add(guess);
 
     if (guesses.length > maxChatLength) {
@@ -167,14 +167,14 @@ class Game {
 
       if (similarity >= similarityThreshold) {
         final serverMsg =
-            new Guess('Server', '${guess.username}\'s guess was close!');
+            Guess('Server', '${guess.username}\'s guess was close!');
 
         lobby.sendToAll(MessageType.guess, val: serverMsg.toJson());
       }
     }
   }
 
-  onWin(ServerWebSocket socket, String username, String word) {
+  void onWin(ServerWebSocket socket, String username, String word) {
     // TODO point system
     scores[socket] += 1;
 
@@ -189,7 +189,7 @@ class Game {
     removeArtist();
   }
 
-  onLose(String word) {
+  void onLose(String word) {
     lobby
       ..sendToAll(MessageType.lose)
       ..sendToAll(MessageType.setCanvasMiddleLabel,
@@ -198,15 +198,15 @@ class Game {
     removeArtist();
   }
 
-  startTimer(Duration duration, Function repeating(Duration elapsed),
-      Function onFinish()) {
+  void startTimer(Duration duration, void Function(Duration) repeating,
+      void Function() onFinish) {
     timer?.cancel();
 
     stopwatch
       ..reset()
       ..start();
 
-    timer = new Timer.periodic(timerTickInterval, (_) {
+    timer = Timer.periodic(timerTickInterval, (_) {
       if (stopwatch.elapsedMilliseconds > duration.inMilliseconds) {
         timer?.cancel();
         stopwatch.stop();
@@ -218,35 +218,34 @@ class Game {
     });
   }
 
-  drawPoint(String json) {
-    final drawPoint = new DrawPoint.fromJson(json);
+  void drawPoint(String json) {
+    final drawPoint = DrawPoint.fromJson(json);
 
-    final layer =
-        new BrushLayer([drawPoint.pos], drawPoint.color, drawPoint.size);
+    final layer = BrushLayer([drawPoint.pos], drawPoint.color, drawPoint.size);
 
     canvasLayers.add(layer);
   }
 
-  drawLine(String json) {
+  void drawLine(String json) {
     if (canvasLayers.isNotEmpty && canvasLayers.last is BrushLayer) {
-      final point = new Point.fromJson(json);
+      final point = Point.fromJson(json);
 
       (canvasLayers.last as BrushLayer).points.add(point);
     }
   }
 
-  clearDrawing() {
+  void clearDrawing() {
     canvasLayers.clear();
   }
 
-  undoLast() {
+  void undoLast() {
     if (canvasLayers.isNotEmpty) {
       canvasLayers.removeLast();
     }
   }
 
-  fill(String json) {
-    final fillLayer = new FillLayer.fromJson(json);
+  void fill(String json) {
+    final fillLayer = FillLayer.fromJson(json);
 
     canvasLayers.add(fillLayer);
   }

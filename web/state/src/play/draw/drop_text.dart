@@ -1,7 +1,7 @@
 part of play;
 
 class DropText {
-  static final rand = new Math.Random();
+  static final rand =  math.Random();
 
   final Element element;
   final Point velocity;
@@ -21,18 +21,18 @@ class DropText {
 
   factory DropText(String text) {
     final element =
-        new Element.html('<div class="drop-text noselect">${text}</div>');
+         Element.html('<div class="drop-text noselect">${text}</div>');
 
-    final position = new Point(rand.nextInt(window.innerWidth),
+    final position =  Point(rand.nextInt(window.innerWidth),
         -element.getBoundingClientRect().height);
 
-    final velocity = new Point(0.0, 2.25);
+    final velocity =  Point(0.0, 2.25);
     final angularVel = rand.nextDouble() * .5 * (rand.nextBool() ? -1 : 1);
 
-    return new DropText._internal(element, velocity, position, angularVel);
+    return  DropText._internal(element, velocity, position, angularVel);
   }
 
-  update() {
+  void update() {
     position.y += velocity.y;
     position.x += velocity.x;
     rotation += angularVel;
@@ -43,7 +43,7 @@ class DropText {
       ..transform = 'rotate(${rotation}deg)';
   }
 
-  remove() {
+  void remove() {
     element.remove();
   }
 }

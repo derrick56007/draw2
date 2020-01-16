@@ -18,7 +18,7 @@ class FillLayer extends CanvasLayer {
       list = jsonDecode(json) as List;
     }
 
-    return new FillLayer(list[xIndex], list[yIndex], list[colorIndex]);
+    return FillLayer(list[xIndex], list[yIndex], list[colorIndex]);
   }
 
   static const xIndex = 1;

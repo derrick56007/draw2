@@ -17,7 +17,7 @@ import '../../../client_websocket.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:html' hide Point;
-import 'dart:math' as Math hide Point;
+import 'dart:math' as math hide Point;
 import 'dart:typed_data';
 
 part 'draw/brush.dart';
@@ -30,7 +30,7 @@ part 'panel_left.dart';
 part 'panel_right.dart';
 
 class Play extends State {
-  static const brushInterval = const Duration(milliseconds: 25);
+  static const brushInterval = Duration(milliseconds: 25);
   static const defaultToolType = ToolType.BRUSH;
 
   final Element playCard = querySelector('#play-card');
@@ -66,9 +66,9 @@ class Play extends State {
   final PanelRight panelRight;
 
   Play(ClientWebSocket client)
-      : cvs = new CanvasHelper(client),
-        panelLeft = new PanelLeft(client),
-        panelRight = new PanelRight(client),
+      : cvs = CanvasHelper(client),
+        panelLeft = PanelLeft(client),
+        panelRight = PanelRight(client),
         super(client) {
     client
       ..on(MessageType.setAsArtist, _setAsArtist)
@@ -83,7 +83,7 @@ class Play extends State {
   }
 
   @override
-  show() {
+  void show() {
     playCard.style.display = '';
 
     playSubs
@@ -109,7 +109,7 @@ class Play extends State {
   }
 
   @override
-  hide() {
+  void hide() {
     playCard.style.display = 'none';
 
     _clearPlaySubs();
@@ -121,21 +121,21 @@ class Play extends State {
     client.send(MessageType.exitLobby);
   }
 
-  _clearPlaySubs() {
+  void _clearPlaySubs() {
     for (var sub in playSubs) {
       sub?.cancel();
     }
     playSubs.clear();
   }
 
-  _clearDrawSubs() {
+  void _clearDrawSubs() {
     for (var sub in drawSubs) {
       sub?.cancel();
     }
     drawSubs.clear();
   }
 
-  _drawStart(Brush brush, Point pos) {
+  void _drawStart(Brush brush, Point pos) {
     final color = querySelector('#color').text;
 
     if (toolType == ToolType.BRUSH) {
@@ -144,13 +144,13 @@ class Play extends State {
         ..pos.y = pos.y
         ..pressed = true;
 
-      final drawPoint = new DrawPoint(color, Brush.defaultSize, brush.pos);
+      final drawPoint = DrawPoint(color, Brush.defaultSize, brush.pos);
 
       cvs.drawPoint(drawPoint);
       client.send(MessageType.drawPoint, drawPoint.toJson());
 
       timer?.cancel();
-      timer = new Timer.periodic(brushInterval, (_) {
+      timer = Timer.periodic(brushInterval, (_) {
         if (brush.moved) {
           cvs.drawLine(brush.pos);
           client.send(MessageType.drawLine, brush.pos.toJson());
@@ -162,14 +162,14 @@ class Play extends State {
       undoBtn.classes.remove('disabled');
       clearBtn.classes.remove('disabled');
     } else if (toolType == ToolType.FILL) {
-      final fillLayer = new FillLayer(pos.x, pos.y, color);
+      final fillLayer = FillLayer(pos.x, pos.y, color);
 
       cvs.addFillLayer(fillLayer);
       client.send(MessageType.fill, fillLayer.toJson());
     }
   }
 
-  _drawMove(Brush brush, Point pos) {
+  void _drawMove(Brush brush, Point pos) {
     if (brush.pressed) {
       brush
         ..pos.x = pos.x
@@ -178,7 +178,7 @@ class Play extends State {
     }
   }
 
-  _drawEnd(Brush brush) {
+  void _drawEnd(Brush brush) {
     if (toolType == ToolType.BRUSH) {
       brush
         ..pressed = false
@@ -188,20 +188,20 @@ class Play extends State {
     }
   }
 
-  _canvasOnMouseDown(Brush brush) => canvas.onMouseDown.listen((MouseEvent e) {
+  StreamSubscription _canvasOnMouseDown(Brush brush) => canvas.onMouseDown.listen((MouseEvent e) {
         final mousePos = _getMousePos(e);
 
         _drawStart(brush, mousePos);
       });
 
-  _documentOnMouseMove(Brush brush) =>
+  StreamSubscription _documentOnMouseMove(Brush brush) =>
       document.onMouseMove.listen((MouseEvent e) {
         final mousePos = _getMousePos(e);
 
         _drawMove(brush, mousePos);
       });
 
-  _documentOnMouseUp(Brush brush) => document.onMouseUp.listen((_) {
+  StreamSubscription _documentOnMouseUp(Brush brush) => document.onMouseUp.listen((_) {
         _drawEnd(brush);
       });
 
@@ -211,10 +211,10 @@ class Play extends State {
     final x = e.page.x - (rect.left + window.pageXOffset);
     final y = e.page.y - (rect.top + window.pageYOffset);
 
-    return new Point(x, y);
+    return Point(x, y);
   }
 
-  _invitePlayers() => invitePlayersBtn.onClick.listen((_) {
+  StreamSubscription _invitePlayers() => invitePlayersBtn.onClick.listen((_) {
     final text = invitePlayersText.text.trim();
 
     if (_copyToClipboard(text)) {
@@ -227,7 +227,7 @@ class Play extends State {
   // made by bergwerf
   // https://gist.github.com/bergwerf/1b427ad2b1f9770b260dd4dac295b6f0
   bool _copyToClipboard(String text) {
-    final textArea = new TextAreaElement();
+    final textArea = TextAreaElement();
     document.body.append(textArea);
     textArea.style.border = '0';
     textArea.style.margin = '0';
@@ -242,53 +242,53 @@ class Play extends State {
     return result;
   }
 
-  _canvasOnTouchStart(Brush brush) =>
-      canvas.onTouchStart.listen((TouchEvent e) {
-        e.preventDefault();
+//  _canvasOnTouchStart(Brush brush) =>
+//      canvas.onTouchStart.listen((TouchEvent e) {
+//        e.preventDefault();
+//
+//        final touchPos = _getTouchPos(e);
+//
+//        _drawStart(brush, touchPos);
+//      });
+//
+//  _documentOnTouchMove(Brush brush) =>
+//      document.onTouchMove.listen((TouchEvent e) {
+//        e.preventDefault();
+//
+//        final touchPos = _getTouchPos(e);
+//
+//        _drawMove(brush, touchPos);
+//      });
+//
+//  _documentOnTouchEnd(Brush brush) =>
+//      document.onTouchEnd.listen((TouchEvent e) {
+//        e.preventDefault();
+//
+//        _drawEnd(brush);
+//      });
 
-        final touchPos = _getTouchPos(e);
+//  Point _getTouchPos(TouchEvent e) {
+//    final rect = canvas.getBoundingClientRect();
+//
+//    final x = e.touches.first.page.x - (rect.left + window.pageXOffset);
+//    final y = e.touches.first.page.y - (rect.top + window.pageYOffset);
+//
+//    return new Point(x, y);
+//  }
 
-        _drawStart(brush, touchPos);
-      });
-
-  _documentOnTouchMove(Brush brush) =>
-      document.onTouchMove.listen((TouchEvent e) {
-        e.preventDefault();
-
-        final touchPos = _getTouchPos(e);
-
-        _drawMove(brush, touchPos);
-      });
-
-  _documentOnTouchEnd(Brush brush) =>
-      document.onTouchEnd.listen((TouchEvent e) {
-        e.preventDefault();
-
-        _drawEnd(brush);
-      });
-
-  Point _getTouchPos(TouchEvent e) {
-    final rect = canvas.getBoundingClientRect();
-
-    final x = e.touches.first.page.x - (rect.left + window.pageXOffset);
-    final y = e.touches.first.page.y - (rect.top + window.pageYOffset);
-
-    return new Point(x, y);
-  }
-
-  _undoBtnOnClick() => undoBtn.onClick.listen((_) {
+  StreamSubscription _undoBtnOnClick() => undoBtn.onClick.listen((_) {
         if (undoBtn.classes.contains('disabled')) return;
 
         client.send(MessageType.undoLast);
         cvs.undoLast();
       });
 
-  _clearBtnOnClick() => clearBtn.onClick.listen((_) {
+  StreamSubscription _clearBtnOnClick() => clearBtn.onClick.listen((_) {
         client.send(MessageType.clearDrawing);
         cvs.clearDrawing();
       });
 
-  _brushBtnOnClick() => brushBtn.onClick.listen((_) {
+  StreamSubscription _brushBtnOnClick() => brushBtn.onClick.listen((_) {
         if (brushBtn.classes.contains('disabled')) return;
 
         toolType = ToolType.BRUSH;
@@ -297,16 +297,16 @@ class Play extends State {
         fillBtn.classes.remove('disabled');
       });
 
-  _fillBtnOnClick() => fillBtn.onClick.listen((_) {
-        if (fillBtn.classes.contains('disabled')) return;
+//  _fillBtnOnClick() => fillBtn.onClick.listen((_) {
+//        if (fillBtn.classes.contains('disabled')) return;
+//
+//        toolType = ToolType.FILL;
+//
+//        fillBtn.classes.add('disabled');
+//        brushBtn.classes.remove('disabled');
+//      });
 
-        toolType = ToolType.FILL;
-
-        fillBtn.classes.add('disabled');
-        brushBtn.classes.remove('disabled');
-      });
-
-  _setAsArtist() {
+  void _setAsArtist() {
     querySelector('#color').text = Brush.defaultColor;
     // TODO set default size
 
@@ -316,7 +316,7 @@ class Play extends State {
 
     cvs.clearDrawing();
 
-    final brush = new Brush();
+    final brush = Brush();
 
     drawSubs.addAll([
       // desktop
@@ -337,7 +337,7 @@ class Play extends State {
     ]);
   }
 
-  _setArtist() {
+  void _setArtist() {
     artistOptions.classes
       ..remove('scale-in')
       ..add('scale-out');
@@ -351,29 +351,29 @@ class Play extends State {
     undoBtn.classes.add('disabled');
   }
 
-  _win() {}
+  void _win() {}
 
-  _lose() {}
+  void _lose() {}
 
-  _setCanvasLeftLabel(String json) {
+  void _setCanvasLeftLabel(String json) {
     canvasLeftLabel.text = json;
   }
 
-  _setCanvasMiddleLabel(String json) {
+  void _setCanvasMiddleLabel(String json) {
     canvasMiddleLabel.text = json;
   }
 
-  _setCanvasRightLabel(String json) {
+  void _setCanvasRightLabel(String json) {
     canvasRightLabel.text = json;
   }
 
-  _clearCanvasLabels() {
+  void _clearCanvasLabels() {
     canvasLeftLabel.text = '';
     canvasMiddleLabel.text = '';
     canvasRightLabel.text = '';
   }
 
-  _enableDrawNext() {
+  void _enableDrawNext() {
     drawNextBtn.classes.remove('disabled');
   }
 }

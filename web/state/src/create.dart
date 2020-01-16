@@ -16,7 +16,7 @@ class Create extends State {
   }
 
   @override
-  show() {
+  void show() {
     createLobbyCard.style.display = '';
 
     submitSub = window.onKeyPress.listen((KeyboardEvent e) {
@@ -29,13 +29,13 @@ class Create extends State {
   }
 
   @override
-  hide() {
+  void hide() {
     createLobbyCard.style.display = 'none';
 
     submitSub?.cancel();
   }
 
-  submit() {
+  void submit() {
     if (!client.isConnected()) {
       toast('Not connected');
       return;
@@ -60,7 +60,7 @@ class Create extends State {
     final hasTimer = timerElement.checked;
 
     final lobbyInfo =
-        new CreateLobbyInfo(lobbyName, password, hasTimer, maxPlayers);
+         CreateLobbyInfo(lobbyName, password, hasTimer, maxPlayers);
 
     client.send(MessageType.createLobby, lobbyInfo.toJson());
   }

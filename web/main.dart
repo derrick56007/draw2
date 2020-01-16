@@ -8,18 +8,18 @@ import 'state/state.dart';
 import 'client_websocket.dart';
 import 'toast.dart';
 
-main() async {
-  final client = new ClientWebSocket();
+void main() async {
+  final client =  ClientWebSocket();
 
   await client.start();
 
   client.on(MessageType.toast, toast);
 
   StateManager.shared.addAll( {
-    'login': new Login(client),
-    'lobbies': new Lobbies(client),
-    'create': new Create(client),
-    'play': new Play(client)
+    'login':  Login(client),
+    'lobbies':  Lobbies(client),
+    'create':  Create(client),
+    'play':  Play(client)
   });
 
   StateManager.shared.pushState('login', '');

@@ -8,7 +8,7 @@ class Password {
   static StreamSubscription enterToSubmitSub;
 
   static Future<String> show() {
-    final completer = new Completer<String>();
+    final completer =  Completer<String>();
 
     submitButtonSub = querySelector('#enter-lobby-password-btn').onClick.listen((_) {
       hide();
@@ -31,7 +31,7 @@ class Password {
     return completer.future;
   }
 
-  static hide() {
+  static void hide() {
     passwordCard.style.display = 'none';
 
     submitButtonSub?.cancel();

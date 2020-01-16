@@ -2,11 +2,11 @@ part of server;
 
 class LoginManager {
   // shared instance
-  static final shared = new LoginManager._internal();
+  static final shared = LoginManager._internal();
 
-  var _lobbies = <String, Lobby>{};
-  var _socketForUsername = <ServerWebSocket, String>{};
-  var _socketForLobby = <ServerWebSocket, Lobby>{};
+  final _lobbies = <String, Lobby>{};
+  final _socketForUsername = <ServerWebSocket, String>{};
+  final _socketForLobby = <ServerWebSocket, Lobby>{};
 
   // create singleton
   LoginManager._internal();
@@ -34,16 +34,16 @@ class LoginManager {
       _socketForUsername[socket];
 
   // get all sockets
-  getSockets() => _socketForUsername.keys;
+  Iterable<ServerWebSocket> getSockets() => _socketForUsername.keys;
 
   // get all lobbies
-  getLobbies() => _lobbies.values;
+  Iterable<Lobby> getLobbies() => _lobbies.values;
 
   // get all usernames
-  getUsernames() => _socketForUsername.values;
+  Iterable<String> getUsernames() => _socketForUsername.values;
 
   // add lobby and alert others of new lobby
-  addLobby(Lobby lobby) {
+  void addLobby(Lobby lobby) {
     _lobbies[lobby.name] = lobby;
 
     // send lobby info to others
@@ -53,14 +53,16 @@ class LoginManager {
   }
 
   // logs in socket with username
-  loginSocket(ServerWebSocket socket, String username) {
+  void loginSocket(ServerWebSocket socket, String username) {
     // logout socket if previously logged in
     if (containsSocket(socket)) {
       logoutSocket(socket);
     }
 
     // check for null username
-    if (username == null || username.trim().isEmpty || username.toLowerCase() == 'null') {
+    if (username == null ||
+        username.trim().isEmpty ||
+        username.toLowerCase() == 'null') {
       socket.send(MessageType.toast, 'Invalid username');
       return;
     }
@@ -93,7 +95,7 @@ class LoginManager {
   }
 
   // logs out socket
-  logoutSocket(ServerWebSocket socket) {
+  void logoutSocket(ServerWebSocket socket) {
     // check if socket is logged in
     if (!containsSocket(socket)) return;
 
@@ -104,7 +106,7 @@ class LoginManager {
   }
 
   // create lobby from info
-  createLobby(ServerWebSocket socket, CreateLobbyInfo info) {
+  void createLobby(ServerWebSocket socket, CreateLobbyInfo info) {
     // check if lobby name already exists
     if (_lobbies.containsKey(info.lobbyName)) {
       socket.send(MessageType.toast, 'Lobby already exists');
@@ -116,7 +118,7 @@ class LoginManager {
       return;
     }
 
-    final lobby = new Lobby.fromInfo(info);
+    final lobby = Lobby.fromInfo(info);
     addLobby(lobby);
 
     _socketForLobby[socket] = lobby;
@@ -125,7 +127,7 @@ class LoginManager {
   }
 
   // enter lobby
-  enterLobby(ServerWebSocket socket, String lobbyName) {
+  void enterLobby(ServerWebSocket socket, String lobbyName) {
     if (!_lobbies.containsKey(lobbyName)) {
       socket.send(MessageType.toast, 'Lobby doesn\'t exist');
       socket.send(MessageType.enterLobbyFailure);
@@ -145,7 +147,7 @@ class LoginManager {
   }
 
   // enter lobby with password
-  enterSecureLobby(ServerWebSocket socket, LoginInfo info) {
+  void enterSecureLobby(ServerWebSocket socket, LoginInfo info) {
     if (!_lobbies.containsKey(info.lobbyName)) {
       socket.send(MessageType.toast, 'Lobby doesn\'t exist');
       socket.send(MessageType.enterLobbyFailure);
@@ -165,7 +167,7 @@ class LoginManager {
     socket.send(MessageType.enterLobbySuccessful, info.lobbyName);
   }
 
-  exitLobby(ServerWebSocket socket) {
+  void exitLobby(ServerWebSocket socket) {
     // check if socket is logged in
     if (!containsSocket(socket)) return;
 

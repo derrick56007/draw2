@@ -11,13 +11,13 @@ class PanelRight {
     client.on(MessageType.guess, _guess);
   }
 
-  _newChatItem(String username, String text) => new Element.html('''
+  Element _newChatItem(String username, String text) => Element.html('''
       <a class="collection-item chat-item">
         <div class="chat-username">$username</div>
         <div class="chat-text">$text</div>
       </a>''');
 
-  _addToChat(Element chatItem) {
+  void _addToChat(Element chatItem) {
     chatList
       ..children.add(chatItem)
       ..scrollTop = chatList.scrollHeight;
@@ -27,12 +27,12 @@ class PanelRight {
     chatList.children.removeAt(0);
   }
 
-  _guess(String json) {
-    final guess = new Guess.fromJson(json);
+  void _guess(String json) {
+    final guess = Guess.fromJson(json);
 
     final chatItem = _newChatItem(guess.username, guess.guess);
     _addToChat(chatItem);
   }
 
-  clearGuesses() => chatList.children.clear();
+  void clearGuesses() => chatList.children.clear();
 }

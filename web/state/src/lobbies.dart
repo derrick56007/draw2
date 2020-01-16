@@ -1,7 +1,7 @@
 part of state;
 
 class Lobbies extends State {
-  static RegExp lobbyNameRegex = new RegExp(DrawRegExp.lobbyName);
+  static RegExp lobbyNameRegex = RegExp(DrawRegExp.lobbyName);
 
   final Element lobbiesCard = querySelector('#lobby-list-card');
   final Element lobbyListCollection = querySelector('#lobby-list-collection');
@@ -22,7 +22,7 @@ class Lobbies extends State {
   }
 
   @override
-  show() {
+  void show() {
     lobbiesCard.style.display = '';
 
     submitSub = window.onKeyPress.listen((KeyboardEvent e) {
@@ -33,12 +33,12 @@ class Lobbies extends State {
   }
 
   @override
-  hide() {
+  void hide() {
     lobbiesCard.style.display = 'none';
     submitSub?.cancel();
   }
 
-  submit() {
+  void submit() {
     if (!client.isConnected()) {
       toast('Not connected');
       return;
@@ -53,12 +53,12 @@ class Lobbies extends State {
     return lobbyMatches != null && lobbyMatches[0] == lobbyName;
   }
 
-  _lobbyInfo(String json) {
+  void _lobbyInfo(String json) {
     querySelector('#lobby-list-progress')?.remove();
 
-    final lobbyInfo = new LobbyInfo.fromJson(json);
+    final lobbyInfo = LobbyInfo.fromJson(json);
 
-    final el = new Element.html('''
+    final el = Element.html('''
           <a id="lobby-${lobbyInfo.name}" class="collection-item lobby-list-item">
             <span class="badge">${lobbyInfo.numberOfPlayers}/${lobbyInfo.maxPlayers}</span>
             
@@ -74,28 +74,27 @@ class Lobbies extends State {
     lobbyListCollection.children.add(el);
   }
 
-  _lobbyClosed(String lobbyName) {
+  void _lobbyClosed(String lobbyName) {
     querySelector('#lobby-$lobbyName')?.remove();
   }
 
-  _requestPassword(String lobbyName) async {
+  void _requestPassword(String lobbyName) async {
     final password = await Password.show();
 
-    final loginInfo = new LoginInfo(lobbyName, password);
+    final loginInfo = LoginInfo(lobbyName, password);
 
     client.send(MessageType.enterLobbyWithPassword, loginInfo.toJson());
   }
 
-  _enterLobbySuccessful(String lobbyName) {
+  void _enterLobbySuccessful(String lobbyName) {
     StateManager.shared.pushState('play', lobbyName);
 
     //
     document.getElementById('invite-players-text').text =
-        '${window.location.host}/$lobbyName';
-
+        '${window.location.host.toString().replaceFirst('https', 'http')}/$lobbyName';
   }
 
-  _enterLobbyFailure() {
+  void _enterLobbyFailure() {
     StateManager.shared.pushState('lobbies');
   }
 }

@@ -18,8 +18,8 @@ class DrawPoint {
       list = jsonDecode(json) as List;
     }
 
-    return new DrawPoint(
-        list[colorIndex], list[sizeIndex], new Point.fromJson(list[posIndex]));
+    return DrawPoint(
+        list[colorIndex], list[sizeIndex],  Point.fromJson(list[posIndex]));
   }
 
   static const colorIndex = 0;

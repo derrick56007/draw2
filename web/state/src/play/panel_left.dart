@@ -15,21 +15,21 @@ class PanelLeft {
       ..on(MessageType.updatePlayerScore, _updatePlayerScore);
   }
 
-  _newPlayerItem(String name, int score) => new Element.html('''
+  Element _newPlayerItem(String name, int score) =>  Element.html('''
       <a id="player-$name" class="collection-item player-item">
         <span id="player-$name-queue-number" class="queue-number"></span>
         <span id="player-$name-score" class="player-score">$score</span>
         $name
       </a>''');
 
-  _newPlayer(String name) {
+  void _newPlayer(String name) {
     final playerItem = _newPlayerItem(name, 0);
 
     playerListCollection.children.add(playerItem);
   }
 
-  _existingPlayer(String json) {
-    final existingPlayer = new ExistingPlayer.fromJson(json);
+  void _existingPlayer(String json) {
+    final existingPlayer =  ExistingPlayer.fromJson(json);
 
     final playerItem =
         _newPlayerItem(existingPlayer.username, existingPlayer.score);
@@ -37,11 +37,11 @@ class PanelLeft {
     playerListCollection.children.add(playerItem);
   }
 
-  _removePlayer(String name) {
+  void _removePlayer(String name) {
     querySelector('#player-$name')?.remove();
   }
 
-  _setQueue(String json) {
+  void _setQueue(String json) {
     for (var el in playerListCollection.children) {
       final queueNumber = el.querySelectorAll('.queue-number').first;
       queueNumber.text = '';
@@ -55,7 +55,7 @@ class PanelLeft {
     }
   }
 
-  _setPlayerOrder(String json) {
+  void _setPlayerOrder(String json) {
     final order = jsonDecode(json) as List;
     for (var name in order.reversed) {
       final el = querySelector('#player-$name');
@@ -67,7 +67,7 @@ class PanelLeft {
     }
   }
 
-  _updatePlayerScore(String json) {
+  void _updatePlayerScore(String json) {
     final playerScore = jsonDecode(json) as List;
     final name = playerScore[0];
     final score = playerScore[1];
@@ -75,5 +75,5 @@ class PanelLeft {
     querySelector('#player-$name-score')?.text = '$score';
   }
 
-  clearPlayers() => playerListCollection.children.clear();
+  void clearPlayers() => playerListCollection.children.clear();
 }

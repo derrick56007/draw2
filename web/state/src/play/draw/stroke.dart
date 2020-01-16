@@ -3,13 +3,13 @@ part of play;
 class Stroke {
   static final fillLayerCache = <FillLayer, CanvasElement>{};
 
-  static brushLayer(BrushLayer layer, CanvasRenderingContext2D ctx) {
+  static void brushLayer(BrushLayer layer, CanvasRenderingContext2D ctx) {
     var p1 = layer.points.first;
 
     if (layer.points.length == 1) {
       ctx
         ..beginPath()
-        ..arc(p1.x, p1.y, layer.size / 2, 0, 2 * Math.pi)
+        ..arc(p1.x, p1.y, layer.size / 2, 0, 2 * math.pi)
         ..closePath()
         ..fillStyle = layer.color
         ..fill();
@@ -39,13 +39,13 @@ class Stroke {
     }
   }
 
-  static fillLayer(FillLayer layer, CanvasRenderingContext2D ctx) {
+  static void fillLayer(FillLayer layer, CanvasRenderingContext2D ctx) {
     if (fillLayerCache.containsKey(layer)) {
       final canvas = fillLayerCache[layer];
 
       ctx.drawImage(canvas, 0, 0);
     } else {
-      final canvas = new CanvasElement(
+      final canvas =  CanvasElement(
           width: CanvasHelper.canvasWidth, height: CanvasHelper.canvasHeight);
 
       final CanvasRenderingContext2D tempCtx =
@@ -66,10 +66,10 @@ class Stroke {
 
       final targetColor = [data[i], data[i + 1], data[i + 2]];
 
-      final hex = new HexColor(layer.color);
+      final hex =  HexColor(layer.color);
 
       if (!pixelCompare(i, targetColor, hex, data, length, tolerance)) {
-        return false;
+        return;
       }
       queue.add(i);
       while (queue.isNotEmpty) {
@@ -81,17 +81,19 @@ class Stroke {
           me = mw + w2; //right bound
           while (mw < (w -= 4) &&
               pixelCompareAndSet(w, targetColor, hex, data, length,
-                  tolerance)); //go left until edge hit
+                  tolerance)){} //go left until edge hit
           while (me > (e += 4) &&
               pixelCompareAndSet(e, targetColor, hex, data, length,
-                  tolerance)); //go right until edge hit
+                  tolerance)){} //go right until edge hit
           for (var j = w; j < e; j += 4) {
             if (j - w2 >= 0 &&
-                pixelCompare(j - w2, targetColor, hex, data, length, tolerance))
+                pixelCompare(j - w2, targetColor, hex, data, length, tolerance)) {
               queue.add(j - w2); //queue y-1
+            }
             if (j + w2 < length &&
-                pixelCompare(j + w2, targetColor, hex, data, length, tolerance))
+                pixelCompare(j + w2, targetColor, hex, data, length, tolerance)) {
               queue.add(j + w2); //queue y+1
+            }
           }
         }
       }
@@ -118,8 +120,9 @@ class Stroke {
 
     if ((targetColor[0] - data[i]).abs() <= tolerance &&
         (targetColor[1] - data[i + 1]).abs() <= tolerance &&
-        (targetColor[2] - data[i + 2]).abs() <= tolerance)
+        (targetColor[2] - data[i + 2]).abs() <= tolerance) {
       return true; //target to surface within tolerance
+    }
 
     return false; //no match
   }

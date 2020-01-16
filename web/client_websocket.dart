@@ -10,7 +10,7 @@ class ClientWebSocket extends DrawWebSocket {
 
   bool _connected = false;
 
-  isConnected() => _connected;
+  bool isConnected() => _connected;
 
   Stream<Event> onOpen, onClose, onError;
 
@@ -18,17 +18,18 @@ class ClientWebSocket extends DrawWebSocket {
 
   @override
   Future start([int retrySeconds = 2]) {
-    final completer = new Completer();
+    final completer = Completer();
 
     var reconnectScheduled = false;
 
     final host = window.location.host;
     print('connecting to $host');
-    _webSocket = new WebSocket('wss://$host/');
+    _webSocket = WebSocket('ws://$host/');
 
-    _scheduleReconnect() {
+    void _scheduleReconnect() {
       if (!reconnectScheduled) {
-        new Timer(new Duration(seconds: retrySeconds), () async => await start(retrySeconds * 2));
+        Timer(Duration(seconds: retrySeconds),
+            () async => await start(retrySeconds * 2));
       }
       reconnectScheduled = true;
     }
@@ -62,7 +63,7 @@ class ClientWebSocket extends DrawWebSocket {
   }
 
   @override
-  send(MessageType type, [var val]) {
+  void send(MessageType type, [var val]) {
     if (val == null) {
       _webSocket.send(type.index.toString());
     } else {

@@ -7,13 +7,13 @@ abstract class DrawWebSocket {
   static const messageTypeIndex = 0;
   static const valueIndex = 1;
 
-  final messageDispatchers = new List<Function>(MessageType.values.length);
+  final messageDispatchers =  List<Function>(MessageType.values.length);
 
   Future start();
 
   void on(MessageType type, Function function) {
     if (messageDispatchers[type.index] != null) {
-      print("warning: overriding message dispatcher ${type.index}");
+      print('warning: overriding message dispatcher ${type.index}');
     }
 
     messageDispatchers[type.index] = function;

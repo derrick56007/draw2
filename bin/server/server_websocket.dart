@@ -6,12 +6,13 @@ class ServerWebSocket extends DrawWebSocket {
   WebSocket _webSocket;
 
   ServerWebSocket._internal(this._req);
+
   Future done;
 
   ServerWebSocket.upgradeRequest(this._req);
 
   @override
-  start() async {
+  Future start() async {
     _webSocket = await WebSocketTransformer.upgrade(_req)
       ..listen(onMessageToDispatch);
 
@@ -19,7 +20,7 @@ class ServerWebSocket extends DrawWebSocket {
   }
 
   @override
-  send(MessageType type, [var val]) {
+  void send(MessageType type, [var val]) {
     if (val == null) {
       _webSocket.add(type.index.toString());
     } else {

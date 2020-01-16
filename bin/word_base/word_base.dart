@@ -1,16 +1,17 @@
 library word_base;
 
 part 'cat1.dart';
+
 part 'words.dart';
 
 class WordBase {
-  static const categories = const [cat1];
+  static const categories = [cat1];
 
   static var mappedCategories = <String, List<String>>{};
 
   static const categoryNameIndex = 0;
 
-  static init() {
+  static void init() {
     for (var category in categories) {
       final list = category.split('\n');
 

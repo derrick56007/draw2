@@ -22,10 +22,10 @@ class BrushLayer extends CanvasLayer {
     final decodedPoints = <Point>[];
 
     for (var point in list[pointsIndex]) {
-      decodedPoints.add(new Point.fromJson(point));
+      decodedPoints.add(Point.fromJson(point));
     }
 
-    return new BrushLayer(decodedPoints, list[colorIndex], list[sizeIndex]);
+    return BrushLayer(decodedPoints, list[colorIndex], list[sizeIndex]);
   }
 
   static const pointsIndex = 1;

@@ -13,28 +13,28 @@ class Lobby {
   Game game;
 
   Lobby(this.name,
-       {this.password = '',
-        this.hasTimer = true,
-        this.maxPlayers = 15,
-        this.isDefaultLobby = false})
+      {this.password = '',
+      this.hasTimer = true,
+      this.maxPlayers = 15,
+      this.isDefaultLobby = false})
       : hasPassword = password.isNotEmpty {
-    game = new Game(this, hasTimer);
+    game = Game(this, hasTimer);
   }
 
-  factory Lobby.fromInfo(CreateLobbyInfo info) => new Lobby(info.lobbyName,
+  factory Lobby.fromInfo(CreateLobbyInfo info) => Lobby(info.lobbyName,
       password: info.password,
       hasTimer: info.hasTimer,
       maxPlayers: info.maxPlayers);
 
-  getInfo() =>
-      new LobbyInfo(name, hasPassword, hasTimer, maxPlayers, _players.length);
+  LobbyInfo getInfo() =>
+      LobbyInfo(name, hasPassword, hasTimer, maxPlayers, _players.length);
 
-  addPlayer(ServerWebSocket socket, String username) {
+  void addPlayer(ServerWebSocket socket, String username) {
     // send info of existing players to the new player
     _players.forEach((ServerWebSocket existingSocket, String existingUsername) {
       // player info
       final existingPlayer =
-          new ExistingPlayer(existingUsername, game.scores[existingSocket]);
+          ExistingPlayer(existingUsername, game.scores[existingSocket]);
 
       socket.send(MessageType.existingPlayer, existingPlayer.toJson());
     });
@@ -72,7 +72,7 @@ class Lobby {
     }
   }
 
-  removePlayer(ServerWebSocket socket) {
+  void removePlayer(ServerWebSocket socket) {
     final username = LoginManager.shared.usernameFromSocket(socket);
 
     sendToAll(MessageType.removePlayer, val: username);
@@ -84,14 +84,14 @@ class Lobby {
     _players.remove(socket);
   }
 
-  sendToAll(MessageType type, {var val, ServerWebSocket excludedSocket}) {
+  void sendToAll(MessageType type, {var val, ServerWebSocket excludedSocket}) {
     // send to all players in lobby except for the excluded socket
     for (var socket in _players.keys.where((s) => s != excludedSocket)) {
       socket.send(type, val);
     }
   }
 
-  sendQueueInfo() {
+  void sendQueueInfo() {
     final list = [];
 
     for (var i = 0; i < game.artistQueue.length; i++) {
@@ -105,7 +105,7 @@ class Lobby {
     sendToAll(MessageType.setQueue, val: jsonEncode(list));
   }
 
-  sendPlayerOrder() {
+  void sendPlayerOrder() {
     final list = <String>[];
 
     // current artist will be first in the list
@@ -130,5 +130,5 @@ class Lobby {
     sendToAll(MessageType.setPlayerOrder, val: jsonEncode(list));
   }
 
-  usernameFromSocket(ServerWebSocket socket) => _players[socket];
+  String usernameFromSocket(ServerWebSocket socket) => _players[socket];
 }
