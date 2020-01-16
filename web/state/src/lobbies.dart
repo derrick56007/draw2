@@ -91,7 +91,7 @@ class Lobbies extends State {
 
     //
     document.getElementById('invite-players-text').text =
-        '${window.location.host.toString().replaceFirst('https', 'http')}/$lobbyName';
+        '${window.location.host.toString() /*.replaceFirst('https', 'http')*/}/$lobbyName';
   }
 
   void _enterLobbyFailure() {
